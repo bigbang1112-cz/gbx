@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BigBang1112.EssentialsV2", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BigBang1112.EssentialsV2.Razor", "Src\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2.Razor\BigBang1112.EssentialsV2.Razor.csproj", "{EEFE353B-CE79-4254-BF88-8FD49D43DFB8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{1BDA35C7-EACC-453E-B0BD-8E67CC06C407}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigBang1112.Gbx.Server.Generators", "Generators\BigBang1112.Gbx.Server.Generators\BigBang1112.Gbx.Server.Generators.csproj", "{CDD3E0B1-F76F-496F-9902-0397D726093E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,10 @@ Global
 		{EEFE353B-CE79-4254-BF88-8FD49D43DFB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEFE353B-CE79-4254-BF88-8FD49D43DFB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEFE353B-CE79-4254-BF88-8FD49D43DFB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDD3E0B1-F76F-496F-9902-0397D726093E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDD3E0B1-F76F-496F-9902-0397D726093E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDD3E0B1-F76F-496F-9902-0397D726093E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDD3E0B1-F76F-496F-9902-0397D726093E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +59,7 @@ Global
 		{6DF685F7-0E15-4E94-963B-8B4873B4917D} = {66037692-DAFD-4BB8-9AF1-CDDD70498090}
 		{0E63B6BB-9E31-4493-90A3-D54B232F5E21} = {66037692-DAFD-4BB8-9AF1-CDDD70498090}
 		{EEFE353B-CE79-4254-BF88-8FD49D43DFB8} = {66037692-DAFD-4BB8-9AF1-CDDD70498090}
+		{CDD3E0B1-F76F-496F-9902-0397D726093E} = {1BDA35C7-EACC-453E-B0BD-8E67CC06C407}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {36A51A0F-7F1D-4750-8135-34F991E041BB}
