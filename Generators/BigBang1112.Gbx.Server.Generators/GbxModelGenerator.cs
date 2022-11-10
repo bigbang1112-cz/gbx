@@ -51,7 +51,7 @@ public class GbxModelGenerator : ISourceGenerator
                 continue;
             }
             
-            WriteClass(builder, typeSymbol, ident: 0, classSelection);
+            WriteClass(builder, typeSymbol, indent: 0, classSelection);
         }
 
         context.AddSource("GeneratedGbxModels.cs", builder.ToString());
@@ -100,15 +100,7 @@ public class GbxModelGenerator : ISourceGenerator
         return IsNodeTypeSymbol(typeSymbol);
     }
 
-    private static void AppendIdent(StringBuilder builder, int ident)
-    {
-        for (var i = 0; i < ident; i++)
-        {
-            builder.Append("    ");
-        }
-    }
-
-    private static void WriteClass(StringBuilder builder, ITypeSymbol typeSymbol, int ident, ImmutableHashSet<string> classSelection)
+    private static void WriteClass(StringBuilder builder, ITypeSymbol typeSymbol, int indent, ImmutableHashSet<string> classSelection)
     {
         if (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.TypeKind == TypeKind.Interface)
         {
@@ -116,8 +108,7 @@ public class GbxModelGenerator : ISourceGenerator
         }
 
         builder.AppendLine();
-        AppendIdent(builder, ident);
-        builder.Append("public class ");
+        builder.Append(indent, "public class ");
         builder.Append(typeSymbol.Name);
 
         if (typeSymbol.BaseType is not null && typeSymbol.BaseType is not { Name: "Object" or "Node" or "ValueType" })
@@ -127,8 +118,7 @@ public class GbxModelGenerator : ISourceGenerator
         }
 
         builder.AppendLine();
-        AppendIdent(builder, ident);
-        builder.AppendLine("{");
+        builder.AppendLine(indent, "{");
 
         foreach (var propertySymbol in typeSymbol.GetMembers().OfType<IPropertySymbol>())
         {
@@ -139,9 +129,8 @@ public class GbxModelGenerator : ISourceGenerator
             {
                 continue;
             }
-
-            AppendIdent(builder, ident + 1);
-            builder.Append("public ");
+            
+            builder.Append(indent + 1, "public ");
             AppendType(builder, propertySymbol.Type);
             builder.Append('?');
 
@@ -151,9 +140,7 @@ public class GbxModelGenerator : ISourceGenerator
         }
 
         builder.AppendLine();
-
-        AppendIdent(builder, ident + 1);
-        builder.Append("public static ");
+        builder.Append(indent + 1, "public static ");
         builder.Append(typeSymbol.Name);
         builder.Append(" Map(GBX.NET.Engines.");
         builder.Append(typeSymbol.ContainingNamespace.Name);
@@ -162,12 +149,9 @@ public class GbxModelGenerator : ISourceGenerator
         JustWriteWholeType(builder, typeSymbol);
         
         builder.AppendLine(" value)");
-        AppendIdent(builder, ident + 1);
-        builder.AppendLine("{");
-        AppendIdent(builder, ident + 2);
-        builder.AppendLine("return new();");
-        AppendIdent(builder, ident + 1);
-        builder.AppendLine("}");
+        builder.AppendLine(indent + 1, "{");
+        builder.AppendLine(indent + 2, "return new();");
+        builder.AppendLine(indent + 1, "}");
 
         foreach (var innerTypeSymbol in typeSymbol.GetTypeMembers())
         {
@@ -178,15 +162,14 @@ public class GbxModelGenerator : ISourceGenerator
             
             if (innerTypeSymbol.TypeKind == TypeKind.Enum)
             {
-                WriteEnum(builder, innerTypeSymbol, ident + 1);
+                WriteEnum(builder, innerTypeSymbol, indent + 1);
                 continue;
             }
             
-            WriteClass(builder, innerTypeSymbol, ident + 1, classSelection);
+            WriteClass(builder, innerTypeSymbol, indent + 1, classSelection);
         }
-
-        AppendIdent(builder, ident);
-        builder.AppendLine("}");
+        
+        builder.AppendLine(indent, "}");
     }
 
     private static void JustWriteWholeType(StringBuilder builder, ITypeSymbol typeSymbol)
@@ -200,27 +183,23 @@ public class GbxModelGenerator : ISourceGenerator
         builder.Append(typeSymbol.Name);
     }
 
-    private static void WriteEnum(StringBuilder builder, INamedTypeSymbol innerTypeSymbol, int ident)
+    private static void WriteEnum(StringBuilder builder, INamedTypeSymbol innerTypeSymbol, int indent)
     {
         builder.AppendLine();
-        AppendIdent(builder, ident);
-        builder.Append("public enum ");
+        builder.Append(indent, "public enum ");
         builder.Append(innerTypeSymbol.Name);
         builder.AppendLine();
-        AppendIdent(builder, ident);
-        builder.AppendLine("{");
+        builder.AppendLine(indent, "{");
 
         foreach (var memberSymbol in innerTypeSymbol.GetMembers().OfType<IFieldSymbol>())
         {
-            AppendIdent(builder, ident + 1);
-            builder.Append(memberSymbol.Name);
+            builder.Append(indent + 1, memberSymbol.Name);
             builder.Append(" = ");
             builder.Append(memberSymbol.ConstantValue);
             builder.AppendLine(",");
         }
-
-        AppendIdent(builder, ident);
-        builder.AppendLine("}");
+        
+        builder.AppendLine(indent, "}");
     }
 
     private static void AppendType(StringBuilder builder, ITypeSymbol typeSymbol)
