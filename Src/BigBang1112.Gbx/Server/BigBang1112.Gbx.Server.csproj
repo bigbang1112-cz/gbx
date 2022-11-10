@@ -18,13 +18,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\Generators\BigBang1112.Gbx.Server.Generators\BigBang1112.Gbx.Server.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2.Razor\BigBang1112.EssentialsV2.Razor.csproj" />
 		<ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2\BigBang1112.EssentialsV2.csproj" />
 		<ProjectReference Include="..\Shared\BigBang1112.Gbx.Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Models\" />
+	  <Folder Include="Models\Gbx\" />
 	</ItemGroup>
 
 

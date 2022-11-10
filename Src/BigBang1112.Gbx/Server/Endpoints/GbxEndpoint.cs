@@ -6,10 +6,11 @@ public class GbxEndpoint : IEndpoint
 {
     public void Endpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("api/gbx", Gbx);
+        app.MapPost("gbx", Gbx);
+        app.MapGet("gbx/fields/{className}", GbxFields);
     }
 
-    public IResult Gbx(IFormFile? file, string? fields, string? cacheKey)
+    public IResult Gbx(IFormFile? file, string fields, string? cacheKey)
     {
         if (file is null)
         {
@@ -19,5 +20,10 @@ public class GbxEndpoint : IEndpoint
         using var stream = file.OpenReadStream();
         
         return Results.Ok(GameBox.ParseNode(stream));
+    }
+
+    public IResult GbxFields(string className)
+    {
+        return Results.Ok();
     }
 }
