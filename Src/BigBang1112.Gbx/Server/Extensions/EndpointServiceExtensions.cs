@@ -25,7 +25,7 @@ public static class EndpointServiceExtensions
         
         foreach (var endpoint in endpoints)
         {
-            endpoint.Endpoint(app.MapGroup("api"));
+            endpoint.Endpoint(app.MapGroup("api/v1"));
         }
         
         return app;
