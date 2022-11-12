@@ -64,7 +64,7 @@ public class GbxEndpoint : IEndpoint
 
         await MapByGraphQlAsync(gbx, graphQl, cancellationToken);
         
-        return Results.Ok(GameBox.ParseNode(stream));
+        return Results.Ok(gbx);
     }
 
     private static async Task<GraphQLDocument> ValidateAsync(string query, string className, CancellationToken cancellationToken)
