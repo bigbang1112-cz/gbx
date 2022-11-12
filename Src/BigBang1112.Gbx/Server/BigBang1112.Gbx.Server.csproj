@@ -12,7 +12,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="GBX.NET" Version="1.1.0-alpha1" />
+		<PackageReference Include="GBX.NET" Version="1.1.0-alpha2" />
 		<PackageReference Include="GBX.NET.LZO" Version="1.0.2" />
 		<PackageReference Include="GraphQL-Parser" Version="8.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0" />
