@@ -1,5 +1,6 @@
 using BigBang1112;
 using BigBang1112.Gbx.Server.Extensions;
+using Microsoft.AspNetCore.Http.Json;
 
 var options = new AppOptions
 {
@@ -16,6 +17,12 @@ App.Services(builder.Services, options);
 builder.Services.AddEndpoints();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+});
 
 var app = builder.Build();
 

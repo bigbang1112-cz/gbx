@@ -24,18 +24,20 @@ public class GbxEndpoint : IEndpoint
             return Results.BadRequest();
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         using var stream = file.OpenReadStream();
 
         var graphQl = default(GraphQLDocument);
 
         if (@class is not null)
         {
-            graphQl = await ValidateAsync(query, @class, cancellationToken);
+            graphQl = Validate(query, @class);
         }
         
         var asyncAction = new GameBoxAsyncReadAction()
         {
-            AfterClassId = async (classId, token) =>
+            AfterClassId = (classId, token) =>
             {
                 token.ThrowIfCancellationRequested();
 
@@ -43,15 +45,19 @@ public class GbxEndpoint : IEndpoint
                 {
                     throw new Exception($"Server issue: unknown class 0x{classId:X8}");
                 }
+
+                name = name.Substring(name.IndexOf(':') + 2); // Will be better to fix it someday
                 
                 if (graphQl is null)
                 {
-                    graphQl = await ValidateAsync(query, name, token);
+                    graphQl = Validate(query, name);
                 }
                 else if (!string.Equals(name, @class))
                 {
                     throw new Exception($"Bad request: expected {@class} != actual {name}");
                 }
+
+                return Task.CompletedTask;
             },
         };
         
@@ -64,14 +70,16 @@ public class GbxEndpoint : IEndpoint
 
         await MapByGraphQlAsync(gbx, graphQl, cancellationToken);
         
-        return Results.Ok(gbx);
+        return Results.Ok();
     }
 
-    private static async Task<GraphQLDocument> ValidateAsync(string query, string className, CancellationToken cancellationToken)
+    private static GraphQLDocument Validate(string query, string className)
     {
         var graphQl = GraphQLParser.Parser.Parse(query);
 
-        return await Task.FromResult(graphQl);
+        Models.Gbx.Gbx.Validate(graphQl.Definitions, className);
+        
+        return graphQl;
     }
 
     private Task MapByGraphQlAsync(GameBox gbx, GraphQLDocument graphQl, CancellationToken cancellationToken)
@@ -85,7 +93,7 @@ public class GbxEndpoint : IEndpoint
 
             foreach (var selection in operation.SelectionSet.Selections)
             {
-
+                
             }
         }
         

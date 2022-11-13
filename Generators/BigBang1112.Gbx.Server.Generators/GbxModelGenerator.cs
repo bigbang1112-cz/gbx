@@ -42,19 +42,81 @@ public class GbxModelGenerator : ISourceGenerator
             .GetNamespaceMembers().First(x => x.Name == "NET")
             .GetNamespaceMembers().First(x => x.Name == "Engines");
 
-        var builder = new StringBuilder("namespace BigBang1112.Gbx.Server.Models.Gbx;\n");
-        
-        foreach (var typeSymbol in enginesNamespace.GetNamespaceMembers().SelectMany(x => x.GetTypeMembers()))
+        var engineClasses = GetAllEngineClasses(enginesNamespace).ToImmutableList();
+
+        foreach (var typeSymbol in engineClasses)
         {
             if (!classSelection.IsEmpty && !classSelection.Contains(typeSymbol.Name))
             {
                 continue;
             }
-            
-            WriteClass(builder, typeSymbol, indent: 0, classSelection);
+
+            var builder = new StringBuilder("namespace BigBang1112.Gbx.Server.Models.Gbx;\n");
+            WriteClass(builder, typeSymbol, indent: 0, classSelection, engineClasses);
+            context.AddSource($"{typeSymbol.Name}.g.cs", builder.ToString());
         }
 
-        context.AddSource("GeneratedGbxModels.cs", builder.ToString());
+        var gbxBuilder = new StringBuilder("namespace BigBang1112.Gbx.Server.Models.Gbx;\n");
+        WriteGbxClass(gbxBuilder, classSelection, engineClasses);
+        context.AddSource("Gbx.g.cs", gbxBuilder.ToString());
+    }
+
+    private static IEnumerable<INamedTypeSymbol> GetAllEngineClasses(INamespaceSymbol enginesNamespace)
+    {
+        return enginesNamespace.GetNamespaceMembers().SelectMany(x => x.GetTypeMembers());
+    }
+
+    private void WriteGbxClass(StringBuilder builder, ImmutableHashSet<string> classSelection, IEnumerable<INamedTypeSymbol> engineTypeSymbols)
+    {
+        builder.AppendLine();
+        builder.AppendLine("public partial class Gbx");
+        builder.AppendLine("{");
+        builder.AppendLine("    public static partial void ValidateClass(IList<GraphQLParser.AST.ASTNode> nodes, string className)");
+        builder.AppendLine("    {");
+        builder.AppendLine("        switch (className)");
+        builder.AppendLine("        {");
+
+        foreach (var typeSymbol in engineTypeSymbols)
+        {
+            if (!classSelection.Contains(typeSymbol.Name))
+            {
+                continue;
+            }
+
+            builder.Append("            case \"");
+            builder.Append(typeSymbol.Name);
+            builder.AppendLine("\":");
+            builder.Append("                ");
+            builder.Append(typeSymbol.Name);
+            builder.AppendLine(".Validate(nodes);");
+            builder.AppendLine("                break;");
+        }
+
+        builder.AppendLine("            default: throw new Exception($\"Unknown class: {className}\");");
+        builder.AppendLine("        }");
+        builder.AppendLine("    }");
+        
+        builder.AppendLine();
+        builder.AppendLine("    public partial Gbx Map(string className, GBX.NET.GameBox value) => new()");
+        builder.AppendLine("    {");
+        builder.AppendLine("        Class = className,");
+        builder.AppendLine("        Node = value.Node is null ? null : className switch");
+        builder.AppendLine("        {");
+
+        foreach (var typeSymbol in engineTypeSymbols)
+        {
+            if (!classSelection.Contains(typeSymbol.Name))
+            {
+                continue;
+            }
+
+            builder.AppendLine($"            \"{typeSymbol.Name}\" => {typeSymbol.Name}.Map((GBX.NET.Engines.{typeSymbol.ContainingNamespace.Name}.{typeSymbol.Name})value.Node),");
+        }
+
+        builder.AppendLine("            _ => throw new Exception($\"Unknown class: {className}\")");
+        builder.AppendLine("        }");
+        builder.AppendLine("    };");
+        builder.AppendLine("}");
     }
 
     private static bool IsNodeTypeSymbol(ITypeSymbol typeSymbol)
@@ -79,28 +141,46 @@ public class GbxModelGenerator : ISourceGenerator
         return false;
     }
 
-    private static bool IncludesNodeTypeSymbol(ITypeSymbol typeSymbol)
+    private static bool IncludesAllowedNodeTypeSymbolOrAnyOther(ITypeSymbol typeSymbol, ImmutableHashSet<string> classSelection)
     {
         if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
         {
             foreach (var typeArgument in namedTypeSymbol.TypeArguments)
             {
-                if (IsNodeTypeSymbol(typeArgument))
+                if (!IsNodeTypeSymbol(typeArgument))
                 {
-                    return true;
+                    continue;
                 }
+                
+                if (!classSelection.Contains(typeArgument.Name))
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
 
-        if (typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
+        if (typeSymbol is IArrayTypeSymbol arrayTypeSymbol
+            && IsNodeTypeSymbol(arrayTypeSymbol.ElementType)
+            && !classSelection.Contains(arrayTypeSymbol.ElementType.Name))
         {
-            return IsNodeTypeSymbol(arrayTypeSymbol.ElementType);
+            return false;
         }
 
-        return IsNodeTypeSymbol(typeSymbol);
+        if (IsNodeTypeSymbol(typeSymbol) && !classSelection.Contains(typeSymbol.Name))
+        {
+            return false;
+        }
+        
+        return true;
     }
 
-    private static void WriteClass(StringBuilder builder, ITypeSymbol typeSymbol, int indent, ImmutableHashSet<string> classSelection)
+    private static void WriteClass(StringBuilder builder,
+        ITypeSymbol typeSymbol,
+        int indent,
+        ImmutableHashSet<string> classSelection,
+        ImmutableList<INamedTypeSymbol> engineClasses)
     {
         if (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.TypeKind == TypeKind.Interface)
         {
@@ -108,7 +188,14 @@ public class GbxModelGenerator : ISourceGenerator
         }
 
         builder.AppendLine();
-        builder.Append(indent, "public class ");
+        builder.Append(indent, "public ");
+
+        if (typeSymbol.IsAbstract)
+        {
+            builder.Append("abstract ");
+        }
+
+        builder.Append("class ");
         builder.Append(typeSymbol.Name);
 
         if (typeSymbol.BaseType is not null && typeSymbol.BaseType is not { Name: "Object" or "Node" or "ValueType" })
@@ -125,11 +212,11 @@ public class GbxModelGenerator : ISourceGenerator
             var nodeMemberAtt = propertySymbol.GetAttributes()
                 .FirstOrDefault(x => x.AttributeClass?.Name == "NodeMemberAttribute");
 
-            if (nodeMemberAtt is null || (!classSelection.Contains(propertySymbol.Type.Name) && IncludesNodeTypeSymbol(propertySymbol.Type)))
+            if (nodeMemberAtt is null || !IncludesAllowedNodeTypeSymbolOrAnyOther(propertySymbol.Type, classSelection))
             {
                 continue;
             }
-            
+
             builder.Append(indent + 1, "public ");
             AppendType(builder, propertySymbol.Type);
             builder.Append('?');
@@ -140,14 +227,122 @@ public class GbxModelGenerator : ISourceGenerator
         }
 
         builder.AppendLine();
+        builder.AppendLine(indent + 1, "public static void Validate(IList<GraphQLParser.AST.ASTNode>? nodes)");
+        builder.AppendLine(indent + 1, "{");
+        builder.AppendLine(indent + 2, "if (nodes is null) return;");
+        builder.AppendLine();
+        builder.AppendLine(indent + 2, "foreach (var node in nodes)");
+        builder.AppendLine(indent + 2, "{");
+        builder.AppendLine(indent + 3, "if (node is not GraphQLParser.AST.GraphQLField field)");
+        builder.AppendLine(indent + 3, "{");
+        builder.AppendLine(indent + 4, "continue;");
+        builder.AppendLine(indent + 3, "}");
+        builder.AppendLine();
+        builder.AppendLine(indent + 3, "var fieldName = field.Name?.Value.ToString().ToLower();");
+        builder.AppendLine();
+        builder.AppendLine(indent + 3, "if (Validate(field, fieldName))");
+        builder.AppendLine(indent + 3, "{");
+        builder.AppendLine(indent + 4, "continue;");
+        builder.AppendLine(indent + 3, "}");
+
+        if (typeSymbol.BaseType is not null && IsNodeTypeSymbol(typeSymbol.BaseType))
+        {
+            builder.AppendLine();
+            builder.Append(indent + 3, "if (");
+            builder.Append(typeSymbol.BaseType.Name);
+            builder.AppendLine(".Validate(field, fieldName))");
+            builder.AppendLine(indent + 3, "{");
+            builder.AppendLine(indent + 4, "continue;");
+            builder.AppendLine(indent + 3, "}");
+        }
+
+        foreach (var potentialInheritingTypeSymbol in engineClasses)
+        {
+            if (!classSelection.Contains(potentialInheritingTypeSymbol.Name) || potentialInheritingTypeSymbol.BaseType?.Name != typeSymbol.Name)
+            {
+                continue;
+            }
+
+            builder.AppendLine();
+            builder.Append(indent + 3, "if (");
+            builder.Append(potentialInheritingTypeSymbol.Name);
+            builder.AppendLine(".Validate(field, fieldName))");
+            builder.AppendLine(indent + 3, "{");
+            builder.AppendLine(indent + 4, "continue;");
+            builder.AppendLine(indent + 3, "}");
+        }
+
+        builder.AppendLine();
+        builder.AppendLine(indent + 3, "throw new Exception($\"Unknown field: {fieldName} ({field.Location.Start}-{field.Location.End})\");");
+        builder.AppendLine(indent + 2, "}");
+        builder.AppendLine(indent + 1, "}");
+
+        builder.AppendLine();
+        builder.AppendLine(indent + 1, "public static bool Validate(GraphQLParser.AST.GraphQLField field, string fieldName)");
+        builder.AppendLine(indent + 1, "{");
+        builder.AppendLine(indent + 2, "switch (fieldName)");
+        builder.AppendLine(indent + 2, "{");
+
+        var propCounter = 0;
+
+        foreach (var grouping in typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>().GroupBy<IPropertySymbol, bool>(HasNodeTypeSymbol))
+        {
+            var isNodeTypeSymbol = grouping.Key;
+
+            foreach (var propertySymbol in grouping)
+            {
+                var nodeMemberAtt = propertySymbol.GetAttributes()
+                    .FirstOrDefault(x => x.AttributeClass?.Name == "NodeMemberAttribute");
+
+                if (nodeMemberAtt is null || !IncludesAllowedNodeTypeSymbolOrAnyOther(propertySymbol.Type, classSelection))
+                {
+                    continue;
+                }
+
+                propCounter++;
+
+                builder.Append(indent + 3, "case \"");
+                builder.Append(propertySymbol.Name.ToLower());
+                builder.AppendLine("\":");
+
+                if (!isNodeTypeSymbol)
+                {
+                    continue;
+                }
+
+                var type = propertySymbol.Type;
+
+                if (type is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.TypeArguments.Length > 0)
+                {
+                    type = namedTypeSymbol.TypeArguments[0];
+                }
+
+                builder.Append(indent + 4, type.Name);
+                builder.AppendLine(".Validate(field.SelectionSet?.Selections);");
+                builder.AppendLine(indent + 4, "return true;");
+            }
+
+            if (!isNodeTypeSymbol && propCounter > 0)
+            {
+                builder.AppendLine(indent + 4, "return true;");
+            }
+        }
+
+        builder.AppendLine(indent + 3, "default: return false;");
+        builder.AppendLine(indent + 2, "}");
+
+        builder.AppendLine(indent + 1, "}");
+        builder.AppendLine();
+
         builder.Append(indent + 1, "public static ");
         builder.Append(typeSymbol.Name);
         builder.Append(" Map(GBX.NET.Engines.");
         builder.Append(typeSymbol.ContainingNamespace.Name);
         builder.Append('.');
-        
+
         JustWriteWholeType(builder, typeSymbol);
-        
+
         builder.AppendLine(" value)");
         builder.AppendLine(indent + 1, "{");
         builder.AppendLine(indent + 2, "return new();");
@@ -159,17 +354,23 @@ public class GbxModelGenerator : ISourceGenerator
             {
                 continue;
             }
-            
+
             if (innerTypeSymbol.TypeKind == TypeKind.Enum)
             {
                 WriteEnum(builder, innerTypeSymbol, indent + 1);
                 continue;
             }
-            
-            WriteClass(builder, innerTypeSymbol, indent + 1, classSelection);
+
+            WriteClass(builder, innerTypeSymbol, indent + 1, classSelection, engineClasses);
         }
-        
+
         builder.AppendLine(indent, "}");
+    }
+
+    private static bool HasNodeTypeSymbol(IPropertySymbol x)
+    {
+        return IsNodeTypeSymbol(x.Type)
+            || (x.Type is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.TypeArguments.Length > 0 && IsNodeTypeSymbol(namedTypeSymbol.TypeArguments[0]));
     }
 
     private static void JustWriteWholeType(StringBuilder builder, ITypeSymbol typeSymbol)
@@ -233,8 +434,6 @@ public class GbxModelGenerator : ISourceGenerator
         switch (namedTypeSymbol.Name)
         {
             case "Nullable":
-                AppendType(builder, namedTypeSymbol.TypeArguments[0]);
-                return;
             case "ExternalNode":
                 AppendType(builder, namedTypeSymbol.TypeArguments[0]);
                 return;
