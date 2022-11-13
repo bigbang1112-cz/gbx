@@ -1,7 +1,7 @@
 ﻿using GBX.NET;
 using GraphQLParser.AST;
 
-namespace BigBang1112.Gbx.Server.Endpoints;
+namespace BigBang1112.Gbx.Server.Endpoints.API.V1;
 
 public class GbxEndpoint : IEndpoint
 {
@@ -34,7 +34,7 @@ public class GbxEndpoint : IEndpoint
         {
             graphQl = Validate(query, @class);
         }
-        
+
         var asyncAction = new GameBoxAsyncReadAction()
         {
             AfterClassId = (classId, token) =>
@@ -47,7 +47,7 @@ public class GbxEndpoint : IEndpoint
                 }
 
                 name = name.Substring(name.IndexOf(':') + 2); // Will be better to fix it someday
-                
+
                 if (graphQl is null)
                 {
                     graphQl = Validate(query, name);
@@ -60,7 +60,7 @@ public class GbxEndpoint : IEndpoint
                 return Task.CompletedTask;
             },
         };
-        
+
         var gbx = await GameBox.ParseAsync(stream, logger: _logger, asyncAction: asyncAction, cancellationToken: cancellationToken);
 
         if (graphQl is null)
@@ -69,7 +69,7 @@ public class GbxEndpoint : IEndpoint
         }
 
         await MapByGraphQlAsync(gbx, graphQl, cancellationToken);
-        
+
         return Results.Ok();
     }
 
@@ -78,7 +78,7 @@ public class GbxEndpoint : IEndpoint
         var graphQl = GraphQLParser.Parser.Parse(query);
 
         Models.Gbx.Gbx.Validate(graphQl.Definitions, className);
-        
+
         return graphQl;
     }
 
@@ -93,10 +93,10 @@ public class GbxEndpoint : IEndpoint
 
             foreach (var selection in operation.SelectionSet.Selections)
             {
-                
+
             }
         }
-        
+
         return Task.CompletedTask;
     }
 }
