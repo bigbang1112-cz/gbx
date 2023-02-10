@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput\ClipInput.csproj" />
+    <ProjectReference Include="..\..\..\Tools\ClipToReplay\ClipToReplay\ClipToReplay.csproj" />
+    <ProjectReference Include="..\..\..\Tools\GhostToClip\GhostToClip\GhostToClip.csproj" />
+    <ProjectReference Include="..\..\..\Tools\ReplayViewer\ReplayViewer\ReplayViewer.csproj" />
+    <ProjectReference Include="..\..\..\Tools\Spike\Spike\Spike.csproj" />
     <ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2.Razor\BigBang1112.EssentialsV2.Razor.csproj" />
     <ProjectReference Include="..\Shared\BigBang1112.Gbx.Shared.csproj" />
   </ItemGroup>

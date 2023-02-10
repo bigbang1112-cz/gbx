@@ -13,3 +13,6 @@
 [submodule "Tools/ReplayViewer"]
 	path = Tools/ReplayViewer
 	url = https://github.com/bigbang1112-cz/replay-viewer
+[submodule "Tools/ClipInput"]
+	path = Tools/ClipInput
+	url = https://github.com/bigbang1112-cz/clip-input-private
