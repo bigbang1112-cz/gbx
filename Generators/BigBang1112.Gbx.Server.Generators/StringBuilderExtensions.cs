@@ -24,9 +24,9 @@ public static class StringBuilderExtensions
         builder.Append(value);
     }
 
-    public static void Append(this StringBuilder builder, int ident, string value)
+    public static void Append(this StringBuilder builder, int indent, string value)
     {
-        builder.AppendIndent(ident);
+        builder.AppendIndent(indent);
         builder.Append(value);
     }
 }
