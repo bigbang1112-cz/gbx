@@ -1,5 +1,6 @@
 ﻿using AspNet.Security.OAuth.Discord;
 using BigBang1112.Gbx.Server.Extensions;
+using BigBang1112.Gbx.Server.Hubs;
 using BigBang1112.Gbx.Server.Middlewares;
 using Microsoft.AspNetCore.Http.Json;
 using System.Text.Json;
@@ -27,6 +28,11 @@ internal static class GbxApp
                 options.ClientSecret = config.GetValue<string>("Discord:Client:Secret") ?? throw new Exception("Discord ClientSecret is missing!");
                 options.SignInScheme = "Cookies";
             });
+
+        services.AddSignalR(options =>
+        {
+            
+        });
 
         services.AddEndpoints();
         services.AddControllersWithViews();
@@ -62,6 +68,8 @@ internal static class GbxApp
 
         app.UseBlazorFrameworkFiles();
         app.UseStaticFiles();
+
+        app.MapHub<SecureHub>("/securehub");
 
         app.UseEndpoints();
         app.UseRouting();

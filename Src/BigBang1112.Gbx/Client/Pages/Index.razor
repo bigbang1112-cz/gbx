@@ -1,9 +1,24 @@
 ﻿@page "/"
+@using BigBang1112.Gbx.Client.Services;
+@inject ISecureHubService Hub
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<button @onclick="() => Hub.PingAsync()">Send important stuff</button>
 
-Welcome to your new app.
+<p>@response</p>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    private string? response;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Hub.On("Pong", () =>
+        {
+            response = "Pong";
+            StateHasChanged();
+        });
+
+        await Hub.StartAsync();
+    }
+}
