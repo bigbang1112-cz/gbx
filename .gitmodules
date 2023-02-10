@@ -1,3 +1,15 @@
 [submodule "Src/BigBang1112.EssentialsV2"]
 	path = Src/BigBang1112.EssentialsV2
 	url = https://github.com/bigbang1112-cz/essentials-v2
+[submodule "Tools/Spike"]
+	path = Tools/Spike
+	url = https://github.com/bigbang1112-cz/spike
+[submodule "Tools/ClipToReplay"]
+	path = Tools/ClipToReplay
+	url = https://github.com/bigbang1112-cz/clip-to-replay
+[submodule "Tools/GhostToClip"]
+	path = Tools/GhostToClip
+	url = https://github.com/bigbang1112-cz/ghost-to-clip
+[submodule "Tools/ReplayViewer"]
+	path = Tools/ReplayViewer
+	url = https://github.com/bigbang1112-cz/replay-viewer
