@@ -1,6 +1,7 @@
 using BigBang1112;
-using BigBang1112.Gbx.Server.Extensions;
-using Microsoft.AspNetCore.Http.Json;
+using BigBang1112.Gbx.Server;
+
+var builder = WebApplication.CreateBuilder(args);
 
 var options = new AppOptions
 {
@@ -8,49 +9,14 @@ var options = new AppOptions
     Assembly = typeof(Program).Assembly
 };
 
-var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 
-App.Services(builder.Services, options);
-
-builder.Services.AddEndpoints();
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
-
-builder.Services.Configure<JsonOptions>(options =>
-{
-    options.SerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-    options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-});
+App.Services(builder.Services, options, builder.Configuration);
+GbxApp.Services(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
 App.Middleware(app, options);
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseWebAssemblyDebugging();
-}
-else
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
-app.UseBlazorFrameworkFiles();
-app.UseStaticFiles();
-
-app.UseEndpoints();
-app.UseRouting();
-
-
-app.MapRazorPages();
-app.MapControllers();
-app.MapFallbackToFile("index.html");
+GbxApp.Middleware(app);
 
 app.Run();

@@ -1,13 +1,16 @@
-﻿namespace BigBang1112.Gbx.Server.Models.Gbx;
+﻿using GBX.NET;
+using GraphQLParser.AST;
+
+namespace BigBang1112.Gbx.Server.Models.Gbx;
 
 public partial class Gbx
 {
     public string? Class { get; set; }
     public CMwNod? Node { get; set; }
 
-    public static void Validate(IList<GraphQLParser.AST.ASTNode> nodes, string className)
+    public static void Validate(IList<ASTNode> nodes, string className)
     {
-        var operation = nodes.OfType<GraphQLParser.AST.GraphQLOperationDefinition>().FirstOrDefault();
+        var operation = nodes.OfType<GraphQLOperationDefinition>().FirstOrDefault();
 
         if (operation is null)
         {
@@ -21,7 +24,7 @@ public partial class Gbx
 
         foreach (var node in operation.SelectionSet.Selections)
         {
-            if (node is not GraphQLParser.AST.GraphQLField field)
+            if (node is not GraphQLField field)
             {
                 continue;
             }
@@ -38,7 +41,7 @@ public partial class Gbx
         }
     }
 
-    public static partial void ValidateClass(IList<GraphQLParser.AST.ASTNode>? nodes, string className);
+    public static partial void ValidateClass(IList<ASTNode>? nodes, string className);
 
-    public partial Gbx Map(string className, GBX.NET.GameBox value);
+    public partial Gbx Map(string className, GameBox value);
 }
