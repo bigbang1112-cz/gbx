@@ -12,11 +12,11 @@ var options = new AppOptions
 // Add services to the container.
 
 App.Services(builder.Services, options, builder.Configuration);
-GbxApp.Services(builder.Services, builder.Configuration);
+GbxServerApp.Services(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
 App.Middleware(app, options);
-GbxApp.Middleware(app);
+GbxServerApp.Middleware(app);
 
 app.Run();

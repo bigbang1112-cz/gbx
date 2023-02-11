@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace BigBang1112.Gbx.Server;
 
-internal static class GbxApp
+internal static class GbxServerApp
 {
     internal static void Services(IServiceCollection services, ConfigurationManager config)
     {

@@ -1,8 +1,18 @@
 ﻿@page "/"
 @using BigBang1112.Gbx.Client.Services;
 @inject ISecureHubService Hub
+@inject ToolManager ToolManager
 
 <PageTitle>Index</PageTitle>
+
+<ul>
+    @foreach (var item in ToolManager.GetToolFactories())
+    {
+        <li>
+            @item
+        </li>
+    }
+</ul>
 
 <button @onclick="() => Hub.PingAsync()">Send important stuff</button>
 

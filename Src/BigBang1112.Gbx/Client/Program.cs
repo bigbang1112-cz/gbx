@@ -9,7 +9,6 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped<ISecureHubService, SecureHubService>();
-builder.Services.AddScoped<HttpClient>(sp => new() { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+GbxClientApp.Services(builder.Services, builder.HostEnvironment);
 
 await builder.Build().RunAsync();
