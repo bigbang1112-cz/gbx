@@ -43,12 +43,10 @@ public class SecureHubService : ISecureHubService
         {
             _logger.LogError(ex, "Failed to connect to hub");
 
-            Connected = false;
-            return false;
+            return Connected = false;
         }
 
-        Connected = true;
-        return true;
+        return Connected = true;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken = default)
