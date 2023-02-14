@@ -36,7 +36,7 @@ internal class ToolManager : IToolManager
         AddTool<SpikeTool>(services);
     }
 
-    internal static void AddTool<T>(IServiceCollection services) where T : Tool
+    internal static void AddTool<T>(IServiceCollection services) where T : ITool
     {
         services.AddScoped<ToolFactory<T>>();
         stronglyTypedTools.Add(typeof(T));

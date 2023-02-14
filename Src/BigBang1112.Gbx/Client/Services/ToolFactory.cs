@@ -2,7 +2,7 @@
 
 namespace BigBang1112.Gbx.Client.Services;
 
-public class ToolFactory<T> : ToolFactory where T : Tool
+public class ToolFactory<T> : ToolFactory where T : ITool
 {
     private readonly ILogger<ToolFactory<T>> logger;
 
