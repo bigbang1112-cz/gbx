@@ -1,8 +1,14 @@
 ﻿using AspNet.Security.OAuth.Discord;
 using BigBang1112.Gbx.Server.Extensions;
-using BigBang1112.Gbx.Server.Hubs;
 using BigBang1112.Gbx.Server.Middlewares;
+using GbxToolAPI.Server;
+using GbxToolAPI.Server.Options;
+using MapViewerEngine.Server;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -31,8 +37,9 @@ internal static class GbxServerApp
 
         services.AddSignalR(options =>
         {
-            
-        });
+            options.SupportedProtocols = new List<string> { "messagepack" };
+        })
+            .AddMessagePackProtocol();
 
         services.AddEndpoints();
         services.AddControllersWithViews();
@@ -43,8 +50,12 @@ internal static class GbxServerApp
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
+
+        services.AddOptions<DatabaseOptions>().Bind(config.GetSection("Database"));
+        
+        AddToolServer<MapViewerEngineServer>(services, config, "MapViewerEngine");
     }
-    
+
     internal static void Middleware(WebApplication app)
     {
         // Configure the HTTP request pipeline.
@@ -69,7 +80,7 @@ internal static class GbxServerApp
         app.UseBlazorFrameworkFiles();
         app.UseStaticFiles();
 
-        app.MapHub<SecureHub>("/securehub");
+        MapToolServer<MapViewerEngineServer>(app);
 
         app.UseEndpoints();
         app.UseRouting();
@@ -77,5 +88,95 @@ internal static class GbxServerApp
         app.MapRazorPages();
         app.MapControllers();
         app.MapFallbackToFile("index.html");
+    }
+
+    private static void AddToolServer<T>(IServiceCollection services, IConfiguration config, string dbName) where T : IServer, new()
+    {
+        var server = new T();
+        server.Services(services);
+
+        foreach (var type in typeof(T).Assembly.DefinedTypes)
+        {
+            TryAddToolDbContext(services, config, dbName, type);
+        }
+    }
+
+    private static bool TryAddToolDbContext(IServiceCollection services, IConfiguration config, string databaseName, TypeInfo type)
+    {
+        if (!type.IsSubclassOf(typeof(DbContext)))
+        {
+            return false;
+        }
+
+        // ugly path to AddDbContext<type>
+
+        var methodInfo = typeof(EntityFrameworkServiceCollectionExtensions).GetMethods()
+            .Where(x => x.Name == nameof(EntityFrameworkServiceCollectionExtensions.AddDbContext)
+                && x.GetParameters().Select(x => x.ParameterType).SequenceEqual(new[]
+            {
+                typeof(IServiceCollection),
+                typeof(Action<DbContextOptionsBuilder>),
+                typeof(ServiceLifetime),
+                typeof(ServiceLifetime)
+            })).FirstOrDefault();
+
+        if (methodInfo is null)
+        {
+            throw new Exception("AddDbContext method not found!");
+        }
+
+        var genericMethod = methodInfo.MakeGenericMethod(type);
+
+        genericMethod.Invoke(null, new object[]
+        {
+            services,
+            delegate (DbContextOptionsBuilder options) {
+                var dbName = "bigbang1112_gbx_tool_" + databaseName.ToLower();
+
+                if (config.GetValue<bool>("Database:InMemory"))
+                {
+                    options.UseInMemoryDatabase(dbName);
+                }
+                else
+                {
+                    var connectionString = config.GetConnectionString(dbName);
+
+                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                }
+            },
+            ServiceLifetime.Scoped,
+            ServiceLifetime.Scoped
+        });
+
+        return true;
+    }
+
+    private static void MapToolServer<T>(IEndpointRouteBuilder app) where T : IServer
+    {
+        foreach (var type in typeof(T).Assembly.DefinedTypes)
+        {
+            TryMapToolHub(app, type);
+        }
+    }
+
+    private static bool TryMapToolHub(IEndpointRouteBuilder app, TypeInfo type)
+    {
+        if (!type.IsSubclassOf(typeof(Hub)))
+        {
+            return false;
+        }
+        
+        // ugly path to MapHub<type>
+
+        var methodInfo = typeof(HubEndpointRouteBuilderExtensions).GetMethod(nameof(HubEndpointRouteBuilderExtensions.MapHub), new[] { typeof(IEndpointRouteBuilder), typeof(string) });
+
+        if (methodInfo is null)
+        {
+            throw new Exception("MapHub method not found!");
+        }
+
+        methodInfo.MakeGenericMethod(type).Invoke(null, new object[] { app, "/" + type.Name.ToLower() });
+
+        return true;
     }
 }

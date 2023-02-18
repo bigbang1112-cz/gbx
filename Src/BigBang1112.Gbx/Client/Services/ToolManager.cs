@@ -1,8 +1,10 @@
 ﻿using ClipInput;
 using ClipToReplay;
 using GbxToolAPI;
+using GbxToolAPI.Client;
 using GhostToClip;
 using MapViewerEngine;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using ReplayViewer;
 using Spike;
 
@@ -39,6 +41,21 @@ internal class ToolManager : IToolManager
     internal static void AddTool<T>(IServiceCollection services) where T : ITool
     {
         services.AddScoped<ToolFactory<T>>();
+
+        foreach (var type in typeof(T).Assembly.DefinedTypes)
+        {
+            if (type.IsSubclassOf(typeof(ToolHub)))
+            {
+                services.AddScoped(type, provider =>
+                {
+                    var hubAddress = provider.GetRequiredService<IWebAssemblyHostEnvironment>().BaseAddress;
+                    var logger = provider.GetRequiredService<ILogger<T>>();
+                    
+                    return Activator.CreateInstance(type, hubAddress, logger)!;
+                });
+            }
+        }
+
         stronglyTypedTools.Add(typeof(T));
     }
 

@@ -1,9 +1,12 @@
 ﻿@page "/"
 @using BigBang1112.Gbx.Client.Services;
-@inject ISecureHubService Hub
+@using MapViewerEngine.Shared;
+@inject MapViewerEngine.MapViewerEngineHub Hub
 @inject ToolManager ToolManager
 
 <PageTitle>Index</PageTitle>
+
+<p>@Hub.State</p>
 
 <ul>
     @foreach (var item in ToolManager.GetToolFactories())
@@ -14,21 +17,21 @@
     }
 </ul>
 
-<button @onclick="() => Hub.PingAsync()">Send important stuff</button>
+<button @onclick="PingAsync">Send important stuff</button>
 
 <p>@response</p>
 
 @code {
-    private string? response;
+    private byte[]? response;
 
     protected override async Task OnInitializedAsync()
     {
-        Hub.On("Pong", () =>
-        {
-            response = "Pong";
-            StateHasChanged();
-        });
-
         await Hub.StartAsync();
+    }
+
+    private async Task PingAsync()
+    {
+        response = await Hub.InvokeBlockMesh(new BlockVariant("Lol", true, 0, 0));
+        StateHasChanged();
     }
 }

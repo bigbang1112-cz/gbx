@@ -7,11 +7,10 @@ public static class GbxClientApp
 {
     internal static void Services(IServiceCollection services, IWebAssemblyHostEnvironment host)
     {
-        services.AddScoped<ISecureHubService, SecureHubService>();
         services.AddScoped<HttpClient>(sp => new() { BaseAddress = new Uri(host.BaseAddress) });
 
-        services.AddScoped<ToolManager>();
+        services.AddScoped<ToolManager>(); // registers the tool manager so that it can implement some testability
 
-        ToolManager.Services(services);
+        ToolManager.Services(services); // registers the individual "strong" tools
     }
 }

@@ -1,5 +1,4 @@
-﻿using GBX.NET.Inputs;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 

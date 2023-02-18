@@ -17,10 +17,15 @@
 		<PackageReference Include="GBX.NET.LZO" Version="1.0.2" />
 		<PackageReference Include="GraphQL-Parser" Version="8.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="7.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.3" />
+		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\Generators\BigBang1112.Gbx.Server.Generators\BigBang1112.Gbx.Server.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\..\..\Tools\ReplayViewer\MapViewerEngine\MapViewerEngine.Server\MapViewerEngine.Server.csproj" />
 		<ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2.Razor\BigBang1112.EssentialsV2.Razor.csproj" />
 		<ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2\BigBang1112.EssentialsV2.csproj" />
 		<ProjectReference Include="..\Client\BigBang1112.Gbx.Client.csproj" />
@@ -29,6 +34,8 @@
 
 	<ItemGroup>
 	  <Folder Include="Controllers\" />
+	  <Folder Include="Hubs\" />
+	  <Folder Include="Options\" />
 	</ItemGroup>
 
 
