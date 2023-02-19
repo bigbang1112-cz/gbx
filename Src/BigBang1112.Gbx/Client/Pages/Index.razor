@@ -1,12 +1,16 @@
 ﻿@page "/"
 @using BigBang1112.Gbx.Client.Services;
 @using MapViewerEngine.Shared;
-@inject MapViewerEngine.MapViewerEngineHub Hub
+@inject MapViewerEngine.MapViewerEngineHubConnection Hub
 @inject ToolManager ToolManager
 
 <PageTitle>Index</PageTitle>
 
 <p>@Hub.State</p>
+
+<button @onclick="LoginAsync">Login</button>
+
+<a href="superadmin">SuperAdmin</a>
 
 <ul>
     @foreach (var item in ToolManager.GetToolFactories())
@@ -33,5 +37,10 @@
     {
         response = await Hub.InvokeBlockMesh(new BlockVariant("Lol", true, 0, 0));
         StateHasChanged();
+    }
+
+    private async Task LoginAsync()
+    {
+        
     }
 }

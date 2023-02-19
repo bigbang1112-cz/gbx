@@ -44,7 +44,7 @@ internal class ToolManager : IToolManager
 
         foreach (var type in typeof(T).Assembly.DefinedTypes)
         {
-            if (type.IsSubclassOf(typeof(ToolHub)))
+            if (type.IsSubclassOf(typeof(ToolHubConnection)))
             {
                 services.AddScoped(type, provider =>
                 {

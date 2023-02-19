@@ -4,6 +4,7 @@ using BigBang1112.Gbx.Server.Middlewares;
 using GbxToolAPI.Server;
 using GbxToolAPI.Server.Options;
 using MapViewerEngine.Server;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.SignalR;
@@ -18,11 +19,20 @@ internal static class GbxServerApp
 {
     internal static void Services(IServiceCollection services, ConfigurationManager config)
     {
+        services.AddOptions<DatabaseOptions>().Bind(config.GetSection("Database"));
+        services.AddOptions<DiscordOptions>().Bind(config.GetSection("Discord"));
+        
         services.AddAuthorization(options =>
         {
             options.AddPolicy("InsiderPolicy", policy =>
             {
                 policy.RequireAuthenticatedUser();
+            });
+
+            options.AddPolicy("SuperAdminPolicy", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim("role", "SuperAdmin");
             });
         });
 
@@ -30,8 +40,10 @@ internal static class GbxServerApp
             .AddCookie("Cookies")
             .AddDiscord(options =>
             {
-                options.ClientId = config.GetValue<string>("Discord:Client:Id") ?? throw new Exception("Discord ClientId is missing!");
-                options.ClientSecret = config.GetValue<string>("Discord:Client:Secret") ?? throw new Exception("Discord ClientSecret is missing!");
+                var discordOptions = config.GetSection("Discord").Get<DiscordOptions>() ?? new DiscordOptions();
+
+                options.ClientId = discordOptions.Client.Id;
+                options.ClientSecret = discordOptions.Client.Secret;
                 options.SignInScheme = "Cookies";
             });
 
@@ -51,8 +63,6 @@ internal static class GbxServerApp
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
 
-        services.AddOptions<DatabaseOptions>().Bind(config.GetSection("Database"));
-        
         AddToolServer<MapViewerEngineServer>(services, config, "MapViewerEngine");
     }
 
@@ -71,11 +81,14 @@ internal static class GbxServerApp
         }
 
         app.UseHttpsRedirection();
+        
+        app.UseRouting();
 
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.UseMiddleware<InsiderAuthorizationMiddleware>();
+        app.UseMiddleware<RegularAuthorizationMiddleware>();
 
         app.UseBlazorFrameworkFiles();
         app.UseStaticFiles();
@@ -83,7 +96,6 @@ internal static class GbxServerApp
         MapToolServer<MapViewerEngineServer>(app);
 
         app.UseEndpoints();
-        app.UseRouting();
 
         app.MapRazorPages();
         app.MapControllers();
