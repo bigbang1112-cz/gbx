@@ -8,7 +8,14 @@
 
 <p>@Hub.State</p>
 
-<button @onclick="LoginAsync">Login</button>
+<AuthorizeView>
+    <NotAuthorized>
+        <a href="login">Login</a>
+    </NotAuthorized>
+    <Authorized>
+        <a href="logout">Logout</a>
+    </Authorized>
+</AuthorizeView>
 
 <a href="superadmin">SuperAdmin</a>
 
@@ -30,17 +37,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await Hub.StartAsync();
+        if (Hub.State == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Disconnected)
+        {
+            await Hub.StartAsync();
+        }
     }
 
     private async Task PingAsync()
     {
         response = await Hub.InvokeBlockMesh(new BlockVariant("Lol", true, 0, 0));
         StateHasChanged();
-    }
-
-    private async Task LoginAsync()
-    {
-        
     }
 }

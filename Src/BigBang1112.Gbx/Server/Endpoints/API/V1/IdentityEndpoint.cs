@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using BigBang1112.Gbx.Shared;
+using System.Security.Claims;
 
 namespace BigBang1112.Gbx.Server.Endpoints.API.V1;
 
@@ -13,18 +14,24 @@ public class IdentityEndpoint : IEndpoint
 
     public void Endpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("identity", (HttpContext httpContext) => Results.Ok(Identity(httpContext)));
+        app.MapGet("identity", Identity);
     }
 
-    private static Dictionary<string, List<string>> Identity(HttpContext httpContext)
+    private static IResult Identity(HttpContext httpContext)
     {
-        if (httpContext.User.Identity is not ClaimsIdentity identity)
+        if (httpContext.User.Identity is not ClaimsIdentity identity || !identity.IsAuthenticated)
         {
-            return new Dictionary<string, List<string>>();
+            return Results.Unauthorized();
         }
 
-        return identity.Claims
-            .ToLookup(x => x.Type, x => x.Value)
-            .ToDictionary(x => x.Key, x => x.ToList());
+        var model = new Identity
+        {
+            AuthenticationType = identity.AuthenticationType,
+            Claims = identity.Claims
+                .ToLookup(x => x.Type, x => x.Value)
+                .ToDictionary(x => x.Key, x => x.ToList())
+        };
+
+        return Results.Ok(model);
     }
 }

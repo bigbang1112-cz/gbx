@@ -1,6 +1,7 @@
 ﻿using AspNet.Security.OAuth.Discord;
 using BigBang1112.Gbx.Server.Extensions;
 using BigBang1112.Gbx.Server.Middlewares;
+using BigBang1112.Gbx.Shared;
 using GbxToolAPI.Server;
 using GbxToolAPI.Server.Options;
 using MapViewerEngine.Server;
@@ -19,37 +20,25 @@ internal static class GbxServerApp
 {
     internal static void Services(IServiceCollection services, ConfigurationManager config)
     {
-        services.AddOptions<DatabaseOptions>().Bind(config.GetSection("Database"));
-        services.AddOptions<DiscordOptions>().Bind(config.GetSection("Discord"));
+        services.AddOptions<DatabaseOptions>().Bind(config.GetSection(Constants.Database));
+        services.AddOptions<DiscordOptions>().Bind(config.GetSection(Constants.Discord));
         
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("InsiderPolicy", policy =>
-            {
-                policy.RequireAuthenticatedUser();
-            });
-
-            options.AddPolicy("SuperAdminPolicy", policy =>
-            {
-                policy.RequireAuthenticatedUser();
-                policy.RequireClaim("role", "SuperAdmin");
-            });
-        });
+        services.AddAuthorization(SharedOptions.Authorization);
 
         services.AddAuthentication(DiscordAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie("Cookies")
+            .AddCookie(Constants.Cookies)
             .AddDiscord(options =>
             {
-                var discordOptions = config.GetSection("Discord").Get<DiscordOptions>() ?? new DiscordOptions();
+                var discordOptions = config.GetSection(Constants.Discord).Get<DiscordOptions>() ?? new DiscordOptions();
 
                 options.ClientId = discordOptions.Client.Id;
                 options.ClientSecret = discordOptions.Client.Secret;
-                options.SignInScheme = "Cookies";
+                options.SignInScheme = Constants.Cookies;
             });
 
         services.AddSignalR(options =>
         {
-            options.SupportedProtocols = new List<string> { "messagepack" };
+            options.SupportedProtocols = new List<string> { Constants.Messagepack };
         })
             .AddMessagePackProtocol();
 

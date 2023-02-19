@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+﻿using BigBang1112.Gbx.Shared;
+using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
 using System.Security.Claims;
 
@@ -22,7 +23,7 @@ public class ClientAuthStateProvider : AuthenticationStateProvider
         return new AuthenticationState(identity is null ? new ClaimsPrincipal() : new ClaimsPrincipal(identity));
     }
 
-    private async Task<ClaimsIdentity?> GetIdentityAsync(HttpResponseMessage response)
+    private static async Task<ClaimsIdentity?> GetIdentityAsync(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)
         {
@@ -30,14 +31,14 @@ public class ClientAuthStateProvider : AuthenticationStateProvider
         }
 
         // parse the ClaimsIdentity from the API response
-        var claimStrings = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+        var identityModel = await response.Content.ReadFromJsonAsync<Identity>();
 
-        if (claimStrings is null)
+        if (identityModel is null)
         {
             return null;
         }
 
-        return new ClaimsIdentity(ClaimStringsToClaims(claimStrings), "Discord");
+        return new ClaimsIdentity(ClaimStringsToClaims(identityModel.Claims), identityModel.AuthenticationType);
     }
 
     private static IEnumerable<Claim> ClaimStringsToClaims(IDictionary<string, List<string>> claimStrings)
