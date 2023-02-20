@@ -13,7 +13,7 @@ namespace BigBang1112.Gbx.Client.Services;
 internal interface IToolManager
 {
     IEnumerable<Type> GetTools();
-    IEnumerable<ToolFactory> GetToolFactories();
+    IEnumerable<IToolFactory> GetToolFactories();
 }
 
 internal class ToolManager : IToolManager
@@ -64,11 +64,11 @@ internal class ToolManager : IToolManager
         return stronglyTypedTools;
     }
 
-    public IEnumerable<ToolFactory> GetToolFactories()
+    public IEnumerable<IToolFactory> GetToolFactories()
     {
         foreach (var tool in GetTools())
         {
-            yield return (ToolFactory)provider.GetRequiredService(typeof(ToolFactory<>).MakeGenericType(tool));
+            yield return (IToolFactory)provider.GetRequiredService(typeof(ToolFactory<>).MakeGenericType(tool));
         }
     }
 }
