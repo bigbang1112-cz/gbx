@@ -1,5 +1,8 @@
 ﻿@page "/"
 @using BigBang1112.Gbx.Client.Services;
+@using GBX.NET;
+@using GbxToolAPI;
+@using GbxToolAPI.Client;
 @using MapViewerEngine.Shared;
 @inject MapViewerEngine.MapViewerEngineHubConnection Hub
 @inject ToolManager ToolManager
@@ -23,17 +26,21 @@
     @foreach (var item in ToolManager.GetToolFactories())
     {
         <li>
-            @item
+            <button @onclick="() => TestInstantiateTool(item)">@item</button>
         </li>
     }
 </ul>
+
+<InputFile OnChange="LoadFiles" />
 
 <button @onclick="PingAsync">Send important stuff</button>
 
 <p>@response</p>
 
 @code {
-    private byte[]? response;
+    private string response = "";
+
+    private Node? node;
 
     protected override async Task OnInitializedAsync()
     {
@@ -41,11 +48,60 @@
         {
             await Hub.StartAsync();
         }
+
+        Hub.Metas += (blocks) =>
+        {
+            response += string.Join(", ", blocks.Select(x => $"{x.Name} ({x.Meta.Length} bytes)"));
+            StateHasChanged();
+            return Task.CompletedTask;
+        };
+
+        Hub.BlockMesh += (block, data) =>
+        {
+            response += string.Join(", ", $"{block.Name} (ground: {block.Ground}, Variant: {block.Variant}, SubVariant: {block.SubVariant}, Data: {data.Length})");
+            StateHasChanged();
+            return Task.CompletedTask;
+        };
     }
 
     private async Task PingAsync()
     {
-        response = await Hub.InvokeBlockMesh(new BlockVariant("AlpineCliffRoadLeft", true, 0, 0));
-        StateHasChanged();
+        await Hub.SendMetasAsync(new[] { "StadiumAirship", "StadiumBump1" }, "Stadium", "Nadeo");
+        await Hub.SendBlockMeshAsync(new BlockVariant("StadiumRoadMain", true, 0, 0));
+        await Hub.SendBlockMeshAsync(new BlockVariant("StadiumRoadMain", true, 1, 0));
+        await Hub.SendBlockMeshAsync(new BlockVariant("StadiumRoadMain", false, 2, 0));
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            using var ms = new MemoryStream();
+            using var stream = file.OpenReadStream(maxAllowedSize: 10000000);
+
+            await stream.CopyToAsync(ms);
+
+            ms.Position = 0;
+
+            node = GameBox.ParseNode(ms);
+        }
+    }
+
+    public async Task TestInstantiateTool(IToolFactory factory)
+    {
+        var tool = factory.CreateTool(node);
+        var type = tool.GetType();
+
+        var hubConnectionInterface = type.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IHubConnection<>));
+
+        if (hubConnectionInterface is not null)
+        {
+            hubConnectionInterface.GetProperty("HubConnection")?.SetValue(tool, Hub);
+        }
+
+        if (tool is IHasUI ui)
+        {
+            await ui.LoadAsync();
+        }
     }
 }
