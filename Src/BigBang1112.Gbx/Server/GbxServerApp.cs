@@ -74,9 +74,11 @@ internal static class GbxServerApp
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
-
-        // this should register better
-        services.AddScoped<IDbConnection>(s => new MySqlConnection(config.GetConnectionString("MapViewerEngine")));
+        
+        services.AddScoped<IDbConnection>(s =>
+        {
+            return new MySqlConnection(config.GetConnectionString("Gbx"));
+        });
 
         AddToolServer<MapViewerEngineServer>(services, config, "MapViewerEngine");
     }
@@ -119,10 +121,11 @@ internal static class GbxServerApp
         app.MapFallbackToFile("index.html");
     }
 
-    private static void AddToolServer<T>(IServiceCollection services, IConfiguration config, string dbName) where T : IServer, new()
+    private static void AddToolServer<T>(IServiceCollection services, IConfiguration config, string dbName) where T : class, IServer, new()
     {
-        var server = new T();
-        server.Services(services);
+        services.AddSingleton<T>();
+        
+        T.Services(services);
 
         var assembly = typeof(T).Assembly;
 
@@ -131,6 +134,11 @@ internal static class GbxServerApp
         foreach (var type in assembly.DefinedTypes)
         {
             TryAddToolDbContext(services, config, dbName, type);
+            
+            services.AddScoped<ISqlConnection<T>, SqlConnection<T>>(provider =>
+            {
+                return new(new MySqlConnection(config.GetConnectionString(provider.GetRequiredService<T>().ConnectionString)));
+            });
         }
     }
 
