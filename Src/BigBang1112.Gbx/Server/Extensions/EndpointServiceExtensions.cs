@@ -1,6 +1,4 @@
 ﻿using BigBang1112.Gbx.Server.Endpoints;
-using Microsoft.AspNetCore.Routing;
-using System.Collections.Immutable;
 
 namespace BigBang1112.Gbx.Server.Extensions;
 
@@ -14,7 +12,7 @@ public static class EndpointServiceExtensions
 
         foreach (var endpoint in endpoints)
         {
-            services.AddSingleton(typeof(IEndpoint), endpoint);
+            services.AddScoped(typeof(IEndpoint), endpoint);
         }
 
         return services;
@@ -22,7 +20,9 @@ public static class EndpointServiceExtensions
 
     public static IEndpointRouteBuilder UseEndpoints(this IEndpointRouteBuilder app)
     {
-        var endpoints = app.ServiceProvider.GetServices<IEndpoint>();
+        using var scope = app.ServiceProvider.CreateScope();
+        
+        var endpoints = scope.ServiceProvider.GetServices<IEndpoint>();
         
         foreach (var endpoint in endpoints)
         {

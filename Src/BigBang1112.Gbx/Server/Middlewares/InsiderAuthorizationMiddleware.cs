@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Security.Claims;
+using System.Security.Principal;
 
 namespace BigBang1112.Gbx.Server.Middlewares;
 
@@ -15,45 +17,37 @@ public class InsiderAuthorizationMiddleware
         _config = config;
     }
 
-    public async Task InvokeAsync(HttpContext context, IAuthorizationService authorizationService)
-    {
-        if (await IsValidInsiderAsync(context, authorizationService))
-        {
-            await _next(context);
-            return;
-        }
-        
-        if (NotAuthenticated(context.User))
-        {
-            await context.ChallengeAsync();
-            return;
-        }
-        
-        context.Response.StatusCode = 403;
-    }
-
-    internal async ValueTask<bool> IsValidInsiderAsync(HttpContext context, IAuthorizationService authorizationService)
+    public async Task InvokeAsync(HttpContext context)
     {
         var isInsiderMode = _config.GetValue<bool>("InsiderMode");
 
-        if (!isInsiderMode)
+        if (!isInsiderMode || await PassInsiderAsync(context))
+        {
+            await _next(context);
+        }
+    }
+
+    internal async Task<bool> PassInsiderAsync(HttpContext context)
+    {
+        if (context.User.Identity is not ClaimsIdentity identity || !context.User.Identity.IsAuthenticated)
+        {
+            await context.ChallengeAsync();
+            return false;
+        }
+
+        if (IsValidInsider(identity))
         {
             return true;
         }
 
-        var user = context.User;
+        context.Response.StatusCode = 403;
 
-        if (NotAuthenticated(user))
-        {
-            var result = await authorizationService.AuthorizeAsync(user, "InsiderPolicy");
+        return false;
+    }
 
-            if (!result.Succeeded)
-            {
-                return false;
-            }
-        }
-
-        var nameIdentifier = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+    internal bool IsValidInsider(ClaimsIdentity identity)
+    {
+        var nameIdentifier = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
         if (nameIdentifier is null)
         {
@@ -68,10 +62,5 @@ public class InsiderAuthorizationMiddleware
         }
 
         return insiders.Contains(nameIdentifier);
-    }
-
-    private static bool NotAuthenticated(ClaimsPrincipal user)
-    {
-        return user.Identity is null || !user.Identity.IsAuthenticated;
     }
 }

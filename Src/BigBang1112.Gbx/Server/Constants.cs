@@ -2,7 +2,6 @@
 
 public static class Constants
 {
-    public const string Cookies = "Cookies";
     public const string Database = "Database";
     public const string Discord = "Discord";
     public const string Messagepack = "messagepack";

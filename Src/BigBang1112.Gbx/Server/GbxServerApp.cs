@@ -6,10 +6,14 @@ using GbxToolAPI.Server;
 using GbxToolAPI.Server.Options;
 using MapViewerEngine.Server;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using MySqlConnector;
+using System.Data;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -26,14 +30,33 @@ internal static class GbxServerApp
         services.AddAuthorization(SharedOptions.Authorization);
 
         services.AddAuthentication(DiscordAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(Constants.Cookies)
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            {
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = 403;
+                    return Task.CompletedTask;
+                };
+            })
             .AddDiscord(options =>
             {
                 var discordOptions = config.GetSection(Constants.Discord).Get<DiscordOptions>() ?? new DiscordOptions();
 
                 options.ClientId = discordOptions.Client.Id;
                 options.ClientSecret = discordOptions.Client.Secret;
-                options.SignInScheme = Constants.Cookies;
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+                options.Events.OnRedirectToAuthorizationEndpoint = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api"))
+                    {
+                        context.Response.StatusCode = 401;
+                        return Task.CompletedTask;
+                    }
+
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                };
             });
 
         services.AddSignalR(options =>
@@ -51,6 +74,9 @@ internal static class GbxServerApp
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
+
+        // this should register better
+        services.AddScoped<IDbConnection>(s => new MySqlConnection(config.GetConnectionString("MapViewerEngine")));
 
         AddToolServer<MapViewerEngineServer>(services, config, "MapViewerEngine");
     }
@@ -74,17 +100,19 @@ internal static class GbxServerApp
         app.UseRouting();
 
         app.UseAuthentication();
-        app.UseAuthorization();
 
         app.UseMiddleware<InsiderAuthorizationMiddleware>();
         app.UseMiddleware<RegularAuthorizationMiddleware>();
 
+        app.UseAuthorization();
+
         app.UseBlazorFrameworkFiles();
         app.UseStaticFiles();
 
-        MapToolServer<MapViewerEngineServer>(app);
-
+        UseToolServer<MapViewerEngineServer>(app);
+        
         app.UseEndpoints();
+        app.UseToolEndpoints();
 
         app.MapRazorPages();
         app.MapControllers();
@@ -96,7 +124,11 @@ internal static class GbxServerApp
         var server = new T();
         server.Services(services);
 
-        foreach (var type in typeof(T).Assembly.DefinedTypes)
+        var assembly = typeof(T).Assembly;
+
+        services.AddToolEndpoints(assembly);
+
+        foreach (var type in assembly.DefinedTypes)
         {
             TryAddToolDbContext(services, config, dbName, type);
         }
@@ -134,13 +166,13 @@ internal static class GbxServerApp
             delegate (DbContextOptionsBuilder options) {
                 var dbName = "bigbang1112_gbx_tool_" + databaseName.ToLower();
 
-                if (config.GetValue<bool>("Database:InMemory"))
+                if (config.GetSection(Constants.Database).Get<DatabaseOptions>()?.InMemory == true)
                 {
                     options.UseInMemoryDatabase(dbName);
                 }
                 else
                 {
-                    var connectionString = config.GetConnectionString(dbName);
+                    var connectionString = config.GetConnectionString(databaseName);
 
                     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                 }
@@ -152,8 +184,8 @@ internal static class GbxServerApp
         return true;
     }
 
-    private static void MapToolServer<T>(IEndpointRouteBuilder app) where T : IServer
-    {
+    private static void UseToolServer<T>(IEndpointRouteBuilder app) where T : IServer
+    {        
         foreach (var type in typeof(T).Assembly.DefinedTypes)
         {
             TryMapToolHub(app, type);

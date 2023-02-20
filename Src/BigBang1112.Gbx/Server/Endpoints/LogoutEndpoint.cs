@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace BigBang1112.Gbx.Server.Endpoints;
 
@@ -18,6 +19,6 @@ public class LogoutEndpoint : IEndpoint
             location = "/";
         }
 
-        await httpContext.SignOutAsync(Constants.Cookies, new AuthenticationProperties { RedirectUri = location });
+        await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties { RedirectUri = location });
     }
 }

@@ -14,7 +14,8 @@ public class GbxEndpoint : IEndpoint
 
     public void Endpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("gbx", Gbx);
+        app.MapPost("gbx", Gbx)
+            .RequireAuthorization();
     }
 
     public async Task<IResult> Gbx(IFormFile? file, string query, string? @class, CancellationToken cancellationToken)

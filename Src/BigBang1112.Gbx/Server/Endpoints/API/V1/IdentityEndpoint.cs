@@ -14,7 +14,8 @@ public class IdentityEndpoint : IEndpoint
 
     public void Endpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("identity", Identity);
+        app.MapGet("identity", Identity)
+            .RequireAuthorization();
     }
 
     private static IResult Identity(HttpContext httpContext)
