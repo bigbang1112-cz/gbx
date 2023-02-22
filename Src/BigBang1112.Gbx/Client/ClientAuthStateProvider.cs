@@ -16,15 +16,15 @@ public class ClientAuthStateProvider : AuthenticationStateProvider
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var response = await _http.GetAsync("/api/v1/identity");
-        
-        var identity = await GetIdentityAsync(response);
+        var identity = await GetIdentityAsync();
 
         return new AuthenticationState(identity is null ? new ClaimsPrincipal() : new ClaimsPrincipal(identity));
     }
 
-    private static async Task<ClaimsIdentity?> GetIdentityAsync(HttpResponseMessage response)
+    private async Task<ClaimsIdentity?> GetIdentityAsync()
     {
+        var response = await _http.GetAsync("/api/v1/identity");
+
         if (!response.IsSuccessStatusCode)
         {
             return null;
