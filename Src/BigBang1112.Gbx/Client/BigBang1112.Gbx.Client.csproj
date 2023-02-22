@@ -7,6 +7,10 @@
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="BigBang1112.Gbx.Client.Tests"/>
+	</ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="GBX.NET.LZO" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.3" />

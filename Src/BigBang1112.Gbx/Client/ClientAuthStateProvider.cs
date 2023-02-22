@@ -41,7 +41,7 @@ public class ClientAuthStateProvider : AuthenticationStateProvider
         return new ClaimsIdentity(ClaimStringsToClaims(identityModel.Claims), identityModel.AuthenticationType);
     }
 
-    private static IEnumerable<Claim> ClaimStringsToClaims(IDictionary<string, List<string>> claimStrings)
+    internal static IEnumerable<Claim> ClaimStringsToClaims(IDictionary<string, List<string>> claimStrings)
     {
         foreach (var (type, values) in claimStrings)
         {
