@@ -4,12 +4,51 @@
 @using GbxToolAPI;
 @using GbxToolAPI.Client;
 @using MapViewerEngine.Shared;
+
 @inject MapViewerEngine.MapViewerEngineHubConnection Hub
-@inject ToolManager ToolManager
+@inject IToolManager ToolManager
+@inject IWorkflowManager WorkflowManager
 
-<PageTitle>Index</PageTitle>
+<PageTitle>GBX WEB TOOLS by BigBang1112</PageTitle>
 
-<p>@Hub.State</p>
+<div class="grid-container">
+    <div class="grid-item">
+        <ImportGbx />
+        <InputText @bind-Value="SearchValue" @oninput="OnSearchInput" class="search-bar" placeholder="Search..."></InputText>
+    </div>
+    <div class="grid-item">
+        <h2>Tools</h2>
+        <div class="list">
+            @foreach (var item in ToolManager.GetToolFactories(searchValue))
+            {
+                <div class="rectangle clickable" @onclick="() => TestInstantiateTool(item)">
+                    <h3>@item.Name</h3>
+                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p>@item.Description</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="grid-item">
+        <h2>Workflows <span title="Workflow is a combination of tools with adjusted input and output.">(?)</span></h2>
+        <div class="list">
+            @foreach (var item in WorkflowManager.GetWorkflows(searchValue))
+            {
+                <div class="rectangle clickable">
+                    <h3>@item.Name</h3>
+                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p>@item.Description</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!--<p>@Hub.State</p>
 
 <AuthorizeView>
     <NotAuthorized>
@@ -22,25 +61,33 @@
 
 <a href="superadmin">SuperAdmin</a>
 
-<ul>
-    @foreach (var item in ToolManager.GetToolFactories())
-    {
-        <li>
-            <button @onclick="() => TestInstantiateTool(item)">@item</button>
-        </li>
-    }
-</ul>
+
 
 <InputFile OnChange="LoadFiles" />
 
 <button @onclick="PingAsync">Send important stuff</button>
 
-<p>@response</p>
+<p>@response</p>-->
 
 @code {
     private string response = "";
-
     private Node? node;
+
+    private string searchValue = "";
+
+    public string SearchValue
+    {
+        get => searchValue;
+        set
+        {
+            searchValue = value;
+        }
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchValue = e.Value?.ToString() ?? "";
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,6 +109,8 @@
             StateHasChanged();
             return Task.CompletedTask;
         };
+
+        await WorkflowManager.LoadWorkflowsAsync();
     }
 
     private async Task PingAsync()

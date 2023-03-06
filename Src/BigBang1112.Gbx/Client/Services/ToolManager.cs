@@ -1,5 +1,6 @@
 ﻿using ClipInput;
 using ClipToReplay;
+using CombineClips;
 using GbxToolAPI;
 using GbxToolAPI.Client;
 using GhostToClip;
@@ -12,8 +13,8 @@ namespace BigBang1112.Gbx.Client.Services;
 
 internal interface IToolManager
 {
-    IEnumerable<Type> GetTools();
-    IEnumerable<IToolFactory> GetToolFactories();
+    IReadOnlyCollection<Type> Tools { get; }
+    IEnumerable<IToolFactory> GetToolFactories(string searchFilter = "");
 }
 
 internal class ToolManager : IToolManager
@@ -21,6 +22,8 @@ internal class ToolManager : IToolManager
     private static readonly List<Type> stronglyTypedTools = new();
 
     private readonly IServiceProvider provider;
+
+    public IReadOnlyCollection<Type> Tools => stronglyTypedTools;
 
     public ToolManager(IServiceProvider provider)
     {
@@ -36,6 +39,7 @@ internal class ToolManager : IToolManager
         AddTool<ReplayViewerTool>(services);
         AddTool<MapViewerEngineTool>(services);
         AddTool<SpikeTool>(services);
+        AddTool<CombineClipsTool>(services);
     }
 
     internal static void AddTool<T>(IServiceCollection services) where T : ITool
@@ -59,16 +63,31 @@ internal class ToolManager : IToolManager
         stronglyTypedTools.Add(typeof(T));
     }
 
-    public IEnumerable<Type> GetTools()
+    public IEnumerable<IToolFactory> GetToolFactories(string searchFilter = "")
     {
-        return stronglyTypedTools;
+        foreach (var tool in Tools)
+        {
+            var factory = (IToolFactory)provider.GetRequiredService(typeof(ToolFactory<>).MakeGenericType(tool));
+            
+            if (FilterFactory(factory, searchFilter))
+            {
+                yield return factory;
+            }
+        }
     }
 
-    public IEnumerable<IToolFactory> GetToolFactories()
+    private static bool FilterFactory(IToolFactory factory, string searchFilter)
     {
-        foreach (var tool in GetTools())
+        if (factory.Name.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
         {
-            yield return (IToolFactory)provider.GetRequiredService(typeof(ToolFactory<>).MakeGenericType(tool));
+            return true;
         }
+
+        if (factory.Description.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return false;
     }
 }

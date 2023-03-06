@@ -1,0 +1,37 @@
+Name: Replay Input
+
+Input:
+- CGameCtnReplayRecord
+
+Tasks:
+- Function: ExportGhostsFromReplay
+  Input:
+  - CGameCtnReplayRecord
+  Output: CGameCtnGhost[]
+  
+- Tool: ClipInput
+  Input:
+  - CGameCtnGhost[]
+  Output: InputsClip # custom named
+  
+- Function: ExportMapFromReplay
+  Input:
+  - CGameCtnReplayRecord
+  Output: CGameCtnChallenge
+
+- Tool: GhostToClip
+  Input:
+  - CGameCtnGhost[]
+  Output: GhostsClip # custom named
+
+- Tool: CombineClips
+  Input:
+  - InputsClip
+  - GhostsClip
+  Output: Clip # custom named
+
+- Tool: ClipToReplay
+  Input:
+  - Clip
+  - CGameCtnChallenge
+  # Output is implicit

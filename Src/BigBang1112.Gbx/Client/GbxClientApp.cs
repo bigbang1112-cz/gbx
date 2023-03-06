@@ -14,7 +14,10 @@ public static class GbxClientApp
         services.AddScoped<AuthenticationStateProvider, ClientAuthStateProvider>();
         services.AddAuthorizationCore(SharedOptions.Authorization);
 
-        services.AddScoped<ToolManager>(); // registers the tool manager so that it can implement some testability
+        services.AddScoped<IToolManager, ToolManager>(); // registers the tool manager so that it can implement some testability
+        services.AddScoped<IWorkflowManager, WorkflowManager>();
+        services.AddScoped<SettingsService>();
+        services.AddScoped<IGbxService, GbxService>();
 
         ToolManager.Services(services); // registers the individual "strong" tools
     }

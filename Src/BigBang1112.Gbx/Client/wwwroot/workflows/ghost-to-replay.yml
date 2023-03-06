@@ -1,0 +1,19 @@
+Name: Ghost to Replay
+Description: Joins map and ghost together into a replay file.
+
+Input:
+- CGameCtnGhost
+- CGameCtnChallenge
+
+Tasks:
+
+- Tool: GhostToClip
+  Input:
+  - CGameCtnGhost
+  Output: Clip # custom named
+
+- Tool: ClipToReplay
+  Input:
+  - Clip
+  - CGameCtnChallenge
+  # Output is implicit

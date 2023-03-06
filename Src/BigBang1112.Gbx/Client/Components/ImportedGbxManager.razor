@@ -1,0 +1,21 @@
+﻿@using GBX.NET;
+@using System.Collections.Specialized;
+
+@inject IGbxService GbxService
+
+@if (GbxService.Gbxs.Count > 0)
+{
+    <div class="rectangle floating-div">@GbxService.Gbxs.Count Gbx files imported</div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        GbxService.Gbxs.CollectionChanged += Gbxs_CollectionChanged;
+    }
+
+    public void Gbxs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+}

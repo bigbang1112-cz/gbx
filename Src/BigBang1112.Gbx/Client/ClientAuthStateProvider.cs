@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace BigBang1112.Gbx.Client;
 
@@ -30,15 +31,22 @@ public class ClientAuthStateProvider : AuthenticationStateProvider
             return null;
         }
 
-        // parse the ClaimsIdentity from the API response
-        var identityModel = await response.Content.ReadFromJsonAsync<Identity>();
+        try // Hacky way to avoid the redirect issue
+        {
+            // parse the ClaimsIdentity from the API response
+            var identityModel = await response.Content.ReadFromJsonAsync<Identity>();
 
-        if (identityModel is null)
+            if (identityModel is null)
+            {
+                return null;
+            }
+
+            return new ClaimsIdentity(ClaimStringsToClaims(identityModel.Claims), identityModel.AuthenticationType);
+        }
+        catch (JsonException)
         {
             return null;
         }
-
-        return new ClaimsIdentity(ClaimStringsToClaims(identityModel.Claims), identityModel.AuthenticationType);
     }
 
     internal static IEnumerable<Claim> ClaimStringsToClaims(IDictionary<string, List<string>> claimStrings)

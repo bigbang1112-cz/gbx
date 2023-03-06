@@ -8,20 +8,23 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="BigBang1112.Gbx.Client.Tests"/>
+		<InternalsVisibleTo Include="BigBang1112.Gbx.Client.Tests" />
 	</ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="GBX.NET.LZO" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.3" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.3" />
+    <PackageReference Include="YamlDotNet" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput\ClipInput.csproj" />
     <ProjectReference Include="..\..\..\Tools\ClipToReplay\ClipToReplay\ClipToReplay.csproj" />
+    <ProjectReference Include="..\..\..\Tools\CombineClips\CombineClips\CombineClips.csproj" />
     <ProjectReference Include="..\..\..\Tools\GhostToClip\GhostToClip\GhostToClip.csproj" />
     <ProjectReference Include="..\..\..\Tools\ReplayViewer\ReplayViewer\ReplayViewer.csproj" />
     <ProjectReference Include="..\..\..\Tools\Spike\Spike\Spike.csproj" />
