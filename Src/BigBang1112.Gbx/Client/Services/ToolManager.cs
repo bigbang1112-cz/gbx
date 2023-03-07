@@ -1,4 +1,5 @@
-﻿using ClipInput;
+﻿using BigBang1112.Gbx.Client.Pages;
+using ClipInput;
 using ClipToReplay;
 using CombineClips;
 using GbxToolAPI;
@@ -8,22 +9,28 @@ using MapViewerEngine;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using ReplayViewer;
 using Spike;
+using System.Reflection;
 
 namespace BigBang1112.Gbx.Client.Services;
 
 internal interface IToolManager
 {
     IReadOnlyCollection<Type> Tools { get; }
+    IReadOnlyDictionary<string, Type> ToolsByRoute { get; }
     IEnumerable<IToolFactory> GetToolFactories(string searchFilter = "");
+    IToolFactory GetToolFactoryByRoute(string route);
 }
 
 internal class ToolManager : IToolManager
 {
     private static readonly List<Type> stronglyTypedTools = new();
+    private static readonly Dictionary<string, Type> toolsByRoute = new();
 
     private readonly IServiceProvider provider;
 
     public IReadOnlyCollection<Type> Tools => stronglyTypedTools;
+
+    public IReadOnlyDictionary<string, Type> ToolsByRoute => toolsByRoute;
 
     public ToolManager(IServiceProvider provider)
     {
@@ -46,7 +53,9 @@ internal class ToolManager : IToolManager
     {
         services.AddScoped<ToolFactory<T>>();
 
-        foreach (var type in typeof(T).Assembly.DefinedTypes)
+        var toolType = typeof(T);
+
+        foreach (var type in toolType.Assembly.DefinedTypes)
         {
             if (type.IsSubclassOf(typeof(ToolHubConnection)))
             {
@@ -60,7 +69,16 @@ internal class ToolManager : IToolManager
             }
         }
 
-        stronglyTypedTools.Add(typeof(T));
+        var id = toolType.Assembly.GetName().Name ?? throw new Exception("Tool requires an Id");
+        var route = toolType.GetCustomAttribute<ToolRouteAttribute>()?.Route ?? RegexUtils.PascalCaseToKebabCase(id);
+
+        stronglyTypedTools.Add(toolType);
+        toolsByRoute.Add(route, toolType);
+    }
+
+    public IToolFactory GetToolFactoryByRoute(string route)
+    {
+        return (IToolFactory)provider.GetRequiredService(typeof(ToolFactory<>).MakeGenericType(toolsByRoute[route]));
     }
 
     public IEnumerable<IToolFactory> GetToolFactories(string searchFilter = "")

@@ -1,18 +1,27 @@
-﻿@page "/tool/{name}"
+﻿@page "/tool/{Route}"
+@inject IToolManager ToolManager
 
-<h3>@Name</h3>
+@if (ToolFactory is not null)
+{
+    <h3>@ToolFactory.Name</h3>
+}
 
 @code {
-    public string? Name { get; set; }
+    [Parameter]
+    public string? Route { get; set; }
+    
+    public IToolFactory? ToolFactory { get; set; }
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
-        foreach (var parameter in parameters)
+        await base.SetParametersAsync(parameters);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Route is not null)
         {
-            if (parameter.Name == nameof(Name))
-            {
-                Name = parameter.Value?.ToString();
-            }
+            ToolFactory = ToolManager.GetToolFactoryByRoute(Route);
         }
     }
 }

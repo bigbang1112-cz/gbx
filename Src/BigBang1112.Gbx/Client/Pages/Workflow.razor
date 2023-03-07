@@ -1,8 +1,30 @@
-﻿@page "/workflow/{name}"
+﻿@page "/workflow/{Route}"
+@inject IWorkflowManager WorkflowManager
 
-<h3>@Name</h3>
+@if (WorkflowModel is not null)
+{
+    <h3>@WorkflowModel.Name</h3>
+}
 
 @code {
     [Parameter]
-    public string? Name { get; set; }
+    public string? Route { get; set; }
+
+    public WorkflowModel? WorkflowModel { get; set; }
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        await base.SetParametersAsync(parameters);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Route is not null)
+        {
+            if (WorkflowManager.WorkflowsByRoute.TryGetValue(Route, out var workflow))
+            {
+                WorkflowModel = workflow;
+            }
+        }
+    }
 }

@@ -6,6 +6,7 @@ namespace BigBang1112.Gbx.Client.Services;
 public interface IWorkflowManager
 {
     IReadOnlyCollection<WorkflowModel> Workflows { get; }
+    IReadOnlyDictionary<string, WorkflowModel> WorkflowsByRoute { get; }
 
     Task LoadWorkflowsAsync(CancellationToken cancellationToken = default);
     IEnumerable<WorkflowModel> GetWorkflows(string searchFilter = "");
@@ -17,6 +18,7 @@ public class WorkflowManager : IWorkflowManager
     private readonly ILogger _logger;
 
     public IReadOnlyCollection<WorkflowModel> Workflows { get; private set; } = Array.Empty<WorkflowModel>();
+    public IReadOnlyDictionary<string, WorkflowModel> WorkflowsByRoute { get; private set; } = new Dictionary<string, WorkflowModel>();
 
     public WorkflowManager(HttpClient http, ILogger logger)
     {
@@ -39,6 +41,7 @@ public class WorkflowManager : IWorkflowManager
 
         var deserializer = new YamlDotNet.Serialization.Deserializer();
         var workflows = new List<WorkflowModel>();
+        var workflowsByRoute = new Dictionary<string, WorkflowModel>();
 
         foreach (var response in tasks.Select(x => x.Result))
         {
@@ -55,6 +58,7 @@ public class WorkflowManager : IWorkflowManager
                 var workflow = deserializer.Deserialize<WorkflowModel>(reader);
 
                 workflows.Add(workflow);
+                workflowsByRoute.Add(workflow.Route, workflow);
             }
             catch (Exception ex)
             {
@@ -65,6 +69,7 @@ public class WorkflowManager : IWorkflowManager
         }
 
         Workflows = workflows;
+        WorkflowsByRoute = workflowsByRoute;
     }
 
     public IEnumerable<WorkflowModel> GetWorkflows(string searchFilter = "")
