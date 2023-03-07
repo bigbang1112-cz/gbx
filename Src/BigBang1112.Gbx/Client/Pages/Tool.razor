@@ -3,6 +3,16 @@
 <h3>@Name</h3>
 
 @code {
-    [Parameter]
     public string? Name { get; set; }
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        foreach (var parameter in parameters)
+        {
+            if (parameter.Name == nameof(Name))
+            {
+                Name = parameter.Value?.ToString();
+            }
+        }
+    }
 }
