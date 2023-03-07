@@ -45,7 +45,7 @@ public static partial class ToolEndpointServiceExtensions
 
             var toolRoute = type.Assembly.GetCustomAttribute<ToolEndpointAttribute>()?.Route ?? throw new Exception("Tool assembly is missing ToolEndpointAttribute");
 
-            var route = $"api/v{match.Groups[1].Value}/{toolRoute}/{match.Groups[2].Value.Replace('.', '/').ToLower()}";
+            var route = $"api/v{match.Groups[1].Value}/tool/{toolRoute}/{match.Groups[2].Value.Replace('.', '/').ToLower()}";
 
             endpoint.Endpoint(app.MapGroup(route));
         }

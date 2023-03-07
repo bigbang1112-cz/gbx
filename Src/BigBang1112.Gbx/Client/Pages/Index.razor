@@ -8,6 +8,7 @@
 @inject MapViewerEngine.MapViewerEngineHubConnection Hub
 @inject IToolManager ToolManager
 @inject IWorkflowManager WorkflowManager
+@inject NavigationManager NavMan
 
 <PageTitle>GBX WEB TOOLS by BigBang1112</PageTitle>
 
@@ -21,13 +22,13 @@
         <div class="list">
             @foreach (var item in ToolManager.GetToolFactories(searchValue))
             {
-                <div class="rectangle clickable" @onclick="() => TestInstantiateTool(item)">
+                <a href="tool/@item.Route" class="rectangle clickable">
                     <h3>@item.Name</h3>
                     @if (!string.IsNullOrWhiteSpace(item.Description))
                     {
                         <p>@item.Description</p>
                     }
-                </div>
+                </a>
             }
         </div>
     </div>
@@ -36,13 +37,13 @@
         <div class="list">
             @foreach (var item in WorkflowManager.GetWorkflows(searchValue))
             {
-                <div class="rectangle clickable">
+                <a href="workflow/@item.Route" class="rectangle clickable">
                     <h3>@item.Name</h3>
                     @if (!string.IsNullOrWhiteSpace(item.Description))
                     {
                         <p>@item.Description</p>
                     }
-                </div>
+                </a>
             }
         </div>
     </div>

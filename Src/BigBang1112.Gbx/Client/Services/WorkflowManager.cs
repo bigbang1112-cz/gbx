@@ -13,24 +13,26 @@ public interface IWorkflowManager
 
 public class WorkflowManager : IWorkflowManager
 {
-    private readonly HttpClient http;
+    private readonly HttpClient _http;
+    private readonly ILogger _logger;
 
     public IReadOnlyCollection<WorkflowModel> Workflows { get; private set; } = Array.Empty<WorkflowModel>();
 
-    public WorkflowManager(HttpClient http)
+    public WorkflowManager(HttpClient http, ILogger logger)
     {
-        this.http = http;
+        _http = http;
+        _logger = logger;
     }
 
     public async Task LoadWorkflowsAsync(CancellationToken cancellationToken = default)
     {
-        var workflowList = await http.GetFromJsonAsync<string[]>("workflow-list.json", cancellationToken) ?? Array.Empty<string>();
+        var workflowList = await _http.GetFromJsonAsync<string[]>("workflow-list.json", cancellationToken) ?? Array.Empty<string>();
 
         var tasks = new List<Task<HttpResponseMessage>>();
 
         foreach (var workflow in workflowList)
         {
-            tasks.Add(http.GetAsync($"workflows/{workflow}.yml", cancellationToken));
+            tasks.Add(_http.GetAsync($"workflows/{workflow}.yml", cancellationToken));
         }
 
         await Task.WhenAll(tasks);
@@ -48,9 +50,16 @@ public class WorkflowManager : IWorkflowManager
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var reader = new StreamReader(stream);
 
-            var workflow = deserializer.Deserialize<WorkflowModel>(reader);
+            try
+            {
+                var workflow = deserializer.Deserialize<WorkflowModel>(reader);
 
-            workflows.Add(workflow);
+                workflows.Add(workflow);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to deserialize workflow");
+            }
 
             response.Dispose();
         }

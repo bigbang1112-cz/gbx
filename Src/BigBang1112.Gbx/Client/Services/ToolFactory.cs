@@ -1,5 +1,6 @@
 ﻿using GbxToolAPI;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace BigBang1112.Gbx.Client.Services;
 
@@ -11,6 +12,7 @@ public interface IToolFactory
     string Name { get; }
     string Description { get; }
     string GitHubRepository { get; }
+    string Route { get; }
 
     ITool CreateTool(params object?[] args);
 }
@@ -25,6 +27,7 @@ public class ToolFactory<T> : IToolFactory where T : ITool
     public string Name { get; }
     public string Description { get; }
     public string GitHubRepository { get; }
+    public string Route { get; }
 
     public ToolFactory(ILogger<ToolFactory<T>> logger)
     {
@@ -36,6 +39,7 @@ public class ToolFactory<T> : IToolFactory where T : ITool
         Name = ToolType.GetCustomAttribute<ToolNameAttribute>()?.Name ?? ToolType.Name;
         Description = ToolType.GetCustomAttribute<ToolDescriptionAttribute>()?.Description ?? string.Empty;
         GitHubRepository = ToolType.GetCustomAttribute<ToolGitHubAttribute>()?.Repository ?? string.Empty;
+        Route = ToolType.GetCustomAttribute<ToolRouteAttribute>()?.Route ?? RegexUtils.PascalCaseToKebabCase(Id);
     }
 
     ITool IToolFactory.CreateTool(params object?[] args)

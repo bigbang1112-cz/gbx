@@ -18,6 +18,7 @@ public static class GbxClientApp
         services.AddScoped<IWorkflowManager, WorkflowManager>();
         services.AddScoped<SettingsService>();
         services.AddScoped<IGbxService, GbxService>();
+        services.AddScoped<ILogger, Logger>();
 
         ToolManager.Services(services); // registers the individual "strong" tools
     }

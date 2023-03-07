@@ -1,4 +1,5 @@
 Name: Ghost to Replay
+Route: ghost-to-replay
 Description: Joins map and ghost together into a replay file.
 
 Input:
