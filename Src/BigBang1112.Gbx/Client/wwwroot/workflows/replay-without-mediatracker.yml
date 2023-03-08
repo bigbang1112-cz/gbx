@@ -1,0 +1,28 @@
+Name: Replay w/o MediaTracker
+Route: replay-without-mediatracker
+Beta: true
+
+Input:
+- CGameCtnReplayRecord
+
+Tasks:
+- Function: GetGhostsFromReplay
+  Input:
+  - CGameCtnReplayRecord
+  Output: CGameCtnGhost[]
+
+- Tool: GhostToClip
+  Input:
+  - CGameCtnGhost[]
+  Output: Clip # custom named
+  
+- Function: GetMapDataFromReplay
+  Input:
+  - CGameCtnReplayRecord
+  Output: MapData
+
+- Tool: ClipToReplay
+  Input:
+  - Clip
+  - MapData
+  # Output is implicit

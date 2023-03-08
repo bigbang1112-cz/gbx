@@ -1,4 +1,5 @@
 [
   "ghost-to-replay",
-  "replay-input"
+  "replay-input",
+  "replay-without-mediatracker"
 ]
