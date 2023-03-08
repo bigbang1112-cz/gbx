@@ -1,11 +1,12 @@
 Name: Replay Input
 Route: replay-input
+Beta: true
 
 Input:
 - CGameCtnReplayRecord
 
 Tasks:
-- Function: ExportGhostsFromReplay
+- Function: GetGhostsFromReplay
   Input:
   - CGameCtnReplayRecord
   Output: CGameCtnGhost[]
@@ -15,7 +16,7 @@ Tasks:
   - CGameCtnGhost[]
   Output: InputsClip # custom named
   
-- Function: ExportMapFromReplay
+- Function: GetMapFromReplay
   Input:
   - CGameCtnReplayRecord
   Output: CGameCtnChallenge
