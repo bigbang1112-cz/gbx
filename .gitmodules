@@ -19,3 +19,9 @@
 [submodule "Tools/CombineClips"]
 	path = Tools/CombineClips
 	url = https://github.com/bigbang1112-cz/combine-clips
+[submodule "Tools/ClipCheckpoint"]
+	path = Tools/ClipCheckpoint
+	url = https://github.com/bigbang1112-cz/clip-checkpoint-private
+[submodule "Tools/Champagne"]
+	path = Tools/Champagne
+	url = https://github.com/bigbang1112-cz/champagne
