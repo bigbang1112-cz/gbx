@@ -11,6 +11,9 @@
 }
 
 body {
+    background: linear-gradient(to bottom, var(--background-gradient-top), var(--background-gradient-bottom)), url(/img/bg.jpg);
+    background-size: cover;
+    color: white;
     font-family: 'Kanit', Rubik, sans-serif;
 }
 

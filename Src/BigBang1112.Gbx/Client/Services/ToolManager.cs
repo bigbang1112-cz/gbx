@@ -1,4 +1,6 @@
 ﻿using BigBang1112.Gbx.Client.Pages;
+using Champagne;
+using ClipCheckpoint;
 using ClipInput;
 using ClipToReplay;
 using CombineClips;
@@ -40,13 +42,14 @@ internal class ToolManager : IToolManager
     internal static void Services(IServiceCollection services)
     {
         AddTool<ClipInputTool>(services);
-        // AddTool<ClipCheckpointTool>(services);
+        AddTool<ClipCheckpointTool>(services);
         AddTool<GhostToClipTool>(services);
         AddTool<ClipToReplayTool>(services);
         AddTool<ReplayViewerTool>(services);
         AddTool<MapViewerEngineTool>(services);
         AddTool<SpikeTool>(services);
         AddTool<CombineClipsTool>(services);
+        AddTool<ChampagneTool>(services);
     }
 
     internal static void AddTool<T>(IServiceCollection services) where T : ITool

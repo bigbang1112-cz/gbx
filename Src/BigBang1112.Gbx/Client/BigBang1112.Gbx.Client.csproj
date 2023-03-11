@@ -22,6 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Tools\Champagne\Champagne\Champagne.csproj" />
+    <ProjectReference Include="..\..\..\Tools\ClipCheckpoint\ClipCheckpoint\ClipCheckpoint.csproj" />
     <ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput\ClipInput.csproj" />
     <ProjectReference Include="..\..\..\Tools\ClipToReplay\ClipToReplay\ClipToReplay.csproj" />
     <ProjectReference Include="..\..\..\Tools\CombineClips\CombineClips\CombineClips.csproj" />
@@ -42,6 +44,7 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Pages\Tool.razor" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\scrollbar.css" />
   </ItemGroup>
 
 </Project>

@@ -3,15 +3,9 @@
     padding: 0;
 }
 
-body {
-    background: linear-gradient(to bottom, var(--background-gradient-top), var(--background-gradient-bottom)), url(/img/bg.jpg);
-    background-position: center;
-    background-size: cover;
-    color: white;
-}
-
 .page {
     min-height: 100vh;
+    position: relative;
 }
 
 header {
@@ -21,6 +15,9 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    position: fixed;
+    z-index: 20;
 }
 
     header > div {
@@ -38,6 +35,7 @@ header {
 footer {
     height: 80px;
     background: #111;
+    margin-top: 20px;
 }
 
 .grid-container {
@@ -45,7 +43,7 @@ footer {
     gap: 20px;
     grid-template-columns: 1fr;
     max-width: 1500px;
-    margin: 20px auto;
+    margin: 0 auto;
     padding: 0 20px;
 }
 
