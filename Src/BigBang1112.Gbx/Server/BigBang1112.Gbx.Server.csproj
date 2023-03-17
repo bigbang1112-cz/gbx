@@ -13,6 +13,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Include="SpecialFiles\css\app.css" />
+	  <Content Include="SpecialFiles\img\bg.jpg" />
+	  <Content Include="SpecialFiles\img\bigbang1112.png" />
+	  <Content Include="SpecialFiles\img\logo.png" />
+	  <Content Include="SpecialPages\Join.html" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AspNet.Security.OAuth.Discord" Version="7.0.0" />
 		<PackageReference Include="GBX.NET.LZO" Version="1.0.2" />
 		<PackageReference Include="GraphQL-Parser" Version="8.1.0" />

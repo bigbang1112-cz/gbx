@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
-using System.Security.Principal;
 
 namespace BigBang1112.Gbx.Server.Middlewares;
 
@@ -10,28 +8,59 @@ public class InsiderAuthorizationMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IConfiguration _config;
+    private readonly IMemoryCache _cache;
 
-    public InsiderAuthorizationMiddleware(RequestDelegate next, IConfiguration config)
+    public InsiderAuthorizationMiddleware(RequestDelegate next, IConfiguration config, IMemoryCache cache)
     {
         _next = next;
         _config = config;
+        _cache = cache;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
         var isInsiderMode = _config.GetValue<bool>("InsiderMode");
 
-        if (!isInsiderMode || await PassInsiderAsync(context))
+        if (!isInsiderMode || PassInsider(context))
         {
             await _next(context);
+            return;
+        }
+
+        if (context.Request.Path == "/")
+        {
+            await ShowTeaserPage(context);
+        }
+        else if (context.Request.Path == "/login")
+        {
+            await context.ChallengeAsync(new AuthenticationProperties { RedirectUri = "/" });
+        }
+        else
+        {
+            context.Response.StatusCode = 404;
         }
     }
 
-    internal async Task<bool> PassInsiderAsync(HttpContext context)
+    private async Task ShowTeaserPage(HttpContext context)
+    {
+        var html = await _cache.GetOrCreateAsync("JoinPage", async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
+            return await File.ReadAllTextAsync("SpecialPages/Join.html");
+        }) ?? throw new Exception();
+
+        var authenticated = context.User.Identity is ClaimsIdentity identity && context.User.Identity.IsAuthenticated;
+
+        html = string.Format(html, authenticated ? "<button disabled>Joined</button>" : "<a href=\"/login\">Join</a>");
+
+        context.Response.ContentType = "text/html";
+        await context.Response.WriteAsync(html);
+    }
+
+    internal bool PassInsider(HttpContext context)
     {
         if (context.User.Identity is not ClaimsIdentity identity || !context.User.Identity.IsAuthenticated)
         {
-            await context.ChallengeAsync();
             return false;
         }
 

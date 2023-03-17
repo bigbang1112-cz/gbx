@@ -16,7 +16,7 @@ GbxServerApp.Services(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
-App.Middleware(app, options);
 GbxServerApp.Middleware(app);
+App.Middleware(app, options);
 
 app.Run();

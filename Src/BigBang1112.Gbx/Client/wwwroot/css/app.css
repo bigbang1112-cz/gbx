@@ -17,6 +17,10 @@ body {
     font-family: 'Kanit', Rubik, sans-serif;
 }
 
+h1 {
+    outline: none;
+}
+
 h2 {
     text-align: center;
     text-transform: uppercase;

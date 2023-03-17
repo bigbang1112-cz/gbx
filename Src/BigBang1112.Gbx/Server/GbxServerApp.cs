@@ -12,9 +12,11 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
 using MySqlConnector;
 using System.Data;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -103,17 +105,24 @@ internal static class GbxServerApp
 
         app.UseAuthentication();
 
-        app.UseMiddleware<InsiderAuthorizationMiddleware>();
-        app.UseMiddleware<RegularAuthorizationMiddleware>();
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "SpecialFiles")),
+            RequestPath = "/teaser"
+        });
 
         app.UseAuthorization();
+
+        app.UseMiddleware<InsiderAuthorizationMiddleware>();
+        app.UseMiddleware<RegularAuthorizationMiddleware>();
+        
+        app.UseEndpoints();
 
         app.UseBlazorFrameworkFiles();
         app.UseStaticFiles();
 
         UseToolServer<MapViewerEngineServer>(app);
         
-        app.UseEndpoints();
         app.UseToolEndpoints();
 
         app.MapRazorPages();

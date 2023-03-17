@@ -1,0 +1,18 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+
+:root {
+    --background-gradient-top: rgba(64, 80, 96, 0.6);
+    --background-gradient-bottom: rgba(32, 36, 44, 1);
+    --button-blue: #214569;
+    --button-blue-edge: #27507A;
+}
+
+body {
+    background: linear-gradient(to bottom, var(--background-gradient-top), var(--background-gradient-bottom)), url(/teaser/img/bg.jpg);
+    background-size: cover;
+    color: white;
+    font-family: 'Kanit', Rubik, sans-serif;
+}
