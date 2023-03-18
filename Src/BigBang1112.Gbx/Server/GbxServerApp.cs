@@ -119,7 +119,7 @@ internal static class GbxServerApp
         app.UseEndpoints();
 
         app.UseBlazorFrameworkFiles();
-        app.UseStaticFiles();
+        app.UseStaticFiles(new StaticFileOptions { ServeUnknownFileTypes = true });
 
         UseToolServer<MapViewerEngineServer>(app);
         
