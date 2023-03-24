@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_NAME: BigBang1112.Gbx
+  PROJECT_NAME: BigBang1112.Gbx/Server
 
 jobs:
   build:
@@ -25,9 +25,9 @@ jobs:
         dotnet-version: 7.0.x
         
     - name: Build
-      run: dotnet build --configuration Release
+      run: dotnet build BigBang1112.Gbx.Server --configuration Release
     - name: Publish
-      run: dotnet publish -c Release
+      run: dotnet publish BigBang1112.Gbx.Server -c Release
       
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
