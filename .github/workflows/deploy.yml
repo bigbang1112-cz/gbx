@@ -25,7 +25,7 @@ jobs:
         dotnet-version: 7.0.x
     
     - name: Build & Publish
-      run: dotnet publish Src/${{env.PROJECT_NAME}} -c Release -p:PublishSingleFile=true -p:PublishTrimmed=true
+      run: dotnet publish Src/${{env.PROJECT_NAME}} -c Release -p:PublishSingleFile=true -p:PublishTrimmed=true -p:UseAppHost=false
       
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
