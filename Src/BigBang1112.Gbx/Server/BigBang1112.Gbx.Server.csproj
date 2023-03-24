@@ -13,11 +13,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="SpecialFiles\css\app.css" />
-	  <Content Include="SpecialFiles\img\bg.jpg" />
-	  <Content Include="SpecialFiles\img\bigbang1112.png" />
-	  <Content Include="SpecialFiles\img\logo.png" />
-	  <Content Include="SpecialPages\Join.html" />
+		<None Update="SpecialFiles\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
