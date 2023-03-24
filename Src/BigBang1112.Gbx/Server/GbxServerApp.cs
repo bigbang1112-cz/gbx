@@ -98,6 +98,12 @@ internal static class GbxServerApp
             }
         });
 
+        // migrate
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            scope.ServiceProvider.GetRequiredService<GbxContext>().Database.Migrate();
+        }
+
         AddToolServer<MapViewerEngineServer>(services, config, "MapViewerEngine");
     }
 
@@ -184,13 +190,8 @@ internal static class GbxServerApp
                 typeof(Action<DbContextOptionsBuilder>),
                 typeof(ServiceLifetime),
                 typeof(ServiceLifetime)
-            })).FirstOrDefault();
-
-        if (methodInfo is null)
-        {
-            throw new Exception("AddDbContext method not found!");
-        }
-
+            })).FirstOrDefault() ?? throw new Exception("AddDbContext method not found!");
+        
         var genericMethod = methodInfo.MakeGenericMethod(type);
 
         genericMethod.Invoke(null, new object[]
@@ -213,6 +214,10 @@ internal static class GbxServerApp
             ServiceLifetime.Scoped,
             ServiceLifetime.Scoped
         });
+
+        using var scope = services.BuildServiceProvider().CreateScope();
+        
+        ((DbContext)scope.ServiceProvider.GetRequiredService(type)).Database.Migrate();
 
         return true;
     }
