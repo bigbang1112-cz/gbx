@@ -23,11 +23,9 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 7.0.x
-        
-    - name: Build
-      run: dotnet build Src/${{env.PROJECT_NAME}} --configuration Release
-    - name: Publish
-      run: dotnet publish Src/${{env.PROJECT_NAME}} -c Release
+    
+    - name: Build & Publish
+      run: dotnet publish Src/${{env.PROJECT_NAME}} -c Release -p:PublishSingleFile=true --self-contained
       
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
