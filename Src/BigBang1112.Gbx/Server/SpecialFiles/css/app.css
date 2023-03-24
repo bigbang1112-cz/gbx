@@ -15,4 +15,80 @@ body {
     background-size: cover;
     color: white;
     font-family: 'Kanit', Rubik, sans-serif;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+h1 {
+    max-width: 90%;
+}
+
+p {
+    text-align: center;
+    margin: 15px 10px;
+}
+
+.logo {
+    width: 600px;
+    text-align: center;
+    width: 100%;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 50px;
+}
+
+.join {
+    display: block;
+    width: 200px;
+    padding: 5px;
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+    text-decoration: none;
+}
+
+a.join {
+    background: #007F0E;
+}
+
+    a.join:hover {
+        background: #00960F;
+    }
+
+div.join {
+    background: #577C5B;
+    cursor: not-allowed;
+}
+
+.donate {
+    display: block;
+    background: #E2B500;
+    width: 150px;
+    padding: 5px;
+    color: black;
+    border-radius: 10px;
+    text-align: center;
+    text-decoration: none;
+}
+
+    .donate:hover {
+        background: #EAD067;
+    }
+
+@media (max-width: 400px) {
+    .links {
+        flex-direction: column;
+    }
 }

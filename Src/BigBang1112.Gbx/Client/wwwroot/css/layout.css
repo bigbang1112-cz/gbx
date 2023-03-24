@@ -42,7 +42,7 @@ footer {
     display: grid;
     gap: 20px;
     grid-template-columns: 1fr;
-    max-width: 1500px;
+    max-width: 1300px;
     margin: 0 auto;
     padding: 0 20px;
 }

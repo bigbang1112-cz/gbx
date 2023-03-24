@@ -51,7 +51,7 @@ public class InsiderAuthorizationMiddleware
 
         var authenticated = context.User.Identity is ClaimsIdentity identity && context.User.Identity.IsAuthenticated;
 
-        html = string.Format(html, authenticated ? "<button disabled>Joined</button>" : "<a href=\"/login\">Join</a>");
+        html = string.Format(html, authenticated ? "<div class=\"join\">Joined</div>" : "<a href=\"/login\" class=\"join\">Join</a>");
 
         context.Response.ContentType = "text/html";
         await context.Response.WriteAsync(html);
