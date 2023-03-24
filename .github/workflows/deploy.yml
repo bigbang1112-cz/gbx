@@ -25,13 +25,13 @@ jobs:
         dotnet-version: 7.0.x
     
     - name: Build & Publish
-      run: dotnet publish Src/${{env.PROJECT_NAME}} -c Release -p:PublishTrimmed=true --self-contained
+      run: dotnet publish Src/${{env.PROJECT_NAME}} -c Release -o publish -p:PublishTrimmed=true --self-contained
       
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
       with:
         name: build
-        path: Src/${{env.PROJECT_NAME}}/bin/Release/net7.0/publish
+        path: publish
   
   deploy:
     needs: build
