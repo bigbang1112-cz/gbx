@@ -63,4 +63,4 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
-        script: sudo systemctl restart ${{env.PROJECT_NAME}}
+        script: sudo systemctl restart BigBang1112.Gbx
