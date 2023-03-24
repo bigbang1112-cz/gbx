@@ -1,0 +1,65 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  PROJECT_NAME: BigBang1112.Gbx
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 7.0.x
+        
+    - name: Build
+      run: dotnet build --configuration Release
+    - name: Publish
+      run: dotnet publish -c Release
+      
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: build
+        path: ${{env.PROJECT_NAME}}/bin/Release/net7.0/publish
+  
+  deploy:
+    needs: build
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: build
+        path: ${{env.PROJECT_NAME}}
+    
+    - name: Deploy to Ubuntu using Rsync
+      uses: burnett01/rsync-deployments@5.2
+      with:
+        switches: -avzr
+        path: ${{env.PROJECT_NAME}}/ # trailing slash means copy content
+        remote_path: /var/www/${{env.PROJECT_NAME}}
+        remote_host: ${{ secrets.HOST }}
+        remote_user: ${{ secrets.USERNAME }}
+        remote_key: ${{ secrets.KEY }}
+        
+    - name: Restart the application
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        script: sudo systemctl restart ${{env.PROJECT_NAME}}
