@@ -21,9 +21,10 @@ public class RegularAuthorizationMiddleware
     public async Task InvokeAsync(HttpContext httpContext)
     {
         AddAdditionalClaimsAsync(httpContext);
+
         await _next(httpContext);
     }
-
+    
     private void AddAdditionalClaimsAsync(HttpContext httpContext)
     {
         if (httpContext.User.Identity?.IsAuthenticated == false || httpContext.User.Identity is not ClaimsIdentity identity)

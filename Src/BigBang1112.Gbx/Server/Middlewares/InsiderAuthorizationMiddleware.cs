@@ -27,17 +27,17 @@ public class InsiderAuthorizationMiddleware
             return;
         }
 
-        if (context.Request.Path == "/")
+        switch (context.Request.Path)
         {
-            await ShowTeaserPage(context);
-        }
-        else if (context.Request.Path == "/login")
-        {
-            await context.ChallengeAsync(new AuthenticationProperties { RedirectUri = "/" });
-        }
-        else
-        {
-            context.Response.StatusCode = 404;
+            case "/":
+                await ShowTeaserPage(context);
+                break;
+            case "/login":
+                await context.ChallengeAsync(new AuthenticationProperties { RedirectUri = "/" });
+                break;
+            default:
+                context.Response.StatusCode = 404;
+                break;
         }
     }
 

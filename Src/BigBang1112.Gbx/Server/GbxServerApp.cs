@@ -1,22 +1,20 @@
 ﻿using AspNet.Security.OAuth.Discord;
 using BigBang1112.Gbx.Server.Extensions;
 using BigBang1112.Gbx.Server.Middlewares;
+using BigBang1112.Gbx.Server.Repos;
 using BigBang1112.Gbx.Shared;
 using GbxToolAPI.Server;
 using GbxToolAPI.Server.Options;
 using MapViewerEngine.Server;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using MySqlConnector;
 using System.Data;
 using System.Reflection;
-using System.Reflection.PortableExecutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -59,6 +57,8 @@ internal static class GbxServerApp
                     context.Response.Redirect(context.RedirectUri);
                     return Task.CompletedTask;
                 };
+
+                options.Events.OnTicketReceived = DiscordAuthentication.TicketReceived;
             });
 
         services.AddSignalR(options =>
@@ -80,6 +80,22 @@ internal static class GbxServerApp
         services.AddScoped<IDbConnection>(s =>
         {
             return new MySqlConnection(config.GetConnectionString("Gbx"));
+        });
+
+        services.AddScoped<IMemberRepo, MemberRepo>();
+        services.AddScoped<IGbxUnitOfWork, GbxUnitOfWork>();
+        
+        services.AddDbContext<GbxContext>(options =>
+        {
+            if (config.GetSection(Constants.Database).Get<DatabaseOptions>()?.InMemory == true)
+            {
+                options.UseInMemoryDatabase("Gbx");
+            }
+            else
+            {
+                var connectionString = config.GetConnectionString("Gbx");
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            }
         });
 
         AddToolServer<MapViewerEngineServer>(services, config, "MapViewerEngine");
@@ -112,7 +128,7 @@ internal static class GbxServerApp
         });
 
         app.UseAuthorization();
-
+        
         app.UseMiddleware<InsiderAuthorizationMiddleware>();
         app.UseMiddleware<RegularAuthorizationMiddleware>();
         
