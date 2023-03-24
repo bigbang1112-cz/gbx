@@ -1,10 +1,7 @@
 ﻿using BigBang1112.Gbx.Server.Models;
 using Dapper;
 using GbxToolAPI.Server;
-using GbxToolAPI.Server.Options;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using System;
 using System.Data;
 
 namespace BigBang1112.Gbx.Server.Repos;
