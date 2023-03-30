@@ -102,7 +102,12 @@ internal static class GbxServerApp
         // migrate
         using (var scope = services.BuildServiceProvider().CreateScope())
         {
-            scope.ServiceProvider.GetRequiredService<GbxContext>().Database.Migrate();
+            var db = scope.ServiceProvider.GetRequiredService<GbxContext>().Database;
+
+            if (db.IsRelational())
+            {
+                db.Migrate();
+            }
         }
 
         AddToolServer<MapViewerEngineServer>(services, config, "MapViewerEngine");
@@ -222,8 +227,13 @@ internal static class GbxServerApp
         });
 
         using var scope = services.BuildServiceProvider().CreateScope();
-        
-        ((DbContext)scope.ServiceProvider.GetRequiredService(type)).Database.Migrate();
+
+        var db = ((DbContext)scope.ServiceProvider.GetRequiredService(type)).Database;
+
+        if (db.IsRelational())
+        {
+            db.Migrate();
+        }
 
         return true;
     }
