@@ -9,7 +9,6 @@
 }
 
 header {
-    background: #111;
     text-align: center;
     height: 80px;
     display: flex;
@@ -34,8 +33,6 @@ header {
 
 footer {
     height: 80px;
-    background: #111;
-    margin-top: 20px;
 }
 
 .grid-container {
@@ -43,7 +40,7 @@ footer {
     gap: 20px;
     grid-template-columns: 1fr;
     max-width: 1300px;
-    margin: 0 auto;
+    margin: 20px auto;
     padding: 0 20px;
 }
 

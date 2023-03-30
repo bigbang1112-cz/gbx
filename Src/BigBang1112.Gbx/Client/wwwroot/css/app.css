@@ -120,3 +120,13 @@ a {
     .search-bar:hover {
         background-color: #22262B;
     }
+
+.grainy {
+    background: #111;
+    background-image: url(../img/noise.svg);
+}
+
+.tool-background {
+    background: green;
+    min-height: calc(100vh - 80px);
+}
