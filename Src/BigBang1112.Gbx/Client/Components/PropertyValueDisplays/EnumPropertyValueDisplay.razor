@@ -1,0 +1,44 @@
+﻿@inherits PropertyValueDisplay
+
+@if (Property is null)
+{
+    return;
+}
+
+@{
+    var values = Enum.GetValues(Property.PropertyType);
+    var curVal = GetValue();
+    var curValAsInt = Convert.ToInt32(curVal);
+    var containsCurrentValue = Array.IndexOf(values, curVal) != -1;
+    var customValueSpawned = false;
+}
+
+<select @onchange="OnChange" style="width: 163px">
+
+    @foreach (var opt in values)
+    {
+        var val = Convert.ToInt32(opt);
+
+        if (!containsCurrentValue && !customValueSpawned && val > curValAsInt)
+        {
+            customValueSpawned = true;
+
+            <option value="@curValAsInt" selected>@curValAsInt</option>
+        }
+
+        <option value="@val" selected="@(GetValue()?.Equals(opt) ?? false)">@opt</option>
+    }
+
+</select>
+
+@code {
+    private void OnChange(ChangeEventArgs e)
+    {
+        if (Property is null || e.Value is null)
+        {
+            return;
+        }
+
+        SetValue(Enum.ToObject(Property.PropertyType, int.Parse(e.Value.ToString() ?? "")));
+    }
+}

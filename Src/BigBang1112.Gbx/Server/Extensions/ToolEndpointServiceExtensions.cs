@@ -1,11 +1,10 @@
-﻿using BigBang1112.Gbx.Server.Endpoints;
-using GbxToolAPI.Server;
+﻿using GbxToolAPI.Server;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace BigBang1112.Gbx.Server.Extensions;
 
-public static partial class ToolEndpointServiceExtensions
+internal static partial class ToolEndpointServiceExtensions
 {
     [GeneratedRegex(@"Server\.Endpoints\.V([0-9]+)\.?(.*)")]
     private static partial Regex RegexEndpointRoute();

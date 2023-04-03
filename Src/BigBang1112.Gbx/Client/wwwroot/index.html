@@ -19,7 +19,9 @@
 <body>
     <div id="app">
         <div class="centered-container">
-            <img class="logo" src="img/logo.png" />
+            <div class="rectangle" style="display:flex;align-items:center">
+                <img class="logo" src="img/logo.png" />
+            </div>
             <div class="progress-bar">
                 <div class="progress-bar-fill"></div>
             </div>
@@ -36,7 +38,7 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
-    
+
     <script src="js/main.js"></script>
 </body>
 

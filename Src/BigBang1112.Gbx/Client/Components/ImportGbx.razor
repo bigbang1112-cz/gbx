@@ -1,24 +1,29 @@
 ﻿@using GBX.NET
+@using System.Text;
 
 @inject IJSRuntime JS
 @inject SettingsService Settings
 @inject IGbxService GbxService
 
-<div class="import-area @(DraggedOver == true ? "hovered" : "")">
+<div style="@(Height.HasValue ? $"height: {Height}px;" : "")" class="import-area @(DraggedOver == true ? "hovered" : "")">
     <InputFile OnChange="@OnChangeAsync"
                @ondragenter="OnDragEnter"
                @ondragleave="OnDragLeave"
                @ondrop="OnDrop"
                id="file-input"
-               class="file-input" multiple />
+               class="file-input"
+               multiple />
     <span>@ImportMessage</span>
 </div>
 
 @code {
-    private const string ImportBaseMessage = "Import *.Gbx files here...";
+    private const string ImportBaseMessage = "Import files here...";
 
     public string ImportMessage { get; set; } = ImportBaseMessage;
     public bool DraggedOver { get; set; }
+
+    [Parameter]
+    public int? Height { get; set; }
 
     private async Task OnChangeAsync(InputFileChangeEventArgs e)
     {
@@ -46,7 +51,7 @@
 
             ms.Position = 0;
 
-            GbxService.TryImport(ms, out var gbx);
+            GbxService.TryImport(file.Name, ms, out var gbx);
 
             ImportMessage = $"Importing {files.Count - i} files...";
             StateHasChanged();

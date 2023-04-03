@@ -1,0 +1,30 @@
+﻿@using GBX.NET;
+
+@inherits PropertyValueDisplay
+@attribute [AppliesForType(typeof(Vec3))]
+
+<div>
+    <input type="text" class="input-text" @bind="ValueX" style="width: 36px" />
+    <input type="text" class="input-text" @bind="ValueY" style="width: 36px" />
+    <input type="text" class="input-text" @bind="ValueZ" style="width: 36px" />
+</div>
+
+@code {
+    public float ValueX
+    {
+        get => ((Vec3)GetValue()!).X;
+        set => SetValue(((Vec3)GetValue()!) with { X = value });
+    }
+    
+    public float ValueY
+    {
+        get => ((Vec3)GetValue()!).Y;
+        set => SetValue(((Vec3)GetValue()!) with { Y = value });
+    }
+
+    public float ValueZ
+    {
+        get => ((Vec3)GetValue()!).Z;
+        set => SetValue(((Vec3)GetValue()!) with { Z = value });
+    }
+}

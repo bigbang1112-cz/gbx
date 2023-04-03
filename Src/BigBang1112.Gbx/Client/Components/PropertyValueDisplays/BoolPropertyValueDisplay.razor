@@ -1,0 +1,25 @@
+﻿@using GBX.NET;
+
+@inherits PropertyValueDisplay
+@attribute [AppliesForType(typeof(bool))]
+
+@{
+    var val = (bool)GetValue()!;
+}
+
+<select @onchange="OnChange" style="width: 163px">
+    <option value="False" selected="@(!val)">False</option>
+    <option value="True" selected="@val">True</option>
+</select>
+
+@code {
+    private void OnChange(ChangeEventArgs e)
+    {
+        if (e.Value is null)
+        {
+            return;
+        }
+
+        SetValue(bool.Parse(e.Value.ToString() ?? "False"));
+    }
+}

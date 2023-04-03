@@ -1,16 +1,48 @@
 ﻿@page "/tool/{route}"
+
+@using BigBang1112.Gbx.Client.Models.UtilImport;
+@using GBX.NET;
+@using GBX.NET.Attributes;
+@using System.Reflection;
+@using GbxToolAPI;
+
 @inject IToolManager ToolManager
 
-@if (ToolFactory is not null)
+@if (ToolFactory is null)
 {
-    <div class="tool-background">@ToolFactory.Name</div>
+    return;
 }
+
+@{
+    var githubRepo = ToolFactory.ToolType.GetCustomAttribute<ToolGitHubAttribute>()?.Repository;
+    var ctors = ToolFactory.ToolType.GetConstructors();
+}
+
+<UtilImport Name="@ToolFactory.Name"
+            ImportTypes="@ImportTypes"
+            Produces="@(Outputs.Count > 0)"
+            Configs="@Configs">
+    <div class="basic-info">
+        <div class="description darker-bg">
+            @ToolFactory.Description
+        </div>
+        <div class="rectangle">
+            @if (githubRepo is not null)
+            {
+                <a href="https://github.com/@githubRepo/releases" class="button" target="_blank">Download tool as executable</a>
+            }
+        </div>
+    </div>
+</UtilImport>
 
 @code {
     [Parameter]
     public string? Route { get; set; }
-    
+
     public IToolFactory? ToolFactory { get; set; }
+    public IEnumerable<UtilImportType> ImportTypes { get; set; } = Enumerable.Empty<UtilImportType>();
+    public List<Type> Outputs { get; set; } = new();
+    public List<Config> Configs { get; set; } = new();
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
@@ -19,9 +51,32 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Route is not null)
+        if (Route is null)
         {
-            ToolFactory = ToolManager.GetToolFactoryByRoute(Route);
+            return;
+        }
+
+        ToolFactory = ToolManager.GetToolFactoryByRoute(Route);
+        ImportTypes = ToolFactory.ToolType.GetConstructors().Select(UtilImportType.FromConstructor).ToList() ?? Enumerable.Empty<UtilImportType>();
+
+        Outputs = new();
+        Configs = new();
+
+        foreach (var iface in ToolFactory.ToolType.GetInterfaces())
+        {
+            if (iface.IsGenericType)
+            {
+                var def = iface.GetGenericTypeDefinition();
+
+                if (def == typeof(IHasOutput<>))
+                {
+                    Outputs.Add(iface.GetGenericArguments()[0]);
+                }
+                else if (def == typeof(IConfigurable<>))
+                {
+                    Configs.Add((Config)Activator.CreateInstance(iface.GetGenericArguments()[0])!);
+                }
+            }
         }
     }
 }

@@ -1,0 +1,27 @@
+﻿@using System.Reflection;
+
+@code {
+    [Parameter]
+    public PropertyInfo? Property { get; set; }
+
+    [Parameter]
+    public object? Owner { get; set; }
+
+    protected object? GetValue()
+    {
+        if (Owner is null)
+        {
+            return null;
+        }
+
+        return Property?.GetValue(Owner);
+    }
+
+    protected void SetValue(object? value)
+    {
+        if (Owner is not null && Property is not null)
+        {
+            Property.SetValue(Owner, value);
+        }
+    }
+}

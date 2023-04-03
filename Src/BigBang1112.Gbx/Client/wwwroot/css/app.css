@@ -8,6 +8,20 @@
     --background-gradient-bottom: rgba(32, 36, 44, 1);
     --button-blue: #214569;
     --button-blue-edge: #27507A;
+    --button-green: #216821;
+    --button-green-edge: #257525;
+    --button-darkgreen: #143F14;
+    --button-darkgreen-edge: #184C18;
+}
+
+a, button, abbr, acronym, address, applet, big, blockquote, body, caption, cite, code, dd, del, dfn, div, dl, dt, em, fieldset, form, h1, h2, h3, h4, h5, h6, html, iframe, img, ins, kbd, label, legend, li, object, ol, p, pre, q, s, samp, small, span, strike, strong, table, tbody, td, tfoot, th, thead, tr, tt, ul, var {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-style: inherit;
+    font-family: inherit;
+    font-size: 100%;
+    vertical-align: baseline;
 }
 
 body {
@@ -21,16 +35,23 @@ h1 {
     outline: none;
 }
 
+
+h2, h3, h4 {
+    text-transform: uppercase;
+}
+
 h2 {
     text-align: center;
-    text-transform: uppercase;
     font-size: 2rem;
     text-shadow: 1px 1px 3px black;
 }
 
 h3 {
-    text-transform: uppercase;
     font-size: 1.5rem;
+}
+
+h4 {
+    font-size: 1.3rem;
 }
 
 a {
@@ -57,6 +78,7 @@ a {
     font-size: 2rem;
     padding-bottom: 4px;
     transition: 0.1s all ease;
+    border-radius: 5px;
 }
 
     .import-area:hover, .import-area.hovered {
@@ -77,6 +99,9 @@ a {
     border-radius: 10px;
     margin-left: auto;
 }
+    .donate:hover {
+        background: #EAD067;
+    }
 
 .rectangle {
     background: linear-gradient(90deg, rgba(20,21,24,0.95) 0%, rgba(25,26,31,0.95) 100%);
@@ -93,21 +118,40 @@ a {
 }
 
     .rectangle.clickable:hover, .rectangle.clicked {
-        cursor: pointer;
         background-color: var(--button-blue);
         border-left: 0.5rem solid var(--button-blue-edge);
         border-right: 0.5rem solid var(--button-blue-edge);
         cursor: pointer;
     }
 
-.search-bar {
-    height: 32px;
-    font-size: 1.2rem;
-    margin-top: 10px;
-}
+    .rectangle.highlighted {
+        background-color: var(--button-blue);
+        border-left: 0.5rem solid var(--button-blue-edge);
+        border-right: 0.5rem solid var(--button-blue-edge);
+    }
 
-.search-bar, select {
-    padding: 4px 12px;
+    .rectangle.highlighted-green {
+        background-color: var(--button-green);
+        border-left: 0.5rem solid var(--button-green-edge);
+        border-right: 0.5rem solid var(--button-green-edge);
+    }
+
+input[type=text], input[type=color], .input-text, select {
+    background-color: rgba(35,36,41,0.95);
+    font-family: inherit;
+    border: none;
+    border-radius: 0.3rem;
+    color: inherit;
+    transition: background-color 0.1s;
+    animation: fadeIn 0.3s;
+    padding: 0 8px;
+    font-size: 1rem;
+}
+    input[type=text]:hover, input[type=color]:hover, .input-text:hover, select:hover {
+        background-color: #303138;
+    }
+
+.search-bar {
     background-color: rgba(25,26,31,0.95);
     font-family: inherit;
     border: none;
@@ -115,6 +159,10 @@ a {
     color: inherit;
     transition: background-color 0.1s;
     animation: fadeIn 0.3s;
+    padding: 4px 12px;
+    height: 32px;
+    font-size: 1.2rem;
+    margin-top: 10px;
 }
 
     .search-bar:hover {
@@ -122,11 +170,51 @@ a {
     }
 
 .grainy {
-    background: #111;
+    background: #111E;
     background-image: url(../img/noise.svg);
+    backdrop-filter: blur(20px);
 }
 
-.tool-background {
-    background: green;
+.util-background {
+    background: #0005;
+    background-image: url(../img/noise.svg);
+    background-size: 150px;
     min-height: calc(100vh - 80px);
+    backdrop-filter: blur(20px);
+    animation: util-background-fadeIn 0.5s;
+}
+
+a.button {
+    cursor: pointer;
+}
+
+button, a.button {
+    display: flex;
+    color: white;
+    border: none;
+    background: linear-gradient(90deg, rgba(40,41,44,0.7) 0%, rgba(35,36,40,0.8) 2%, rgba(37,38,40,0.8) 98%, rgba(36,38,42,0.7) 100%);
+    padding: 0.5rem 0.9rem;
+    border-radius: 0.3rem;
+    align-items: center;
+    justify-content: center;
+}
+
+    button:hover:enabled, a.button:hover {
+        background: linear-gradient(90deg, var(--button-blue-edge) 0%, var(--button-blue) 2%, var(--button-blue) 98%, var(--button-blue-edge) 100%);
+        cursor: pointer;
+    }
+
+.darker-bg {
+    background: #1114;
+    border-radius: 10px;
+}
+
+@keyframes util-background-fadeIn {
+    0% {
+        background-color: #0000;
+    }
+
+    100% {
+        background-color: #0005;
+    }
 }

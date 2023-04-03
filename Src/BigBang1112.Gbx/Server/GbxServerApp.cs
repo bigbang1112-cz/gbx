@@ -3,19 +3,18 @@ using BigBang1112.Gbx.Server.Extensions;
 using BigBang1112.Gbx.Server.Middlewares;
 using BigBang1112.Gbx.Server.Repos;
 using BigBang1112.Gbx.Shared;
-using GbxToolAPI.Server;
+using ClipInput;
 using GbxToolAPI.Server.Options;
 using MapViewerEngine.Server;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using MySqlConnector;
 using System.Data;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -72,6 +71,13 @@ internal static class GbxServerApp
         services.AddControllersWithViews();
         services.AddRazorPages();
 
+        services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+            options.Providers.Add<BrotliCompressionProvider>();
+            options.Providers.Add<GzipCompressionProvider>();
+        });
+
         services.Configure<JsonOptions>(options =>
         {
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -110,7 +116,7 @@ internal static class GbxServerApp
             }
         }
 
-        AddToolServer<MapViewerEngineServer>(services, config, "MapViewerEngine");
+        services.AddToolServer<MapViewerEngineServer>(config, "MapViewerEngine");
     }
 
     internal static void Middleware(WebApplication app)
@@ -130,6 +136,8 @@ internal static class GbxServerApp
         app.UseHttpsRedirection();
         
         app.UseRouting();
+        
+        app.UseResponseCompression();
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
@@ -154,116 +162,14 @@ internal static class GbxServerApp
         app.UseBlazorFrameworkFiles();
         app.UseStaticFiles(new StaticFileOptions { ServeUnknownFileTypes = true });
 
-        UseToolServer<MapViewerEngineServer>(app);
+        app.UseToolAssets<ClipInputTool>();
+
+        app.UseToolServer<MapViewerEngineServer>();
         
         app.UseToolEndpoints();
 
         app.MapRazorPages();
         app.MapControllers();
         app.MapFallbackToFile("index.html");
-    }
-
-    private static void AddToolServer<T>(IServiceCollection services, IConfiguration config, string dbName) where T : class, IServer, new()
-    {
-        services.AddSingleton<T>();
-        
-        T.Services(services);
-
-        var assembly = typeof(T).Assembly;
-
-        services.AddToolEndpoints(assembly);
-
-        foreach (var type in assembly.DefinedTypes)
-        {
-            TryAddToolDbContext(services, config, dbName, type);
-            
-            services.AddScoped<ISqlConnection<T>, SqlConnection<T>>(provider =>
-            {
-                return new(new MySqlConnection(config.GetConnectionString(provider.GetRequiredService<T>().ConnectionString)));
-            });
-        }
-    }
-
-    private static bool TryAddToolDbContext(IServiceCollection services, IConfiguration config, string databaseName, TypeInfo type)
-    {
-        if (!type.IsSubclassOf(typeof(DbContext)))
-        {
-            return false;
-        }
-
-        // ugly path to AddDbContext<type>
-
-        var methodInfo = typeof(EntityFrameworkServiceCollectionExtensions).GetMethods()
-            .Where(x => x.Name == nameof(EntityFrameworkServiceCollectionExtensions.AddDbContext)
-                && x.GetParameters().Select(x => x.ParameterType).SequenceEqual(new[]
-            {
-                typeof(IServiceCollection),
-                typeof(Action<DbContextOptionsBuilder>),
-                typeof(ServiceLifetime),
-                typeof(ServiceLifetime)
-            })).FirstOrDefault() ?? throw new Exception("AddDbContext method not found!");
-        
-        var genericMethod = methodInfo.MakeGenericMethod(type);
-
-        genericMethod.Invoke(null, new object[]
-        {
-            services,
-            delegate (DbContextOptionsBuilder options) {
-                var dbName = "bigbang1112_gbx_tool_" + databaseName.ToLower();
-
-                if (config.GetSection(Constants.Database).Get<DatabaseOptions>()?.InMemory == true)
-                {
-                    options.UseInMemoryDatabase(dbName);
-                }
-                else
-                {
-                    var connectionString = config.GetConnectionString(databaseName);
-
-                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-                }
-            },
-            ServiceLifetime.Scoped,
-            ServiceLifetime.Scoped
-        });
-
-        using var scope = services.BuildServiceProvider().CreateScope();
-
-        var db = ((DbContext)scope.ServiceProvider.GetRequiredService(type)).Database;
-
-        if (db.IsRelational())
-        {
-            db.Migrate();
-        }
-
-        return true;
-    }
-
-    private static void UseToolServer<T>(IEndpointRouteBuilder app) where T : IServer
-    {        
-        foreach (var type in typeof(T).Assembly.DefinedTypes)
-        {
-            TryMapToolHub(app, type);
-        }
-    }
-
-    private static bool TryMapToolHub(IEndpointRouteBuilder app, TypeInfo type)
-    {
-        if (!type.IsSubclassOf(typeof(Hub)))
-        {
-            return false;
-        }
-        
-        // ugly path to MapHub<type>
-
-        var methodInfo = typeof(HubEndpointRouteBuilderExtensions).GetMethod(nameof(HubEndpointRouteBuilderExtensions.MapHub), new[] { typeof(IEndpointRouteBuilder), typeof(string) });
-
-        if (methodInfo is null)
-        {
-            throw new Exception("MapHub method not found!");
-        }
-
-        methodInfo.MakeGenericMethod(type).Invoke(null, new object[] { app, "/" + type.Name.ToLower() });
-
-        return true;
     }
 }

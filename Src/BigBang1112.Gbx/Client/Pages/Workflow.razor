@@ -1,10 +1,16 @@
 ﻿@page "/workflow/{route}"
 @inject IWorkflowManager WorkflowManager
 
-@if (WorkflowModel is not null)
+@if (WorkflowModel is null)
 {
-    <h3>@WorkflowModel.Name</h3>
+    return;
 }
+
+<UtilImport Name="@WorkflowModel.Name">
+    <div style="height: 300px">
+        graph
+    </div>
+</UtilImport>
 
 @code {
     [Parameter]

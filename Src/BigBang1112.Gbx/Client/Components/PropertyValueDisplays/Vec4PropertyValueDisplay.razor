@@ -1,0 +1,68 @@
+﻿@using GBX.NET;
+@using System.Reflection;
+@using GbxToolAPI;
+
+@inherits PropertyValueDisplay
+@attribute [AppliesForType(typeof(Vec4))]
+
+@if (Property is null)
+{
+    return;
+}
+
+@if (Attribute.IsDefined(Property, typeof(ColorAttribute)))
+{
+    <div style="display: flex; gap: 4px">
+        <input type="color" value="#@GetHexValue()" @onchange="OnHexColorChange" style="width: 122px" />
+        <input type="text" class="input-text" @bind="ValueW" style="width: 22px" />
+    </div>
+}
+else
+{
+    <div>
+        <input type="text" class="input-text" @bind="ValueX" style="width: 22px" />
+        <input type="text" class="input-text" @bind="ValueY" style="width: 22px" />
+        <input type="text" class="input-text" @bind="ValueZ" style="width: 22px" />
+        <input type="text" class="input-text" @bind="ValueW" style="width: 22px" />
+    </div>
+}
+
+
+@code {
+    public float ValueX
+    {
+        get => ((Vec4)GetValue()!).X;
+        set => SetValue(((Vec4)GetValue()!) with { X = value });
+    }
+
+    public float ValueY
+    {
+        get => ((Vec4)GetValue()!).Y;
+        set => SetValue(((Vec4)GetValue()!) with { Y = value });
+    }
+
+    public float ValueZ
+    {
+        get => ((Vec4)GetValue()!).Z;
+        set => SetValue(((Vec4)GetValue()!) with { Z = value });
+    }
+
+    public float ValueW
+    {
+        get => ((Vec4)GetValue()!).W;
+        set => SetValue(((Vec4)GetValue()!) with { W = value });
+    }
+
+    private string GetHexValue()
+    {
+        var vec4 = (Vec4)GetValue()!;
+        var colorInt = ((int)(vec4.X * 255) << 16) | ((int)(vec4.Y * 255) << 8) | (int)(vec4.Z * 255);
+        var hex = colorInt.ToString("x6");
+        return hex;
+    }
+
+    private void OnHexColorChange(ChangeEventArgs e)
+    {
+        
+    }
+}

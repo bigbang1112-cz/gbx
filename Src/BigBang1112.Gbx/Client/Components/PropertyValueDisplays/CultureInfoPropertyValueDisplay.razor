@@ -1,0 +1,28 @@
+﻿@using GBX.NET;
+@using System.Globalization;
+
+@inherits PropertyValueDisplay
+@attribute [AppliesForType(typeof(CultureInfo))]
+
+@{
+    var val = (CultureInfo)GetValue()!;
+}
+
+<select @onchange="OnChange" style="width: 163px">
+    @foreach (var culture in CultureInfo.GetCultures(CultureTypes.AllCultures))
+    {
+        <option value="@culture.Name" selected="@culture.Equals(val)">@culture.DisplayName</option>
+    }
+</select>
+
+@code {
+    private void OnChange(ChangeEventArgs e)
+    {
+        if (e.Value is null)
+        {
+            return;
+        }
+
+        //SetValue(bool.Parse(e.Value.ToString() ?? "False"));
+    }
+}

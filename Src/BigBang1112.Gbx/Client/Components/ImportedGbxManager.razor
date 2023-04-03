@@ -14,7 +14,7 @@
         GbxService.Gbxs.CollectionChanged += Gbxs_CollectionChanged;
     }
 
-    public void Gbxs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void Gbxs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         StateHasChanged();
     }

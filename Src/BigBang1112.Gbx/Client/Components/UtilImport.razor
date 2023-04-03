@@ -1,0 +1,359 @@
+﻿@using BigBang1112.Gbx.Client.Models.UtilImport;
+@using System.Collections.Specialized;
+@using GbxToolAPI;
+@using System.Reflection;
+
+@inject IGbxService GbxService
+@inject IPropertyValueDisplayService PropValDisplay
+
+@{
+    var canProceed = false;
+}
+
+<div class="util-background">
+    <div class="util-container">
+        <h2>
+            @Name
+        </h2>
+        @ChildContent
+        <div class="import-section" style="padding-bottom: 30px">
+            
+            <div class="import-gbx">
+                <ImportGbx Height="284" />
+            </div>
+            <div>
+                <h3>Looking for:</h3>
+                <div class="import-looking-for-grid">
+
+                    @foreach (var importType in ImportTypes)
+                    {
+                        var parameters = importType.Parameters;
+
+                        <div class="import-looking-for-params darker-bg">
+
+                            @{
+                                var allFilesImported = true;
+                            }
+
+                            @for (var i = 0; i < parameters.Count; i++)
+                            {
+                                var p = parameters[i];
+                                var importedFile = p.ImportedFiles.Length > 0;
+
+                                if (!importedFile)
+                                {
+                                    allFilesImported = false;
+                                }
+
+                                @if (i > 0)
+                                {
+                                    <div class="symbol">+</div>
+                                }
+
+                                <div class="rectangle import-looking-for-param @(importedFile ? "highlighted" : "")">
+                                    <div style="display:flex;align-items:center;">
+
+                                        @if (p.IsNodeType)
+                                        {
+                                            if (p.Extensions.Length == 0)
+                                            {
+                                                <span>Gbx</span>
+                                            }
+                                            else if (p.Extensions.Length == 1)
+                                            {
+                                                <span>@p.Extensions[0]</span>
+                                                <span>.</span>
+                                                <span>Gbx</span>
+                                            }
+                                            else
+                                            {
+                                                <span style="visibility: hidden;">@(p.Extensions.OrderByDescending(x => x.Length).First()).Gbx</span>
+                                                <div style="position: absolute;display: inherit;left: 50%;transform: translate(-50%, 0);">
+                                                    <span>@p.Extensions[counter % p.Extensions.Length]</span>
+                                                    <span>.</span>
+                                                    <span>Gbx</span>
+                                                </div>
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            <span>@p.TypeName</span>
+                                        }
+
+                                        @if (p.Multiple)
+                                        {
+                                            <img src="img/multiple.svg" width="20" style="margin-left: 10px;" />
+                                        }
+
+
+                                    </div>
+
+                                    @if (p.IsNodeType)
+                                    {
+                                        <div class="param-type">@p.TypeName</div>
+                                    }
+                                </div>
+
+                            }
+
+                            <div class="symbol">
+                                →
+                            </div>
+
+                            @if (allFilesImported)
+                            {
+                                canProceed = true;
+
+                                <div class="rectangle proceed-specific highlighted-green" title="This method will be used.">
+                                    <img src="img/checkmark.svg" width="24" />
+                                </div>
+                            }
+                            else
+                            {
+                                <button class="rectangle proceed-specific" title="No file has been selected for this method." disabled>
+                                    <img src="img/x.svg" width="24" />
+                                </button>
+                            }
+                        </div>
+
+                    }
+                </div>
+            </div>
+            <div class="rectangle imported-gbxs">
+
+                @{
+                    var gbxs = FilterGbxsBySuggestedTypes(GbxService.Gbxs);
+                    var any = gbxs.Any();
+                }
+
+                <div class="gbx-list @(any ? "" : "centered-note")">
+
+                    @if (any)
+                    {
+                        foreach (var gbx in FilterGbxsBySuggestedTypes(GbxService.Gbxs))
+                        {
+                            <div class="@(gbxSelection.Contains(gbx) ? "selected" : "")" @onclick="() => ChangeGbxSelection(gbx)">
+                                @gbx.FileName
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <span>Please import related files...</span>
+                    }
+
+                </div>
+                <div style="display:flex;gap: 8px;">
+                    <button class="button-util" @onclick="SelectAll">Select all</button>
+                    <button class="button-util" @onclick="DeselectAll">Deselect all</button>
+                    <button class="button-util" style="flex: 1">Auto-@(Produces ? "produce" : "proceed")</button>
+                </div>
+                <button class="proceed-general" disabled="@(!canProceed)">@(Produces ? "Produce" : "Proceed")</button>
+            </div>
+
+            @if (Configs.Any())
+            {
+                <div class="rectangle config">
+                    <h4>Config</h4>
+                    <div style="display:flex">
+                        <select style="flex:1">
+                            <option value="Default">Default</option>
+                        </select>
+                        <button>Save as...</button>
+                        <button>Reset</button>
+                    </div>
+
+                    @foreach (var config in Configs)
+                    {
+                        var type = config.GetType();
+                        var props = type.GetProperties();
+
+                        if (props.Length == 0)
+                        {
+                            <div class="centered-note" style="margin: 10px 0 0 0;">TBA</div>
+                        }
+                        else
+                        {
+                            <div class="config-grid">
+                                @foreach (var prop in props)
+                                {
+                                    <div style="overflow: hidden;">@prop.Name</div>
+
+                                    @if (PropValDisplay.TryGetComponent(prop.PropertyType, out var componentType))
+                                    {
+                                        <DynamicComponent Type="componentType" Parameters="GetPropertyValueDisplayParameters(prop, config)" />
+                                    }
+                                    else
+                                    {
+                                        <div style="color: gray;padding:0 8px">@prop.GetValue(config)</div>
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+
+                    <button style="margin-top: 10px;">Dictionary</button>
+                    <button style="margin-top: 10px;">Export to .yml</button>
+
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private Timer? timer;
+    private uint counter;
+    private HashSet<string>? suggestedTypeNames;
+    private HashSet<GbxModel> gbxSelection = new();
+
+    [Parameter]
+    public string Name { get; set; } = "Unnamed";
+
+    [Parameter]
+    public bool Produces { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public IEnumerable<Config> Configs { get; set; } = Enumerable.Empty<Config>();
+
+    [Parameter]
+    public IEnumerable<UtilImportType> ImportTypes { get; set; } = Enumerable.Empty<UtilImportType>();
+
+    protected override void OnInitialized()
+    {
+        suggestedTypeNames = ImportTypes.SelectMany(x => x.Parameters)
+            .Select(x => x.TypeName)
+            .Distinct()
+            .ToHashSet();
+
+        timer = new Timer(TimerCallback, null, 0, 1500); // TimerCallback will be called every 1000 milliseconds (1 second)
+
+        GbxService.Gbxs.CollectionChanged += Gbxs_CollectionChanged;
+    }
+
+    private void TimerCallback(object? state)
+    {
+        counter++;
+        StateHasChanged();
+    }
+
+    private void Gbxs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        var selectionChanged = false;
+
+        if (e.NewItems is not null)
+        {
+            foreach (var gbx in FilterGbxsBySuggestedTypes(e.NewItems.OfType<GbxModel>()))
+            {
+                gbxSelection.Add(gbx);
+                selectionChanged = true;
+            }
+        }
+
+        if (e.OldItems is not null)
+        {
+            foreach (var gbx in FilterGbxsBySuggestedTypes(e.OldItems.OfType<GbxModel>()))
+            {
+                gbxSelection.Remove(gbx);
+                selectionChanged = true;
+            }
+        }
+
+        if (selectionChanged)
+        {
+            OnSelectionChanged();
+        }
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+
+    private IEnumerable<GbxModel> FilterGbxsBySuggestedTypes(IEnumerable<GbxModel> gbxs)
+    {
+        return gbxs.Where(IsSuggested);
+    }
+
+    private bool IsSuggested(GbxModel gbx)
+    {
+        if (suggestedTypeNames is null)
+        {
+            return true;
+        }
+
+        if (gbx.Text is not null)
+        {
+            return suggestedTypeNames.Contains(nameof(TextFile)) || suggestedTypeNames.Contains(nameof(String));
+        }
+
+        if (gbx.Type is not null)
+        {
+            return suggestedTypeNames.Contains(gbx.Type.Name);
+        }
+
+        return false;
+    }
+
+    private void ChangeGbxSelection(GbxModel gbx)
+    {
+        if (gbxSelection.Contains(gbx))
+        {
+            gbxSelection.Remove(gbx);
+        }
+        else
+        {
+            gbxSelection.Add(gbx);
+        }
+
+        OnSelectionChanged();
+    }
+
+    private void OnSelectionChanged()
+    {
+        var gbxModelByTypeName = gbxSelection.ToLookup(x => x.Type?.Name);
+
+        foreach (var importType in ImportTypes)
+        {
+            foreach (var param in importType.Parameters)
+            {
+                param.ImportedFiles = gbxModelByTypeName[param.TypeName].ToArray();
+            }
+        }
+    }
+
+    private void SelectAll()
+    {
+        foreach (var gbx in FilterGbxsBySuggestedTypes(GbxService.Gbxs))
+        {
+            gbxSelection.Add(gbx);
+        }
+
+        OnSelectionChanged();
+    }
+
+    private void DeselectAll()
+    {
+        foreach (var gbx in FilterGbxsBySuggestedTypes(GbxService.Gbxs))
+        {
+            gbxSelection.Remove(gbx);
+        }
+
+        OnSelectionChanged();
+    }
+    
+    private Dictionary<string, object?> GetPropertyValueDisplayParameters(PropertyInfo property, object owner)
+    {
+        return new Dictionary<string, object?>
+        {
+            { "Property", property },
+            { "Owner", owner }
+        };
+    }
+}

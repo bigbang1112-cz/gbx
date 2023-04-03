@@ -1,4 +1,4 @@
-﻿using BigBang1112.Gbx.Client.Pages;
+﻿using BigBang1112.Gbx.Shared;
 using Champagne;
 using ClipCheckpoint;
 using ClipInput;

@@ -1,0 +1,172 @@
+﻿.util-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 1300px;
+    min-height: calc(100vh - 160px);
+}
+
+h2, h3 {
+    margin: 20px 0 10px 0;
+    text-align: center;
+}
+
+h2 {
+    font-size: 3rem;
+}
+
+h3 {
+    font-size: 2rem;
+}
+
+h4 {
+    text-align: center;
+}
+
+.import-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+    .import-section .import-gbx {
+        flex: 1;
+    }
+
+    .import-section .imported-gbxs {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        height: 296px;
+    }
+
+        .import-section .imported-gbxs .gbx-list {
+            display: grid;
+            grid-auto-rows: min-content;
+            grid-gap: 4px;
+            padding: 4px;
+            flex: 1;
+            background: #0004;
+            border-radius: 3px;
+            overflow: auto;
+        }
+
+            .import-section .imported-gbxs .gbx-list > div {
+                background: #3332;
+                border-radius: 3px;
+                white-space: nowrap;
+                overflow: hidden;
+                padding: 2px 8px;
+                cursor: pointer;
+            }
+
+            .import-section .imported-gbxs .gbx-list > div:hover {
+                background: var(--button-blue);
+            }
+            
+            .import-section .imported-gbxs .gbx-list > div.selected {
+                background: var(--button-blue);
+            }
+
+.import-looking-for-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px 40px;
+    width: max-content;
+    margin: 0 auto;
+    font-size: 1.5rem;
+}
+
+.import-looking-for-params {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    padding: 15px;
+}
+
+.import-looking-for-param {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 20px;
+    height: 90px;
+}
+
+    .import-looking-for-param .param-type {
+        font-size: 0.8rem;
+        background: #3335;
+        color: #5BFFDE;
+        width: min-content;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+.symbol {
+    font-size: 2rem;
+}
+
+.button-util {
+    font-size: 0.8rem;
+}
+
+.proceed-general {
+    font-weight: bold;
+    height: 55px;
+    font-size: 1.5rem;
+}
+
+    .proceed-general:enabled {
+        background: linear-gradient(90deg, var(--button-darkgreen-edge) 0%, var(--button-darkgreen) 2%, var(--button-darkgreen) 98%, var(--button-darkgreen-edge) 100%) !important;
+    }
+
+    .proceed-general:disabled {
+        color: gray;
+        cursor: not-allowed;
+    }
+
+.proceed-general:hover:enabled {
+    background: linear-gradient(90deg, var(--button-green-edge) 0%, var(--button-green) 2%, var(--button-green) 98%, var(--button-green-edge) 100%) !important;
+    cursor: pointer;
+}
+
+.proceed-specific {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 90px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+    .proceed-specific:disabled {
+        background: linear-gradient(90deg, rgba(25,26,30,0.95) 0%, rgba(30,31,35,0.95) 100%);
+        border-left: 0.5rem solid #21202311;
+        border-right: 0.5rem solid #21202322;
+        color: gray;
+        cursor: not-allowed;
+    }
+
+.config {
+    height: min-content;
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: 50% 1fr;
+    grid-gap: 4px 10px;
+    margin: 5px;
+    overflow: auto;
+}
+
+@media screen and (min-width: 1024px) {
+    .import-section {
+        grid-template-columns: auto 400px;
+        grid-template-rows: auto auto;
+        grid-auto-flow: column;
+    }
+}

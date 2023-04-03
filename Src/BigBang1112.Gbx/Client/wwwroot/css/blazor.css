@@ -9,7 +9,7 @@
 }
 
 .progress-bar {
-    width: 300px;
+    width: 532px;
     background: #444;
     border-radius: 3px;
 }
@@ -19,7 +19,7 @@
     align-items: center;
     justify-content: center;
     width: var(--blazor-load-percentage, 0%);
-    height: 2rem;
+    height: 0.5rem;
     background: var(--button-blue);
     border-radius: 3px;
 }

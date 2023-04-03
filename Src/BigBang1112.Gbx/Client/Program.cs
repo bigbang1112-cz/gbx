@@ -1,5 +1,4 @@
 using BigBang1112.Gbx.Client;
-using BigBang1112.Gbx.Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
