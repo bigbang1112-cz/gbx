@@ -1,5 +1,7 @@
 ﻿using BigBang1112.Gbx.Client.Services;
 using BigBang1112.Gbx.Shared;
+using Blazored.LocalStorage;
+using GbxToolAPI;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -13,6 +15,13 @@ public static class GbxClientApp
         
         services.AddScoped<AuthenticationStateProvider, ClientAuthStateProvider>();
         services.AddAuthorizationCore(SharedOptions.Authorization);
+        services.AddBlazoredLocalStorage(options =>
+        {
+            foreach (var conv in Json.DefaultOptions.Converters)
+            {
+                options.JsonSerializerOptions.Converters.Add(conv);
+            }
+        });
 
         services.AddScoped<IToolManager, ToolManager>(); // registers the tool manager so that it can implement some testability
         services.AddScoped<IWorkflowManager, WorkflowManager>();

@@ -16,4 +16,6 @@ public class Member
 
     [StringLength(255)]
     public string? AvatarHash { get; set; }
+    
+    public DateTimeOffset? JoinedOn { get; set; } = DateTimeOffset.UtcNow;
 }

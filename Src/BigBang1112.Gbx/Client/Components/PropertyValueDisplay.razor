@@ -1,4 +1,7 @@
 ﻿@using System.Reflection;
+@using GbxToolAPI;
+
+@inject Blazored.LocalStorage.ISyncLocalStorageService LocalStorage
 
 @code {
     [Parameter]
@@ -6,6 +9,15 @@
 
     [Parameter]
     public object? Owner { get; set; }
+
+    [Parameter]
+    public string? ToolRoute { get; set; }
+
+    [Parameter]
+    public string? ToolConfigName { get; set; }
+
+    [Parameter]
+    public Config? ToolConfig { get; set; }
 
     protected object? GetValue()
     {
@@ -19,9 +31,20 @@
 
     protected void SetValue(object? value)
     {
-        if (Owner is not null && Property is not null)
+        if (Owner is null || Property is null)
         {
-            Property.SetValue(Owner, value);
+            return;
+        }
+
+        Property.SetValue(Owner, value);
+
+        if (ToolRoute is not null && ToolConfig is not null && ToolConfigName is not null)
+        {
+            var configList = LocalStorage.GetItem<Dictionary<string, object>>($"Tool:{ToolRoute}:Config") ?? new();
+            
+            configList[ToolConfigName] = ToolConfig;
+
+            LocalStorage.SetItem($"Tool:{ToolRoute}:Config", configList);
         }
     }
 }

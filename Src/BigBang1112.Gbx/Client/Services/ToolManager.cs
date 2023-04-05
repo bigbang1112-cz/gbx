@@ -20,7 +20,7 @@ internal interface IToolManager
     IReadOnlyCollection<Type> Tools { get; }
     IReadOnlyDictionary<string, Type> ToolsByRoute { get; }
     IEnumerable<IToolFactory> GetToolFactories(string searchFilter = "");
-    IToolFactory GetToolFactoryByRoute(string route);
+    IToolFactory? GetToolFactoryByRoute(string route);
 }
 
 internal class ToolManager : IToolManager
@@ -37,6 +37,16 @@ internal class ToolManager : IToolManager
     public ToolManager(IServiceProvider provider)
     {
         this.provider = provider;
+
+        foreach (var toolType in stronglyTypedTools)
+        {
+            typeof(AssetsManager<>).MakeGenericType(toolType)
+                .GetProperty("ExternalRetrieve", BindingFlags.Static | BindingFlags.NonPublic)?
+                .SetValue(null, new Func<string, Task<byte[]>>(path =>
+                {
+                    return provider.GetRequiredService<HttpClient>().GetByteArrayAsync(path);
+                }));
+        }
     }
 
     internal static void Services(IServiceCollection services)
@@ -79,9 +89,11 @@ internal class ToolManager : IToolManager
         toolsByRoute.Add(route, toolType);
     }
 
-    public IToolFactory GetToolFactoryByRoute(string route)
+    public IToolFactory? GetToolFactoryByRoute(string route)
     {
-        return (IToolFactory)provider.GetRequiredService(typeof(ToolFactory<>).MakeGenericType(toolsByRoute[route]));
+        return toolsByRoute.TryGetValue(route, out var toolType)
+            ? (IToolFactory)provider.GetRequiredService(typeof(ToolFactory<>).MakeGenericType(toolType))
+            : null;
     }
 
     public IEnumerable<IToolFactory> GetToolFactories(string searchFilter = "")

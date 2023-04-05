@@ -1,13 +1,4 @@
-﻿.util-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0 auto;
-    max-width: 1300px;
-    min-height: calc(100vh - 160px);
-}
-
-h2, h3 {
+﻿h2, h3 {
     margin: 20px 0 10px 0;
     text-align: center;
 }
@@ -38,7 +29,7 @@ h4 {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        height: 296px;
+        height: 292px;
     }
 
         .import-section .imported-gbxs .gbx-list {
@@ -115,11 +106,10 @@ h4 {
 
 .proceed-general {
     font-weight: bold;
-    height: 55px;
     font-size: 1.5rem;
 }
 
-    .proceed-general:enabled {
+    .proceed-general:enabled, a.proceed-general {
         background: linear-gradient(90deg, var(--button-darkgreen-edge) 0%, var(--button-darkgreen) 2%, var(--button-darkgreen) 98%, var(--button-darkgreen-edge) 100%) !important;
     }
 
@@ -128,10 +118,10 @@ h4 {
         cursor: not-allowed;
     }
 
-.proceed-general:hover:enabled {
-    background: linear-gradient(90deg, var(--button-green-edge) 0%, var(--button-green) 2%, var(--button-green) 98%, var(--button-green-edge) 100%) !important;
-    cursor: pointer;
-}
+    .proceed-general:hover:enabled, a.proceed-general:hover {
+        background: linear-gradient(90deg, var(--button-green-edge) 0%, var(--button-green) 2%, var(--button-green) 98%, var(--button-green-edge) 100%) !important;
+        cursor: pointer;
+    }
 
 .proceed-specific {
     display: flex;
@@ -152,6 +142,9 @@ h4 {
     }
 
 .config {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
     height: min-content;
 }
 
@@ -159,8 +152,14 @@ h4 {
     display: grid;
     grid-template-columns: 50% 1fr;
     grid-gap: 4px 10px;
-    margin: 5px;
     overflow: auto;
+    margin: 5px;
+}
+
+.config-bar {
+    display: flex;
+    height: 28px;
+    gap: 5px;
 }
 
 @media screen and (min-width: 1024px) {

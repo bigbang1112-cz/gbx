@@ -7,6 +7,16 @@
     public string? Value
     {
         get => GetValue() as string;
-        set => SetValue(value);
+        set
+        {
+            try
+            {
+                SetValue(value);
+            }
+            catch
+            {
+                // gone
+            }
+        }
     }
 }

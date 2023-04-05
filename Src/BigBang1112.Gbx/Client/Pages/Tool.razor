@@ -5,11 +5,17 @@
 @using GBX.NET.Attributes;
 @using System.Reflection;
 @using GbxToolAPI;
+@using System.Text;
+@using System.Text.Json;
 
 @inject IToolManager ToolManager
+@inject NavigationManager NavMgr
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 @if (ToolFactory is null)
 {
+    <div>Tool not found.</div>
+
     return;
 }
 
@@ -18,31 +24,56 @@
     var ctors = ToolFactory.ToolType.GetConstructors();
 }
 
-<UtilImport Name="@ToolFactory.Name"
-            ImportTypes="@ImportTypes"
-            Produces="@(Outputs.Count > 0)"
-            Configs="@Configs">
-    <div class="basic-info">
-        <div class="description darker-bg">
-            @ToolFactory.Description
-        </div>
-        <div class="rectangle">
-            @if (githubRepo is not null)
-            {
-                <a href="https://github.com/@githubRepo/releases" class="button" target="_blank">Download tool as executable</a>
-            }
-        </div>
+<div class="util-background">
+    <div class="util-container">
+
+        @if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
+        {
+    
+        }
+        else
+        {
+            <UtilImport Name="@ToolFactory.Name"
+                        Route="@ToolFactory.Route"
+                        ImportTypes="ImportTypes"
+                        Produces="Outputs.Count > 0"
+                        Configs="Configs"
+                        GbxSelection="gbxSelection">
+                <div class="basic-info">
+                    <div class="description darker-bg">
+                        @ToolFactory.Description
+                    </div>
+                    <div class="rectangle">
+                        @if (githubRepo is not null)
+                        {
+                            <a href="https://github.com/@githubRepo/releases" class="button" target="_blank">Download tool as executable</a>
+                        }
+                    </div>
+                </div>
+            </UtilImport>
+        }
+
     </div>
-</UtilImport>
+</div>
+
+<div class="semi-overlay">
+    
+</div>
 
 @code {
+    private HashSet<GbxModel> gbxSelection = new();
+
     [Parameter]
     public string? Route { get; set; }
 
     public IToolFactory? ToolFactory { get; set; }
     public IEnumerable<UtilImportType> ImportTypes { get; set; } = Enumerable.Empty<UtilImportType>();
     public List<Type> Outputs { get; set; } = new();
-    public List<Config> Configs { get; set; } = new();
+    public Dictionary<string, Config> Configs { get; set; } = new();
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Produce { get; set; }
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
@@ -56,11 +87,33 @@
             return;
         }
 
+        if (ToolFactory is not null)
+        {
+            if (Produce == "selected")
+            {
+                await ProduceToolOutputAsync();
+            }
+
+            return;
+        }
+
         ToolFactory = ToolManager.GetToolFactoryByRoute(Route);
-        ImportTypes = ToolFactory.ToolType.GetConstructors().Select(UtilImportType.FromConstructor).ToList() ?? Enumerable.Empty<UtilImportType>();
+
+        if (ToolFactory is null)
+        {
+            return;
+        }
+
+        ImportTypes = ToolFactory.ToolType
+            .GetConstructors()
+            .Select(UtilImportType.FromConstructor)
+            .ToList();
 
         Outputs = new();
         Configs = new();
+
+        // This is a bit weird for inheritance and repetition and should be reworked
+        var configType = default(Type);
 
         foreach (var iface in ToolFactory.ToolType.GetInterfaces())
         {
@@ -74,9 +127,43 @@
                 }
                 else if (def == typeof(IConfigurable<>))
                 {
-                    Configs.Add((Config)Activator.CreateInstance(iface.GetGenericArguments()[0])!);
+                    configType = iface.GetGenericArguments()[0];
                 }
             }
+        }
+
+        if (configType is null)
+        {
+            return;
+        }
+
+        var configList = await LocalStorage.GetItemAsync<Dictionary<string, JsonDocument>>($"Tool:{Route}:Config");
+
+        if (configList is null || configList.Count == 0)
+        {
+            Configs.Add("Default", (Config)Activator.CreateInstance(configType)!);
+        }
+        else
+        {
+            foreach (var config in configList)
+            {
+                Configs.Add(config.Key, (Config)JsonSerializer.Deserialize(config.Value, configType, Json.DefaultOptions)!);
+            }
+        }
+    }
+
+    private async Task ProduceToolOutputAsync()
+    {
+        if (ToolFactory is null)
+        {
+            throw new Exception();
+        }
+
+        var tool = ToolFactory.CreateTool();
+
+        if(tool is IHasAssets toolWithAssets)
+        {
+            await toolWithAssets.LoadAssetsAsync();
         }
     }
 }
