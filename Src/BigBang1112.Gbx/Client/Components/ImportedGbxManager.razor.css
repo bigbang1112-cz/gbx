@@ -1,0 +1,52 @@
+﻿.top {
+    display: flex;
+}
+
+.top-text {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.top-button {
+    height: 32px;
+}
+
+    .top-button > img {
+        transition: 0.1s all ease;
+    }
+
+    .top-button > img.expanded {
+        transform: rotate(180deg);
+    }
+
+.gbx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+    flex: 1;
+    margin-top: 8px;
+    background: #0004;
+    border-radius: 3px;
+    overflow: auto;
+}
+
+    .gbx-list > div {
+        display: flex;
+        background: #3332;
+        border-radius: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 2px 8px;
+        cursor: pointer;
+    }
+
+        .gbx-list > div:first-child {
+            flex: 1;
+        }
+
+        .gbx-list > div:hover, .gbx-list > div.selected {
+            background: var(--button-blue);
+        }

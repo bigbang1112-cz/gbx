@@ -13,7 +13,7 @@
 @if (Attribute.IsDefined(Property, typeof(ColorAttribute)))
 {
     <div style="display: flex; gap: 4px">
-        <input type="color" value="#@GetHexValue()" @onchange="OnHexColorChange" style="width: 122px" />
+        <input type="color" value="#@GetHexValue()" @onchange="OnHexColorChange" style="width: 122px;height: 27px" />
         <input type="text" class="input-text" @bind="ValueW" style="width: 22px" />
     </div>
 }
@@ -63,6 +63,16 @@ else
 
     private void OnHexColorChange(ChangeEventArgs e)
     {
-        
+        if (e.Value is string hex && hex.Length > 0)
+        {
+            var colorInt = int.Parse(hex.Substring(1), System.Globalization.NumberStyles.HexNumber);
+            var vec4 = new Vec4(
+                ((colorInt >> 16) & 0xFF) / 255f,
+                ((colorInt >> 8) & 0xFF) / 255f,
+                (colorInt & 0xFF) / 255f,
+                ValueW
+            );
+            SetValue(vec4);
+        }
     }
 }

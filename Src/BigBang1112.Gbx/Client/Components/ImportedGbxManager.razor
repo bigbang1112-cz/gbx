@@ -5,10 +5,37 @@
 
 @if (GbxService.Gbxs.Count > 0)
 {
-    <div class="rectangle floating-div">@GbxService.Gbxs.Count Gbx files imported</div>
+    <div class="rectangle floating-div" style="height: @(Expanded ? ExpandedHeight : ClosedHeight)px">
+        <div class="top">
+            <div class="top-text">@GbxService.Gbxs.Count files imported</div>
+            <button class="top-button" @onclick="ExpandOrClose"><img src="img/arrow-up.svg" width="24" class="@(Expanded ? "expanded" : "")" /></button>
+        </div>
+        <div class="gbx-list">
+
+            @foreach (var gbx in GbxService.Gbxs)
+            {
+                <div class="@(SelectedGbx == gbx ? "selected" : "")" @onclick="() => SelectGbx(gbx)">
+                    <div>
+                        @gbx.FileName
+                    </div>
+                    <div>
+                        DEL
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
 }
 
 @code {
+    private const int ExpandedHeight = 300;
+    private const int ClosedHeight = 50;
+
+    public GbxModel? SelectedGbx { get; set; }
+
+    public bool Expanded { get; set; }
+
     protected override void OnInitialized()
     {
         GbxService.Gbxs.CollectionChanged += Gbxs_CollectionChanged;
@@ -17,5 +44,15 @@
     private void Gbxs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         StateHasChanged();
+    }
+
+    private void ExpandOrClose()
+    {
+        Expanded = !Expanded;
+    }
+
+    private void SelectGbx(GbxModel gbx)
+    {
+        SelectedGbx = gbx;
     }
 }
