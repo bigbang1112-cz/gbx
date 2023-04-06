@@ -111,7 +111,7 @@ a {
     padding: 0.8rem;
     backdrop-filter: blur(5px);
     box-shadow: 1px 1px 3px 0px rgb(0 0 0 / 50%);
-    transition: 0.1s all ease;
+    transition: 0.25s all ease;
     background-blend-mode: lighten;
     box-sizing: border-box;
     color: white;
@@ -206,6 +206,11 @@ button, a.button {
     button:hover:enabled, a.button:hover {
         background: linear-gradient(90deg, var(--button-blue-edge) 0%, var(--button-blue) 2%, var(--button-blue) 98%, var(--button-blue-edge) 100%);
         cursor: pointer;
+    }
+
+    button:disabled {
+        color: gray;
+        cursor: not-allowed;
     }
 
 .darker-bg {

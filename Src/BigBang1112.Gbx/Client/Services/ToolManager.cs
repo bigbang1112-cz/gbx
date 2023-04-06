@@ -44,7 +44,7 @@ internal class ToolManager : IToolManager
                 .GetProperty("ExternalRetrieve", BindingFlags.Static | BindingFlags.NonPublic)?
                 .SetValue(null, new Func<string, Task<byte[]>>(path =>
                 {
-                    return provider.GetRequiredService<HttpClient>().GetByteArrayAsync(path);
+                    return provider.GetRequiredService<HttpClient>().GetByteArrayAsync($"assets/tools/{path}");
                 }));
         }
     }
@@ -62,7 +62,7 @@ internal class ToolManager : IToolManager
         AddTool<ChampagneTool>(services);
     }
 
-    internal static void AddTool<T>(IServiceCollection services) where T : ITool
+    internal static void AddTool<T>(IServiceCollection services) where T : class, ITool
     {
         services.AddScoped<ToolFactory<T>>();
 

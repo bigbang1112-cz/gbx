@@ -1,0 +1,62 @@
+﻿@using GbxToolAPI;
+
+<div class="progress-container">
+    <div class="rectangle list">
+        @foreach (var gbx in GbxSelection)
+        {
+            <div>@gbx.FileName</div>
+        }
+    </div>
+    <div class="rectangle log">
+        @foreach (var msg in CurrentProductionLog)
+        {
+            <div>@msg</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public IToolFactory? ToolFactory { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public HashSet<GbxModel> GbxSelection { get; set; } = new();
+
+    public List<string> CurrentProductionLog { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ToolFactory is null)
+        {
+            return;
+        }
+
+        foreach (var tool in ToolFactory.CreateTools(GbxSelection))
+        {
+            CurrentProductionLog.Clear();
+
+            if (tool is IHasAssets toolWithAssets)
+            {
+                CurrentProductionLog.Add("Loading assets...");
+                StateHasChanged();
+
+                await toolWithAssets.LoadAssetsAsync();
+            }
+
+            foreach (var produceMethod in ToolFactory.ProduceMethods)
+            {
+                CurrentProductionLog.Add("Producing...");
+                StateHasChanged();
+                await Task.Delay(20);
+
+                var obj = produceMethod.Invoke(tool, null);
+
+                CurrentProductionLog.Add("Produced!");
+                StateHasChanged();
+                await Task.Delay(20);
+            }
+        }
+    }
+}

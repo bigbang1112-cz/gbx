@@ -14,10 +14,13 @@
 
 @if (ToolFactory is null)
 {
+    <PageTitle>Tool not found - Gbx Web Tools</PageTitle>
     <div>Tool not found.</div>
 
     return;
 }
+
+<PageTitle>@ToolFactory.Name - Tool - Gbx Web Tools</PageTitle>
 
 @{
     var githubRepo = ToolFactory.ToolType.GetCustomAttribute<ToolGitHubAttribute>()?.Repository;
@@ -29,7 +32,18 @@
 
         @if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
         {
-    
+            if (gbxSelection.Count == 0)
+            {
+                <h2>No files have been selected</h2>
+            }
+            else if (ToolFactory.HasOutput)
+            {
+                <ToolProduceReport ToolFactory="ToolFactory" GbxSelection="gbxSelection"></ToolProduceReport>
+            }
+            else
+            {
+                <h2>This tool doesn't support producing</h2>
+            }
         }
         else
         {
@@ -89,11 +103,6 @@
 
         if (ToolFactory is not null)
         {
-            if (Produce == "selected")
-            {
-                await ProduceToolOutputAsync();
-            }
-
             return;
         }
 
@@ -149,21 +158,6 @@
             {
                 Configs.Add(config.Key, (Config)JsonSerializer.Deserialize(config.Value, configType, Json.DefaultOptions)!);
             }
-        }
-    }
-
-    private async Task ProduceToolOutputAsync()
-    {
-        if (ToolFactory is null)
-        {
-            throw new Exception();
-        }
-
-        var tool = ToolFactory.CreateTool();
-
-        if(tool is IHasAssets toolWithAssets)
-        {
-            await toolWithAssets.LoadAssetsAsync();
         }
     }
 }

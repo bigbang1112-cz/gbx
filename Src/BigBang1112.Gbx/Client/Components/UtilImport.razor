@@ -151,7 +151,7 @@
         <div style="display:flex;gap: 8px;">
             <button class="button-util" @onclick="SelectAll">Select all</button>
             <button class="button-util" @onclick="DeselectAll">Deselect all</button>
-            <button class="button-util" style="flex: 1">Auto-@(Produces ? "produce" : "proceed")</button>
+            <button class="button-util" style="flex: 1" disabled>Auto-@(Produces ? "produce" : "proceed")</button>
         </div>
         @if (Produces && canProceed)
         {
@@ -197,9 +197,16 @@
             }
             else
             {
+                var textDictionaryInterface = type.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IHasTextDictionary<>));
+                
                 <div class="config-grid">
                     @foreach (var prop in props)
                     {
+                        if (textDictionaryInterface is not null && prop.Name == "Dictionary" && prop.PropertyType == textDictionaryInterface.GetGenericArguments()[0])
+                        {
+                            continue;
+                        }
+
                         <div style="overflow: hidden;">@prop.Name</div>
 
                         @if (PropValDisplay.TryGetComponent(prop.PropertyType, out var componentType))

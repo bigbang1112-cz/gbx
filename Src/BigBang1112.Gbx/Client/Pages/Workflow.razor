@@ -1,22 +1,33 @@
 ﻿@page "/workflow/{route}"
+@using BigBang1112.Gbx.Client.Models.UtilImport;
 @inject IWorkflowManager WorkflowManager
 
 @if (WorkflowModel is null)
 {
+    <PageTitle>Workflow not found - Gbx Web Tools</PageTitle>
     return;
 }
 
-<UtilImport Name="@WorkflowModel.Name">
-    <div style="height: 300px">
-        graph
+<PageTitle>@WorkflowModel.Name - Workflow - Gbx Web Tools</PageTitle>
+
+<div class="util-background">
+    <div class="util-container">
+        <UtilImport Name="@WorkflowModel.Name" GbxSelection="gbxSelection" ImportTypes="ImportTypes">
+            <div style="height: 300px">
+                graph
+            </div>
+        </UtilImport>
     </div>
-</UtilImport>
+</div>
 
 @code {
+    private HashSet<GbxModel> gbxSelection = new();
+
     [Parameter]
     public string? Route { get; set; }
 
     public WorkflowModel? WorkflowModel { get; set; }
+    public IEnumerable<UtilImportType> ImportTypes { get; set; } = Enumerable.Empty<UtilImportType>();
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
@@ -25,12 +36,21 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Route is not null)
+        if (Route is null || !WorkflowManager.WorkflowsByRoute.TryGetValue(Route, out var workflow))
         {
-            if (WorkflowManager.WorkflowsByRoute.TryGetValue(Route, out var workflow))
-            {
-                WorkflowModel = workflow;
-            }
+            return;
         }
+
+        WorkflowModel = workflow;
+
+        ImportTypes = new List<UtilImportType>()
+        {
+            new()
+            {
+                Parameters = workflow.Input
+                    .Select(x => new UtilImportTypeParam() { TypeName = x, IsNodeType = true })
+                    .ToList()
+            }
+        };
     }
 }

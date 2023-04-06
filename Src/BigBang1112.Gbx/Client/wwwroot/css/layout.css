@@ -140,6 +140,16 @@ a.menu-button {
     margin-top: 2px;
 }
 
+.util-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 1300px;
+    min-height: calc(100vh - 160px);
+    padding: 0 20px;
+}
+
 @media screen and (min-width: 1024px) {
     .grid-container {
         grid-template-columns: repeat(2, 1fr);
@@ -164,7 +174,8 @@ a.menu-button {
 
 @media screen and (min-width: 600px) {
     .floating-div {
-        display: block;
+        display: flex;
+        flex-direction: column;
         z-index: 9;
     }
 }
