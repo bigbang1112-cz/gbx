@@ -3,6 +3,7 @@ using System;
 using BigBang1112.Gbx.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BigBang1112.Gbx.Server.Migrations
 {
     [DbContext(typeof(GbxContext))]
-    partial class GbxContextModelSnapshot : ModelSnapshot
+    [Migration("20230406105908_AddJoinedOn")]
+    partial class AddJoinedOn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
