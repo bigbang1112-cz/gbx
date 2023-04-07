@@ -5,7 +5,6 @@
 @using GbxToolAPI.Client;
 @using MapViewerEngine.Shared;
 
-@inject MapViewerEngine.MapViewerEngineHubConnection Hub
 @inject IToolManager ToolManager
 @inject IWorkflowManager WorkflowManager
 @inject NavigationManager NavMan
@@ -33,7 +32,7 @@
         </div>
     </div>
     <div class="grid-item">
-        <h2>Workflows <span title="Workflow is a combination of tools with adjusted input and output.">(?)</span></h2>
+        <h2 class="workflows">Workflows <img src="img/question.svg" width="24" style="margin-top: 2px;" title="Workflow is a combination of tools with adjusted input and output."/></h2>
         <div class="list">
             @foreach (var item in WorkflowManager.GetWorkflows(searchValue))
             {
@@ -92,66 +91,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (Hub.State == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Disconnected)
-        {
-            await Hub.StartAsync();
-        }
-
-        Hub.Metas += (blocks) =>
-        {
-            response += string.Join(", ", blocks.Select(x => $"{x.Name} ({x.Meta.Length} bytes)"));
-            StateHasChanged();
-            return Task.CompletedTask;
-        };
-
-        Hub.BlockMesh += (block, data) =>
-        {
-            response += string.Join(", ", $"{block.Name} (ground: {block.Ground}, Variant: {block.Variant}, SubVariant: {block.SubVariant}, Data: {data.Length})");
-            StateHasChanged();
-            return Task.CompletedTask;
-        };
-
         await WorkflowManager.LoadWorkflowsAsync();
-    }
-
-    private async Task PingAsync()
-    {
-        await Hub.SendMetasAsync(new[] { "StadiumAirship", "StadiumBump1" }, "Stadium", "Nadeo");
-        await Hub.SendBlockMeshAsync(new BlockVariant("StadiumRoadMain", true, 0, 0));
-        await Hub.SendBlockMeshAsync(new BlockVariant("StadiumRoadMain", true, 1, 0));
-        await Hub.SendBlockMeshAsync(new BlockVariant("StadiumRoadMain", false, 2, 0));
-    }
-
-    private async Task LoadFiles(InputFileChangeEventArgs e)
-    {
-        foreach (var file in e.GetMultipleFiles())
-        {
-            using var ms = new MemoryStream();
-            using var stream = file.OpenReadStream(maxAllowedSize: 10000000);
-
-            await stream.CopyToAsync(ms);
-
-            ms.Position = 0;
-
-            node = GameBox.ParseNode(ms);
-        }
-    }
-
-    public async Task TestInstantiateTool(IToolFactory factory)
-    {
-        var tool = factory.CreateTool(node);
-        var type = tool.GetType();
-
-        var hubConnectionInterface = type.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IHubConnection<>));
-
-        if (hubConnectionInterface is not null)
-        {
-            hubConnectionInterface.GetProperty("HubConnection")?.SetValue(tool, Hub);
-        }
-
-        if (tool is IHasUI ui)
-        {
-            await ui.LoadAsync();
-        }
     }
 }

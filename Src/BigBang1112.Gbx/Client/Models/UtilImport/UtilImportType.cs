@@ -9,6 +9,7 @@ public class UtilImportType
     public string? Description { get; init; }
 
     public bool HasImportedFile { get; set; }
+    public bool Invalid { get; set; }
 
     public static UtilImportType FromConstructor(ConstructorInfo ctor)
     {

@@ -1,18 +1,69 @@
-﻿@using GbxToolAPI;
+﻿@using GBX.NET;
+@using GbxToolAPI;
+
+@inject IGbxService GbxService
+
+@if (ToolFactory is null)
+{
+    return;
+}
+
+<h2>@ToolFactory.Name</h2>
 
 <div class="progress-container">
-    <div class="rectangle list">
-        @foreach (var gbx in GbxSelection)
-        {
-            <div>@gbx.FileName</div>
-        }
+    <div class="menu">
+        <div class="rectangle">
+            <div class="button-overview @(SelectedToolInstance is null ? "selected" : "") @(AutomationDone ? "enabled" : "")" @onclick="() => SelectedToolInstance = null">Overview</div>
+        </div>
+        <div class="rectangle list">
+            @foreach (var toolInstance in ToolInstances)
+            {
+                <div class="@(SelectedToolInstance == toolInstance ? "selected" : "") @(AutomationDone ? "enabled" : "")" @onclick="() => SelectedToolInstance = toolInstance">
+                    @if (toolInstance.Output is not null)
+                    {
+                        <span>@toolInstance.ShortFileName</span>
+                    }
+                    else
+                    {
+                        <span>Producing...</span>
+                    }
+                </div>
+            }
+        </div>
     </div>
-    <div class="rectangle log">
-        @foreach (var msg in CurrentProductionLog)
-        {
-            <div>@msg</div>
-        }
-    </div>
+
+    @if (SelectedToolInstance is null)
+    {
+        <div class="rectangle report overview">
+            <h3>Produced @ToolInstances.Count @(ToolInstances.Count == 1 ? "file" : "files")</h3>
+            <div class="overview-buttons">
+                <button @onclick="DownloadWithFolders" title="Downloads all outputs as a zip that you can just extract into your user data folder (MyDocuments/[game]).">
+                    Download with folders
+                </button>
+                <button @onclick="DownloadOnlyOutputs" title="Downloads all output files without any folder structuring (if there are multiple, they will be packed into zip).">
+                    Download only outputs
+                </button>
+                <button @onclick="SaveIntoMemory" title="Saves all outputs in memory for the next use in Gbx Web Tools.">
+                    Save into memory
+                </button>
+                <button @onclick="DownloadAssets" title="Downloads tool assets that you can just extract into your user data folder (MyDocuments/[game]).">
+                    Download assets
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="rectangle report">
+            <div class="log">
+                @foreach (var msg in SelectedToolInstance.Log)
+                {
+                    <div>@msg</div>
+                }
+            </div>
+        </div>
+    }
+
 </div>
 
 @code {
@@ -24,7 +75,11 @@
     [EditorRequired]
     public HashSet<GbxModel> GbxSelection { get; set; } = new();
 
-    public List<string> CurrentProductionLog { get; set; } = new();
+    public ToolInstanceModel? SelectedToolInstance { get; set; }
+
+    public List<ToolInstanceModel> ToolInstances { get; set; } = new();
+
+    public bool AutomationDone { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -35,11 +90,17 @@
 
         foreach (var tool in ToolFactory.CreateTools(GbxSelection))
         {
-            CurrentProductionLog.Clear();
+            if (tool is FailedToolModel failedTool)
+            {
+                continue;
+            }
+
+            SelectedToolInstance = new ToolInstanceModel(tool);
+            ToolInstances.Add(SelectedToolInstance);
 
             if (tool is IHasAssets toolWithAssets)
             {
-                CurrentProductionLog.Add("Loading assets...");
+                SelectedToolInstance.Log.Add("Loading assets...");
                 StateHasChanged();
 
                 await toolWithAssets.LoadAssetsAsync();
@@ -47,16 +108,91 @@
 
             foreach (var produceMethod in ToolFactory.ProduceMethods)
             {
-                CurrentProductionLog.Add("Producing...");
+                SelectedToolInstance.Log.Add("Producing...");
                 StateHasChanged();
                 await Task.Delay(20);
 
-                var obj = produceMethod.Invoke(tool, null);
+                try
+                {
+                    var output = produceMethod.Invoke(tool, null);
 
-                CurrentProductionLog.Add("Produced!");
+                    if (output is null)
+                    {
+                        continue;
+                    }
+
+                    SelectedToolInstance.Output = output;
+                    SelectedToolInstance.FileName = GetToolOutputFileName(output);
+                    SelectedToolInstance.Log.Add($"Produced {SelectedToolInstance.ShortFileName}!");
+                }
+                catch (Exception ex)
+                {
+                    SelectedToolInstance.Log.Add("Error while producing:");
+                    SelectedToolInstance.Log.Add(ex.ToString());
+                }
+
+                SelectedToolInstance.Log.Add("Production finished!");
                 StateHasChanged();
                 await Task.Delay(20);
             }
         }
+
+        SelectedToolInstance = null;
+        AutomationDone = true;
+    }
+
+    private string? GetToolOutputFileName(object output)
+    {
+        var type = output.GetType();
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(NodeFile<>))
+        {
+            var fileName = type.GetProperty(nameof(NodeFile<Node>.FileName))?.GetValue(output)?.ToString();
+
+            if (fileName is null)
+            {
+                return null;
+            }
+
+            return fileName;
+        }
+
+        return output?.ToString();
+    }
+
+    private void DownloadWithFolders()
+    {
+
+    }
+
+    private void DownloadOnlyOutputs()
+    {
+
+    }
+
+    private void SaveIntoMemory()
+    {
+        foreach (var toolInstance in ToolInstances)
+        {
+            if (toolInstance.Output is null || toolInstance.ShortFileName is null)
+            {
+                continue;
+            }
+
+            var outputType = toolInstance.Output.GetType();
+
+            if (outputType.IsGenericType && outputType.GetGenericTypeDefinition() == typeof(NodeFile<>))
+            {
+                var node = (Node)(outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(toolInstance.Output) ?? throw new Exception("NodeFile.Node is null!"));
+
+                GbxService.Gbxs.Add(new GbxModel(toolInstance.ShortFileName, node.ToGbx()));
+            }
+
+        }
+    }
+
+    private void DownloadAssets()
+    {
+
     }
 }

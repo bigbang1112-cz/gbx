@@ -115,7 +115,21 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
                     case <= 0:
                         throw new Exception("No input for parameter " + param.Name + " of type " + param.ParameterType.Name);
                     case 1:
-                        ctorParamValuesToServe[i] = inputList.First();
+                        if (param.ParameterType.IsGenericType && param.ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                        {
+                            var list = (System.Collections.IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(param.ParameterType.GetGenericArguments()[0]))!;
+
+                            foreach (var item in inputList.Select(x => ObjectFromGbxModel(x, param)))
+                            {
+                                list.Add(item);
+                            }
+                            
+                            ctorParamValuesToServe[i] = list;
+                        }
+                        else
+                        {
+                            ctorParamValuesToServe[i] = inputList.Select(x => ObjectFromGbxModel(x, param)).First();
+                        }
                         break;
                     default:
                         if (bulkParamIndex is not null)
@@ -124,7 +138,7 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
                         }
 
                         bulkParamIndex = i;
-                        bulkParamList.AddRange(inputList);
+                        bulkParamList.AddRange(inputList.Select(x => ObjectFromGbxModel(x, param)));
                         break;
                 }
             }
@@ -136,34 +150,113 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
 
             if (bulkParamIndex is null)
             {
-                yield return ctor.Invoke(ctorParamValuesToServe) as T ?? throw new Exception("Invalid constructor");
-                continue;
+                T toolInstance;
+
+                try
+                {
+                    toolInstance = ctor.Invoke(ctorParamValuesToServe) as T ?? throw new Exception("Invalid constructor");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to create tool {ToolType}", typeof(T));
+                    continue;
+                }
+
+                yield return toolInstance;
+                break;
             }
 
-            foreach (var val in bulkParamList)
+            var paramType = ctorParams[bulkParamIndex.Value].ParameterType;
+
+            foreach (var givenVal in bulkParamList)
             {
+                var val = givenVal;
+                var isList = paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+
+                if (isList)
+                {
+                    var list = (System.Collections.IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(paramType.GetGenericArguments()[0]))!;
+                    list.Add(givenVal);
+                    val = list;
+                }
+
                 ctorParamValuesToServe[bulkParamIndex.Value] = val;
-                yield return ctor.Invoke(ctorParamValuesToServe) as T ?? throw new Exception("Invalid constructor");
+
+                T toolInstance;
+
+                try
+                {
+                    toolInstance = ctor.Invoke(ctorParamValuesToServe) as T ?? throw new Exception("Invalid constructor");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to create tool {ToolType}", typeof(T));
+                    continue;
+                }
+
+                yield return toolInstance;
+
+                if (isList)
+                {
+                    yield break;
+                }
             }
         }
     }
 
-    private static Dictionary<Type, ICollection<Node>> CreateInputObjectsDictionary(IEnumerable<GbxModel> gbxs)
+    private static Dictionary<Type, ICollection<GbxModel>> CreateInputObjectsDictionary(IEnumerable<GbxModel> gbxs)
     {
-        var dict = new Dictionary<Type, ICollection<Node>>();
+        var dict = new Dictionary<Type, ICollection<GbxModel>>();
 
-        foreach (var typeGroup in gbxs.Select(x => x.Object?.Node).OfType<Node>().GroupBy(obj => obj.GetType()))
+        foreach (var typeGroup in gbxs.GroupBy<GbxModel, Type>(TypeOfGbxGrouping))
         {
-            var list = new List<Node>();
-
-            foreach (var obj in typeGroup)
-            {
-                list.Add(obj);
-            }
+            var list = typeGroup.ToList();
 
             dict.Add(typeGroup.Key, list);
+            dict.Add(typeof(IEnumerable<>).MakeGenericType(typeGroup.Key), list);
         }
 
         return dict;
+    }
+
+    private static Type TypeOfGbxGrouping(GbxModel gbx)
+    {
+        if (gbx.Type is not null)
+        {
+            return gbx.Type;
+        }
+        
+        if (gbx.Text is not null)
+        {
+            return typeof(TextFile);
+        }
+
+        throw new NotSupportedException("Unknown GbxModel type");
+    }
+
+    private static object ObjectFromGbxModel(GbxModel gbx, ParameterInfo param)
+    {
+        if (gbx.Object?.Node is not null)
+        {
+            return gbx.Object.Node;
+        }
+
+        if (gbx.Text is not null)
+        {
+            if (param.ParameterType == typeof(TextFile))
+            {
+                return new TextFile(gbx.Text, gbx.FileName);
+            }
+            else if(param.ParameterType == typeof(string))
+            {
+                return gbx.Text;
+            }
+            else
+            {
+                throw new NotSupportedException("Text is not supported for parameter type " + param.ParameterType.Name);
+            }
+        }
+
+        throw new NotSupportedException("Not supported for parameter type " + param.ParameterType.Name);
     }
 }

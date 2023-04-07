@@ -148,16 +148,24 @@
 
         var configList = await LocalStorage.GetItemAsync<Dictionary<string, JsonDocument>>($"Tool:{Route}:Config");
 
-        if (configList is null || configList.Count == 0)
+        if (configList is null || configList.Count == 0 || !configList.ContainsKey("Default"))
         {
             Configs.Add("Default", (Config)Activator.CreateInstance(configType)!);
         }
-        else
+        
+        if (configList is not null)
         {
             foreach (var config in configList)
             {
                 Configs.Add(config.Key, (Config)JsonSerializer.Deserialize(config.Value, configType, Json.DefaultOptions)!);
             }
         }
+    }
+
+    private Dictionary<GbxModel, ITool> gbxModelLinkToTool = new();
+
+    private void OnGbxSelectionChanged()
+    {
+        
     }
 }

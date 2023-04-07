@@ -55,11 +55,11 @@ internal class ToolManager : IToolManager
         AddTool<ClipCheckpointTool>(services);
         AddTool<GhostToClipTool>(services);
         AddTool<ClipToReplayTool>(services);
-        AddTool<ReplayViewerTool>(services);
-        AddTool<MapViewerEngineTool>(services);
+        //AddTool<ReplayViewerTool>(services);
+        //AddTool<MapViewerEngineTool>(services);
         AddTool<SpikeTool>(services);
         AddTool<CombineClipsTool>(services);
-        AddTool<ChampagneTool>(services);
+        //AddTool<ChampagneTool>(services);
     }
 
     internal static void AddTool<T>(IServiceCollection services) where T : class, ITool

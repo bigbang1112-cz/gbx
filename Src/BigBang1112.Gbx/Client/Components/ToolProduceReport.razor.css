@@ -4,12 +4,70 @@
     margin: 0 auto;
     gap: 10px;
     min-height: 300px;
+    padding-bottom: 20px;
 }
 
 .list {
+    display: grid;
+    grid-auto-rows: min-content;
+    gap: 4px;
+    border-radius: 3px;
+    overflow: auto;
     width: 400px;
+    flex: 1;
+}
+
+    .list > div, .button-overview {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #3332;
+        border-radius: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 4px 8px;
+        cursor: not-allowed;
+    }
+
+        .list > div.enabled, .button-overview.enabled {
+            cursor: pointer;
+        }
+
+        .list > div.enabled:hover, .list > div.selected, .button-overview.enabled:hover, .button-overview.selected {
+            background: var(--button-blue);
+        }
+
+.report {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.overview {
+    align-items: center;
+}
+
+.overview-buttons {
+    display: flex;
+    gap: 5px;
 }
 
 .log {
+    background: #3333;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: Source Code Pro;
     flex: 1;
+}
+
+h2 {
+    margin: 20px 0;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }

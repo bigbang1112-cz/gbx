@@ -36,7 +36,7 @@
                 <div class="import-looking-for-params darker-bg">
 
                     @{
-                        var allFilesImported = true;
+                        var allFilesImportedAndValid = true;
                     }
 
                     @for (var i = 0; i < parameters.Count; i++)
@@ -44,9 +44,9 @@
                         var p = parameters[i];
                         var importedFile = p.ImportedFiles.Length > 0;
 
-                        if (!importedFile)
+                        if (!importedFile || importType.Invalid)
                         {
-                            allFilesImported = false;
+                            allFilesImportedAndValid = false;
                         }
 
                         @if (i > 0)
@@ -54,7 +54,7 @@
                             <div class="symbol">+</div>
                         }
 
-                        <div class="rectangle import-looking-for-param @(importedFile ? "highlighted" : "")">
+                        <div class="rectangle import-looking-for-param @(importType.Invalid && p.ImportedFiles.Length > 1 ? "highlighted-red" : "") @(!importType.Invalid && importedFile ? "highlighted" : "")">
                             <div style="display:flex;align-items:center;">
 
                                 @if (p.IsNodeType)
@@ -78,7 +78,6 @@
                                             <span>Gbx</span>
                                         </div>
                                     }
-
                                 }
                                 else
                                 {
@@ -105,7 +104,7 @@
                         →
                     </div>
 
-                    @if (allFilesImported)
+                    @if (allFilesImportedAndValid)
                     {
                         canProceed = true;
 
@@ -115,7 +114,7 @@
                     }
                     else
                     {
-                        <button class="rectangle proceed-specific" title="No file has been selected for this method." disabled>
+                        <button class="rectangle proceed-specific @(importType.Invalid ? "highlighted-red" : "")" title="@(importType.Invalid ? "Parameters have been assigned incorrectly." : "No file has been selected for this method.")" disabled>
                             <img src="img/x.svg" width="24" />
                         </button>
                     }
@@ -360,9 +359,24 @@
 
         foreach (var importType in ImportTypes)
         {
+            importType.Invalid = false;
+
+            var hasMultiParamAlready = false;
+
             foreach (var param in importType.Parameters)
             {
                 param.ImportedFiles = gbxModelByTypeName[param.TypeName].ToArray();
+
+                if (param.ImportedFiles.Length > 1)
+                {
+                    if (hasMultiParamAlready)
+                    {
+                        importType.Invalid = true;
+                        break;
+                    }
+                    
+                    hasMultiParamAlready = true;
+                }
             }
         }
     }
@@ -437,7 +451,7 @@
 
         await LocalStorage.SetItemAsync($"Tool:{Route}:Config", configList);
 
-        // weird trick to disjoin reference
+        // weird trick to disjoin reference without deep clone
         var configsTemp = await LocalStorage.GetItemAsync<Dictionary<string, JsonDocument>>($"Tool:{Route}:Config");
 
         Configs[configName] = (Config)JsonSerializer.Deserialize(configsTemp[configName], configToSave.GetType(), Json.DefaultOptions)!;
