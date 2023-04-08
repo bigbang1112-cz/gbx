@@ -10,6 +10,7 @@ const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/ ];
 const offlineAssetsExclude = [ /^service-worker\.js$/ ];
+const excludedRoutes = ['/swagger', '/assets', '/api'];
 
 async function onInstall(event) {
     console.info('Service worker: Install');
@@ -34,7 +35,7 @@ async function onActivate(event) {
 
 async function onFetch(event) {
     let cachedResponse = null;
-    if (event.request.method === 'GET') {
+    if (event.request.method === 'GET' && !isExcludedRoute(requestUrl.pathname, excludedRoutes)) {
         // For all navigation requests, try to serve index.html from cache
         // If you need some URLs to be server-rendered, edit the following check to exclude those URLs
         const shouldServeIndexHtml = event.request.mode === 'navigate';
@@ -45,4 +46,11 @@ async function onFetch(event) {
     }
 
     return cachedResponse || fetch(event.request);
+}
+
+function isExcludedRoute(pathname, excludedRoutes) {
+    return excludedRoutes.some(route => {
+        // Check if the excluded route matches the beginning of the pathname
+        return pathname.startsWith(route);
+    });
 }
