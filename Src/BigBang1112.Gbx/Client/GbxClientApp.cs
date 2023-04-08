@@ -28,6 +28,7 @@ public static class GbxClientApp
         services.AddScoped<SettingsService>();
         services.AddScoped<IGbxService, GbxService>();
         services.AddScoped<IPropertyValueDisplayService, PropertyValueDisplayService>();
+        services.AddScoped<IDownloadService, DownloadService>();
         services.AddScoped<ILogger, Logger>();
 
         ToolManager.Services(services); // registers the individual "strong" tools

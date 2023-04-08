@@ -1,8 +1,10 @@
 ﻿using AspNet.Security.OAuth.Discord;
+using BigBang1112.Gbx.Server.Endpoints;
 using BigBang1112.Gbx.Server.Extensions;
 using BigBang1112.Gbx.Server.Middlewares;
 using BigBang1112.Gbx.Server.Repos;
 using BigBang1112.Gbx.Shared;
+using ClipCheckpoint;
 using ClipInput;
 using GbxToolAPI.Server.Options;
 using MapViewerEngine.Server;
@@ -83,7 +85,7 @@ internal static class GbxServerApp
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
-        
+
         services.AddScoped<IDbConnection>(s =>
         {
             return new MySqlConnection(config.GetConnectionString("Gbx"));
@@ -166,6 +168,7 @@ internal static class GbxServerApp
         app.UseStaticFiles(new StaticFileOptions { ServeUnknownFileTypes = true });
 
         app.UseToolAssets<ClipInputTool>();
+        app.UseToolAssets<ClipCheckpointTool>();
 
         app.UseToolServer<MapViewerEngineServer>();
         

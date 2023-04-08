@@ -17,7 +17,10 @@ public interface IToolFactory
     string Route { get; }
     IReadOnlyCollection<MethodInfo> ProduceMethods { get; }
     
+    Type? ConfigType { get; }
+
     bool HasOutput { get; }
+    bool HasAssets { get; }
 
     ITool CreateTool(params object?[] args);
     IEnumerable<ITool> CreateTools(IEnumerable<GbxModel> gbxs);
@@ -36,7 +39,10 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
     public string Route { get; }
     public IReadOnlyCollection<MethodInfo> ProduceMethods { get; }
     
+    public Type? ConfigType { get; }
+
     public bool HasOutput => ProduceMethods.Count > 0;
+    public bool HasAssets { get; }
 
     public ToolFactory(ILogger<ToolFactory<T>> logger)
     {
@@ -49,6 +55,26 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
         Description = ToolType.GetCustomAttribute<ToolDescriptionAttribute>()?.Description ?? string.Empty;
         GitHubRepository = ToolType.GetCustomAttribute<ToolGitHubAttribute>()?.Repository ?? string.Empty;
         Route = ToolType.GetCustomAttribute<ToolRouteAttribute>()?.Route ?? RegexUtils.PascalCaseToKebabCase(Id);
+
+        foreach(var iface in ToolType.GetInterfaces())
+        {
+            if (iface.IsGenericType)
+            {
+                var def = iface.GetGenericTypeDefinition();
+
+                if (def == typeof(IConfigurable<>))
+                {
+                    ConfigType = iface.GetGenericArguments()[0];
+                }
+                
+                continue;
+            }
+
+            if (iface == typeof(IHasAssets))
+            {
+                HasAssets = true;
+            }
+        }
 
         var produceMethods = new List<MethodInfo>();
         ProduceMethods = produceMethods;

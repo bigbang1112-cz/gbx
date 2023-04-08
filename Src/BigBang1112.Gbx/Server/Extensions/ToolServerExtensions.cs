@@ -1,4 +1,5 @@
-﻿using GbxToolAPI.Server;
+﻿using BigBang1112.Gbx.Server.Endpoints;
+using GbxToolAPI.Server;
 using GbxToolAPI.Server.Options;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;

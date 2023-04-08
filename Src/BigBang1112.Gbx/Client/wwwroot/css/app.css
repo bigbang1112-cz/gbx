@@ -198,6 +198,7 @@ input[type=text], input[type=color], .input-text, select {
 
 a.button {
     cursor: pointer;
+    text-align: center;
 }
 
 button, a.button {

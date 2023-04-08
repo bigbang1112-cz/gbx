@@ -7,8 +7,9 @@
 @inject IGbxService GbxService
 @inject IPropertyValueDisplayService PropValDisplay
 @inject NavigationManager NavMgr
-@inject IJSRuntime JS
+@inject IDownloadService DownloadService
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject Blazored.LocalStorage.ISyncLocalStorageService SyncLocalStorage
 
 @{
     var canProceed = false;
@@ -152,6 +153,7 @@
             <button class="button-util" @onclick="DeselectAll">Deselect all</button>
             <button class="button-util" style="flex: 1" disabled>Auto-@(Produces ? "produce" : "proceed")</button>
         </div>
+
         @if (Produces && canProceed)
         {
             <a href="@NavMgr.GetUriWithQueryParameter("produce", "selected")" class="button proceed-general">Produce</a>
@@ -160,6 +162,7 @@
         {
             <button class="proceed-general" disabled="@(!canProceed)">@(Produces ? "Produce" : "Proceed")</button>
         }
+        
     </div>
 
     @if (Configs.Count > 0)
@@ -180,7 +183,7 @@
                 <button class="button-util" @onclick="ResetConfig">Reset</button>
             </div>
             <div class="config-bar">
-                <button class="button-util" style="flex:1" @onclick="ExportConfigToYml">Import from .yml</button>
+                <button class="button-util" style="flex:1">Import from .yml</button>
                 <button class="button-util" style="flex:1" @onclick="ExportConfigToYml">Export to .yml</button>
             </div>
 
@@ -232,8 +235,17 @@
     private Timer? timer;
     private uint counter;
     private HashSet<string>? suggestedTypeNames;
+    private string selectedConfigName = "Default";
 
-    public string SelectedConfigName { get; set; } = "Default";
+    public string SelectedConfigName
+    {
+        get => selectedConfigName;
+        set
+        {
+            selectedConfigName = value;
+            SyncLocalStorage.SetItem($"Tool:{Route}:Config:Selected", selectedConfigName);
+        }
+    }
 
     [Parameter]
     [EditorRequired]
@@ -261,7 +273,7 @@
     [EditorRequired]
     public IEnumerable<UtilImportType> ImportTypes { get; set; } = Enumerable.Empty<UtilImportType>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         suggestedTypeNames = ImportTypes.SelectMany(x => x.Parameters)
             .Select(x => x.TypeName)
@@ -271,6 +283,8 @@
         timer = new Timer(TimerCallback, null, 0, 1500); // TimerCallback will be called every 1000 milliseconds (1 second)
 
         GbxService.Gbxs.CollectionChanged += Gbxs_CollectionChanged;
+
+        SelectedConfigName = await LocalStorage.GetItemAsync<string>($"Tool:{Route}:Config:Selected") ?? "Default";
     }
 
     private void TimerCallback(object? state)
@@ -374,7 +388,7 @@
                         importType.Invalid = true;
                         break;
                     }
-                    
+
                     hasMultiParamAlready = true;
                 }
             }
@@ -417,7 +431,7 @@
     {
         if (Configs.TryGetValue(SelectedConfigName, out var config))
         {
-            await JS.InvokeVoidAsync("download_file", $"{SelectedConfigName}.yml", Yml.Serializer.Serialize(config), "text/yaml");
+            await DownloadService.DownloadAsync($"{SelectedConfigName}.yml", Yml.Serializer.Serialize(config), "text/yaml");
         }
     }
 

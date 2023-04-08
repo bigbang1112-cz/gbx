@@ -10,6 +10,7 @@ public class ToolInstanceModel
     public List<string> Log { get; } = new();
     public string? FileName { get; set; }
     public string? ShortFileName => Path.GetFileName(FileName);
+    public bool IsForManiaPlanet { get; set; }
 
     public ToolInstanceModel(ITool tool)
     {

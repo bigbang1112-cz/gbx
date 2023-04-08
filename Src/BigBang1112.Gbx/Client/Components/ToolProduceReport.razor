@@ -1,7 +1,11 @@
 ﻿@using GBX.NET;
 @using GbxToolAPI;
+@using System.IO.Compression;
+@using System.Text.Json;
 
 @inject IGbxService GbxService
+@inject IDownloadService DownloadService
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 @if (ToolFactory is null)
 {
@@ -46,9 +50,25 @@
                 <button @onclick="SaveIntoMemory" title="Saves all outputs in memory for the next use in Gbx Web Tools.">
                     Save into memory
                 </button>
-                <button @onclick="DownloadAssets" title="Downloads tool assets that you can just extract into your user data folder (MyDocuments/[game]).">
-                    Download assets
-                </button>
+
+                @if (ToolFactory.HasAssets)
+                {
+                    @if (ProducedManiaPlanetFiles)
+                    {
+                        <a href="assets/tools/@ToolFactory.Route?game=mp" class="button" title="Downloads tool assets that you can just extract into your user data folder (MyDocuments/[game]).">
+                            Download assets for ManiaPlanet
+                        </a>
+                    }
+
+                    @if (ProducedNonManiaPlanetFiles)
+                    {
+                        <a href="assets/tools/@ToolFactory.Route?game=tmf" class="button" title="Downloads tool assets that you can just extract into your user data folder (MyDocuments/[game]).">
+                            Download assets for TMF
+                        </a>
+                    }
+
+                }
+
             </div>
         </div>
     }
@@ -81,6 +101,9 @@
 
     public bool AutomationDone { get; set; }
 
+    public bool ProducedManiaPlanetFiles { get; set; }
+    public bool ProducedNonManiaPlanetFiles { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         if (ToolFactory is null)
@@ -88,11 +111,36 @@
             return;
         }
 
+        var route = ToolFactory.Route;
+
+        // Config retrieval from local storage
+        var config = default(Config);
+        var configs = await LocalStorage.GetItemAsync<Dictionary<string, JsonDocument>>($"Tool:{route}:Config");
+
+        if (configs is not null && configs.Count > 0)
+        {
+            var selectedConfigName = await LocalStorage.GetItemAsync<string>($"Tool:{route}:Config:Selected");
+
+            if (string.IsNullOrWhiteSpace(selectedConfigName))
+            {
+                selectedConfigName = "Default";
+            }
+
+            config = (Config)JsonSerializer.Deserialize(configs[selectedConfigName], ToolFactory.ConfigType, Json.DefaultOptions)!;
+        }
+        //
+
         foreach (var tool in ToolFactory.CreateTools(GbxSelection))
         {
             if (tool is FailedToolModel failedTool)
             {
                 continue;
+            }
+
+            // Sets custom config if available
+            if (ToolFactory.ConfigType is not null && config is not null)
+            {
+                ToolFactory.ToolType.GetProperty("Config", ToolFactory.ConfigType)!.SetValue(tool, config);
             }
 
             SelectedToolInstance = new ToolInstanceModel(tool);
@@ -123,6 +171,7 @@
 
                     SelectedToolInstance.Output = output;
                     SelectedToolInstance.FileName = GetToolOutputFileName(output);
+                    SelectedToolInstance.IsForManiaPlanet = IsOutputForManiaPlanet(output);
                     SelectedToolInstance.Log.Add($"Produced {SelectedToolInstance.ShortFileName}!");
                 }
                 catch (Exception ex)
@@ -160,14 +209,110 @@
         return output?.ToString();
     }
 
-    private void DownloadWithFolders()
+    private bool IsOutputForManiaPlanet(object output)
     {
+        var type = output.GetType();
 
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(NodeFile<>))
+        {
+            var isManiaPlanet = (bool)(type.GetProperty(nameof(NodeFile<Node>.IsManiaPlanet))?.GetValue(output) ?? false);
+
+            if (!ProducedManiaPlanetFiles)
+            {
+                ProducedManiaPlanetFiles = isManiaPlanet;
+            }
+
+            if (!ProducedNonManiaPlanetFiles)
+            {
+                ProducedNonManiaPlanetFiles = !isManiaPlanet;
+            }
+
+            return isManiaPlanet;
+        }
+
+        return true; // default should be rather true
+    }
+    
+    private async Task DownloadWithFolders()
+    {
+        if (ToolInstances.Count == 0)
+        {
+            return;
+        }
+
+        using var ms = new MemoryStream();
+        
+        var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true);
+        
+        var fileName = $"tool-output-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.zip";
+
+        foreach (var toolInstance in ToolInstances)
+        {
+            if (toolInstance.Output is null || toolInstance.FileName is null)
+            {
+                continue;
+            }
+
+            var outputType = toolInstance.Output.GetType();
+
+            if (outputType.IsGenericType && outputType.GetGenericTypeDefinition() == typeof(NodeFile<>))
+            {
+                var node = (Node)(outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(toolInstance.Output) ?? throw new Exception("NodeFile.Node is null!"));
+                
+                using var entryStream = zip.CreateEntry(toolInstance.FileName).Open();
+                node.Save(entryStream); // IDRemap needs to be addressed
+            }
+        }
+        
+        zip.Dispose();
+
+        await DownloadService.DownloadAsync(fileName, ms.ToArray(), "application/octet-stream");
     }
 
-    private void DownloadOnlyOutputs()
+    private async Task DownloadOnlyOutputs()
     {
+        if (ToolInstances.Count == 0)
+        {
+            return;
+        }
 
+        using var ms = new MemoryStream();
+
+        var zipArchive = ToolInstances.Count == 1 ? null : new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true);
+        var fileName = $"tool-output-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.zip";
+
+        foreach (var toolInstance in ToolInstances)
+        {
+            if (toolInstance.Output is null || toolInstance.ShortFileName is null)
+            {
+                continue;
+            }
+
+            var outputType = toolInstance.Output.GetType();
+
+            if (outputType.IsGenericType && outputType.GetGenericTypeDefinition() == typeof(NodeFile<>))
+            {
+                var node = (Node)(outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(toolInstance.Output) ?? throw new Exception("NodeFile.Node is null!"));
+
+                if (zipArchive is null)
+                {
+                    node.Save(ms); // IDRemap needs to be addressed
+                    fileName = toolInstance.ShortFileName;
+                }
+                else
+                {
+                    using var entryStream = zipArchive.CreateEntry(toolInstance.ShortFileName).Open();
+                    node.Save(entryStream); // IDRemap needs to be addressed
+                }
+            }
+        }
+
+        if (zipArchive is not null)
+        {
+            zipArchive.Dispose();
+        }
+
+        await DownloadService.DownloadAsync(fileName, ms.ToArray(), "application/octet-stream");
     }
 
     private void SaveIntoMemory()
@@ -187,12 +332,6 @@
 
                 GbxService.Gbxs.Add(new GbxModel(toolInstance.ShortFileName, node.ToGbx()));
             }
-
         }
-    }
-
-    private void DownloadAssets()
-    {
-
     }
 }
