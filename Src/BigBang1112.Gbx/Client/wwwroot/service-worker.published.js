@@ -35,7 +35,8 @@ async function onActivate(event) {
 
 async function onFetch(event) {
     let cachedResponse = null;
-    if (event.request.method === 'GET' && !isExcludedRoute(requestUrl.pathname, excludedRoutes)) {
+    const requestUrl = new URL(event.request.url);
+    if (event.request.method === 'GET' && !isExcludedRoute(requestUrl.pathname)) {
         // For all navigation requests, try to serve index.html from cache
         // If you need some URLs to be server-rendered, edit the following check to exclude those URLs
         const shouldServeIndexHtml = event.request.mode === 'navigate';
@@ -48,7 +49,7 @@ async function onFetch(event) {
     return cachedResponse || fetch(event.request);
 }
 
-function isExcludedRoute(pathname, excludedRoutes) {
+function isExcludedRoute(pathname) {
     return excludedRoutes.some(route => {
         // Check if the excluded route matches the beginning of the pathname
         return pathname.startsWith(route);
