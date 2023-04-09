@@ -50,7 +50,7 @@ internal static class GbxServerApp
 
                 options.Events.OnRedirectToAuthorizationEndpoint = context =>
                 {
-                    if (context.Request.Path.StartsWithSegments("/api"))
+                    if (context.Request.Path.StartsWithSegments(Constants.ApiRoute))
                     {
                         context.Response.StatusCode = 401;
                         return Task.CompletedTask;
@@ -88,7 +88,7 @@ internal static class GbxServerApp
 
         services.AddScoped<IDbConnection>(s =>
         {
-            return new MySqlConnection(config.GetConnectionString("Gbx"));
+            return new MySqlConnection(config.GetConnectionString(Constants.Gbx));
         });
 
         services.AddScoped<IMemberRepo, MemberRepo>();
@@ -98,11 +98,11 @@ internal static class GbxServerApp
         {
             if (config.GetSection(Constants.Database).Get<DatabaseOptions>()?.InMemory == true)
             {
-                options.UseInMemoryDatabase("Gbx");
+                options.UseInMemoryDatabase(Constants.Gbx);
             }
             else
             {
-                var connectionString = config.GetConnectionString("Gbx");
+                var connectionString = config.GetConnectionString(Constants.Gbx);
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             }
         });
