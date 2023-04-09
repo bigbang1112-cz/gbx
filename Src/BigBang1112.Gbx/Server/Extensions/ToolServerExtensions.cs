@@ -66,7 +66,10 @@ internal static class ToolServerExtensions
                 {
                     var connectionString = config.GetConnectionString(databaseName);
 
-                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), options =>
+                    {
+                        options.MigrationsAssembly(type.Assembly.FullName);
+                    });
                 }
             },
             ServiceLifetime.Scoped,
