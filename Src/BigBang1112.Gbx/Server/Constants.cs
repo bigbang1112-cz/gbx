@@ -8,4 +8,5 @@ public static class Constants
     public const string EndpointsNamespace = "BigBang1112.Gbx.Server.Endpoints";
     public const string ApiRoute = "/api";
     public const string Gbx = "Gbx";
+    public const string InsiderMode = "InsiderMode";
 }

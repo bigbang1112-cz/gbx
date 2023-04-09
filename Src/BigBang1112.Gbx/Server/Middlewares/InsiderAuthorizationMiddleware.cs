@@ -19,7 +19,7 @@ public class InsiderAuthorizationMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var isInsiderMode = _config.GetValue<bool>("InsiderMode");
+        var isInsiderMode = _config.GetValue<bool>(Constants.InsiderMode);
 
         if (!isInsiderMode || PassInsider(context))
         {
