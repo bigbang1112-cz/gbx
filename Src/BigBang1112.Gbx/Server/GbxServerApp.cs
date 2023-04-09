@@ -133,7 +133,19 @@ internal static class GbxServerApp
         }
         else
         {
-            app.UseExceptionHandler("/Error");
+            app.UseExceptionHandler(new ExceptionHandlerOptions
+            {
+                ExceptionHandler = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments(Constants.ApiRoute))
+                    {
+                        return Task.CompletedTask;
+                    }
+
+                    context.Response.Redirect("/Error");
+                    return Task.CompletedTask;
+                }
+            });
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
