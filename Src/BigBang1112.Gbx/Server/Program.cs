@@ -1,6 +1,8 @@
 using BigBang1112;
 using BigBang1112.Gbx.Server;
 
+GBX.NET.Lzo.SetLzo(typeof(GBX.NET.LZO.MiniLZO));
+
 var builder = WebApplication.CreateBuilder(args);
 
 var options = new AppOptions

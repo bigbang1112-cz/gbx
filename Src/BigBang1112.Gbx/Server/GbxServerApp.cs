@@ -146,6 +146,7 @@ internal static class GbxServerApp
                     return Task.CompletedTask;
                 }
             });
+            
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
@@ -153,8 +154,11 @@ internal static class GbxServerApp
         app.UseHttpsRedirection();
         
         app.UseRouting();
-        
-        app.UseResponseCompression();
+
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseResponseCompression();
+        }
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
