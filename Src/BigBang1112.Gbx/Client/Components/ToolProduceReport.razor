@@ -206,6 +206,16 @@
             return fileName;
         }
 
+        if (output is BinFile binFile)
+        {
+            return binFile.FileName ?? Guid.NewGuid() + ".dat";
+        }
+
+        if (output is Node node)
+        {
+            return NodeManager.GetGbxExtensions(node.Id).FirstOrDefault() + ".Gbx";
+        }
+
         return output?.ToString();
     }
 
@@ -232,7 +242,7 @@
 
         return true; // default should be rather true
     }
-    
+
     private async Task DownloadWithFolders()
     {
         if (ToolInstances.Count == 0)
@@ -241,9 +251,9 @@
         }
 
         using var ms = new MemoryStream();
-        
+
         var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true);
-        
+
         var fileName = $"tool-output-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.zip";
 
         foreach (var toolInstance in ToolInstances)
@@ -253,20 +263,28 @@
                 continue;
             }
 
+            using var entryStream = zip.CreateEntry(toolInstance.ShortFileName).Open();
+
             var outputType = toolInstance.Output.GetType();
 
             if (outputType.IsGenericType && outputType.GetGenericTypeDefinition() == typeof(NodeFile<>))
             {
                 var node = (Node)(outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(toolInstance.Output) ?? throw new Exception("NodeFile.Node is null!"));
-                
-                using var entryStream = zip.CreateEntry(toolInstance.FileName).Open();
                 node.Save(entryStream); // IDRemap needs to be addressed
             }
+            else if (toolInstance.Output is Node node)
+            {
+                node.Save(entryStream); // IDRemap needs to be addressed
+            }
+            else if (toolInstance.Output is BinFile binFile)
+            {
+                entryStream.Write(binFile.Data);
+            }
         }
-        
+
         zip.Dispose();
 
-        await DownloadService.DownloadAsync(fileName, ms.ToArray(), "application/octet-stream");
+        await DownloadService.DownloadAsync(fileName, ms.ToArray(), "application/zip");
     }
 
     private async Task DownloadOnlyOutputs()
@@ -305,6 +323,32 @@
                     node.Save(entryStream); // IDRemap needs to be addressed
                 }
             }
+            else if (toolInstance.Output is Node node)
+            {
+                if (zipArchive is null)
+                {
+                    node.Save(ms); // IDRemap needs to be addressed
+                    fileName = toolInstance.ShortFileName;
+                }
+                else
+                {
+                    using var entryStream = zipArchive.CreateEntry(toolInstance.ShortFileName).Open();
+                    node.Save(entryStream); // IDRemap needs to be addressed
+                }
+            }
+            else if (toolInstance.Output is BinFile binFile)
+            {
+                if (zipArchive is null)
+                {
+                    ms.Write(binFile.Data);
+                    fileName = toolInstance.ShortFileName;
+                }
+                else
+                {
+                    using var entryStream = zipArchive.CreateEntry(toolInstance.ShortFileName).Open();
+                    entryStream.Write(binFile.Data);
+                }
+            }
         }
 
         if (zipArchive is not null)
@@ -312,7 +356,7 @@
             zipArchive.Dispose();
         }
 
-        await DownloadService.DownloadAsync(fileName, ms.ToArray(), "application/octet-stream");
+        await DownloadService.DownloadAsync(fileName, ms.ToArray(), zipArchive is null ? "application/octet-stream" : "application/zip");
     }
 
     private void SaveIntoMemory()
@@ -330,6 +374,10 @@
             {
                 var node = (Node)(outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(toolInstance.Output) ?? throw new Exception("NodeFile.Node is null!"));
 
+                GbxService.Gbxs.Add(new GbxModel(toolInstance.ShortFileName, node.ToGbx()));
+            }
+            else if (toolInstance.Output is Node node)
+            {
                 GbxService.Gbxs.Add(new GbxModel(toolInstance.ShortFileName, node.ToGbx()));
             }
         }

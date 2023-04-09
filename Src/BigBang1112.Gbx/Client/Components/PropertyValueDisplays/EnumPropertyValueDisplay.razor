@@ -13,7 +13,7 @@
     var customValueSpawned = false;
 }
 
-<select @onchange="OnChange" style="width: 163px">
+<select @bind="Value" style="width: 163px">
 
     @foreach (var opt in values)
     {
@@ -32,13 +32,9 @@
 </select>
 
 @code {
-    private void OnChange(ChangeEventArgs e)
+    public string Value
     {
-        if (Property is null || e.Value is null)
-        {
-            return;
-        }
-
-        SetValue(Enum.ToObject(Property.PropertyType, int.Parse(e.Value.ToString() ?? "")));
+        get => ((int)GetValue()!).ToString();
+        set => SetValue(Enum.ToObject(Property.PropertyType, int.Parse(value)));
     }
 }

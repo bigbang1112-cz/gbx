@@ -1,0 +1,60 @@
+﻿@using BigBang1112.Gbx.Client.Models.UtilImport;
+
+@{
+    if (Parameter is null)
+    {
+        return;
+    }
+}
+
+@if (Parameter.IsNodeType)
+{
+    if (Parameter.Extensions.Length == 0)
+    {
+        <span>Gbx</span>
+    }
+    else if (Parameter.Extensions.Length == 1)
+    {
+        <span>@Parameter.Extensions[0]</span>
+        <span>.</span>
+        <span>Gbx</span>
+    }
+    else
+    {
+        <span style="visibility: hidden;">@(Parameter.Extensions.OrderByDescending(x => x.Length).First()).Gbx</span>
+        <div style="position: absolute;display: inherit;left: 50%;transform: translate(-50%, 0);">
+            <span>@Parameter.Extensions[counter % Parameter.Extensions.Length]</span>
+            <span>.</span>
+            <span>Gbx</span>
+        </div>
+    }
+}
+else
+{
+    <span>@Parameter.TypeName</span>
+}
+
+@code {
+    private Timer? timer;
+    private uint counter;
+    
+    [Parameter]
+    public UtilImportTypeParam? Parameter { get; set; }
+
+    protected override void OnInitialized()
+    {
+        timer = new Timer(TimerCallback, null, 0, 1500); // TimerCallback will be called every 1000 milliseconds (1 second)
+    }
+
+
+    private void TimerCallback(object? state)
+    {
+        counter++;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}

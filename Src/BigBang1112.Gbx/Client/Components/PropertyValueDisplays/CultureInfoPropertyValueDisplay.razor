@@ -8,7 +8,7 @@
     var val = (CultureInfo)GetValue()!;
 }
 
-<select @onchange="OnChange" style="width: 163px">
+<select @bind="Value" style="width: 163px">
     @foreach (var culture in CultureInfo.GetCultures(CultureTypes.AllCultures))
     {
         <option value="@culture.Name" selected="@culture.Equals(val)">@culture.DisplayName</option>
@@ -16,13 +16,9 @@
 </select>
 
 @code {
-    private void OnChange(ChangeEventArgs e)
+    public string Value
     {
-        if (e.Value is null)
-        {
-            return;
-        }
-
-        //SetValue(bool.Parse(e.Value.ToString() ?? "False"));
+        get => ((CultureInfo)GetValue()!).Name;
+        set => SetValue(new CultureInfo(value));
     }
 }

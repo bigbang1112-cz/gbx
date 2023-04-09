@@ -10,20 +10,28 @@
             <div class="top-text">@GbxService.Gbxs.Count @(GbxService.Gbxs.Count == 1 ? "file" : "files") stored</div>
             <button class="top-button" @onclick="ExpandOrClose"><img src="img/arrow-up.svg" width="24" class="@(Expanded ? "expanded" : "")" /></button>
         </div>
-        <div class="gbx-list">
+        <div class="panel" style="@(SelectedGbx is null ? "" : "gap: 5px;")">
+            <div class="gbx-options" style="width: @(SelectedGbx is null ? "0" : "200")px">
+                @if (SelectedGbx is not null)
+                {
+                    <span>nice</span>
+                }
+            </div>
+            <div class="gbx-list">
 
-            @foreach (var gbx in GbxService.Gbxs)
-            {
-                <div class="@(SelectedGbx == gbx ? "selected" : "")" @onclick="() => SelectGbx(gbx)">
-                    <div class="delete-gbx" @onclick="() => DeleteGbx(gbx)">
-                        <img src="img/x.svg" />
+                @foreach (var gbx in GbxService.Gbxs)
+                {
+                    <div class="@(SelectedGbx == gbx ? "selected" : "")" @onclick="() => SelectGbx(gbx)">
+                        <div class="delete-gbx" @onclick="() => DeleteGbx(gbx)">
+                            <img src="img/x.svg" />
+                        </div>
+                        <div class="gbx-name">
+                            @gbx.FileName
+                        </div>
                     </div>
-                    <div class="gbx-name">
-                        @gbx.FileName
-                    </div>
-                </div>
-            }
+                }
 
+            </div>
         </div>
     </div>
 }

@@ -27,11 +27,11 @@
     grid-auto-rows: min-content;
     gap: 4px;
     padding: 4px;
-    flex: 1;
     margin-top: 8px;
     background: #0004;
     border-radius: 3px;
     overflow: auto;
+    width: 350px;
 }
 
     .gbx-list > div {
@@ -69,4 +69,18 @@
 
 .gbx-name {
     overflow: hidden;
+}
+
+.panel {
+    display: flex;
+    overflow: auto;
+    flex: 1;
+}
+
+.gbx-options {
+    margin-top: 8px;
+    background: #0004;
+    border-radius: 3px;
+    overflow: auto;
+    transition: 0.2s all ease;
 }

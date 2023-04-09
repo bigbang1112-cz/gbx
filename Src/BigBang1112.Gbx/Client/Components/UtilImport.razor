@@ -58,32 +58,7 @@
                         <div class="rectangle import-looking-for-param @(importType.Invalid && p.ImportedFiles.Length > 1 ? "highlighted-red" : "") @(!importType.Invalid && importedFile ? "highlighted" : "")">
                             <div style="display:flex;align-items:center;">
 
-                                @if (p.IsNodeType)
-                                {
-                                    if (p.Extensions.Length == 0)
-                                    {
-                                        <span>Gbx</span>
-                                    }
-                                    else if (p.Extensions.Length == 1)
-                                    {
-                                        <span>@p.Extensions[0]</span>
-                                        <span>.</span>
-                                        <span>Gbx</span>
-                                    }
-                                    else
-                                    {
-                                        <span style="visibility: hidden;">@(p.Extensions.OrderByDescending(x => x.Length).First()).Gbx</span>
-                                        <div style="position: absolute;display: inherit;left: 50%;transform: translate(-50%, 0);">
-                                            <span>@p.Extensions[counter % p.Extensions.Length]</span>
-                                            <span>.</span>
-                                            <span>Gbx</span>
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <span>@p.TypeName</span>
-                                }
+                                <ExtensionDisplay Parameter="p"></ExtensionDisplay>
 
                                 @if (p.Multiple)
                                 {
@@ -232,8 +207,6 @@
 </div>
 
 @code {
-    private Timer? timer;
-    private uint counter;
     private HashSet<string>? suggestedTypeNames;
     private string selectedConfigName = "Default";
 
@@ -280,17 +253,9 @@
             .Distinct()
             .ToHashSet();
 
-        timer = new Timer(TimerCallback, null, 0, 1500); // TimerCallback will be called every 1000 milliseconds (1 second)
-
         GbxService.Gbxs.CollectionChanged += Gbxs_CollectionChanged;
 
         SelectedConfigName = await LocalStorage.GetItemAsync<string>($"Tool:{Route}:Config:Selected") ?? "Default";
-    }
-
-    private void TimerCallback(object? state)
-    {
-        counter++;
-        StateHasChanged();
     }
 
     private void Gbxs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -321,11 +286,6 @@
         }
 
         StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        timer?.Dispose();
     }
 
     private IEnumerable<GbxModel> FilterGbxsBySuggestedTypes(IEnumerable<GbxModel> gbxs)
