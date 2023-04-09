@@ -1,5 +1,7 @@
-﻿using GBX.NET;
+﻿using BigBang1112.Gbx.Server.Exceptions;
+using GBX.NET;
 using GraphQLParser.AST;
+using System.Diagnostics;
 
 namespace BigBang1112.Gbx.Server.Endpoints.API.V1;
 
@@ -22,7 +24,7 @@ public class GbxEndpoint : IEndpoint
     {
         if (file is null)
         {
-            return Results.BadRequest();
+            return Results.BadRequest("File is null");
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -44,7 +46,7 @@ public class GbxEndpoint : IEndpoint
 
                 if (!NodeManager.TryGetName(classId, out var name))
                 {
-                    throw new Exception($"Server issue: unknown class 0x{classId:X8}");
+                    throw new GbxApiServerException($"Server issue: unknown class 0x{classId:X8}");
                 }
 
                 name = name.Substring(name.IndexOf(':') + 2); // Will be better to fix it someday
@@ -55,18 +57,18 @@ public class GbxEndpoint : IEndpoint
                 }
                 else if (!string.Equals(name, @class))
                 {
-                    throw new Exception($"Bad request: expected {@class} != actual {name}");
+                    throw new GbxApiClientException($"Bad request: expected {@class} != actual {name}");
                 }
 
                 return Task.CompletedTask;
             },
         };
-
+        
         var gbx = await GameBox.ParseAsync(stream, logger: _logger, asyncAction: asyncAction, cancellationToken: cancellationToken);
 
         if (graphQl is null)
         {
-            throw new Exception("Null graphQl. This should not happen.");
+            throw new UnreachableException("Null graphQl. This should not happen.");
         }
 
         await MapByGraphQlAsync(gbx, graphQl, cancellationToken);

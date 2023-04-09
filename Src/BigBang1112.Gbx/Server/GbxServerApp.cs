@@ -174,7 +174,8 @@ internal static class GbxServerApp
         });
 
         app.UseAuthorization();
-        
+
+        app.UseMiddleware<GbxApiMiddleware>();
         app.UseMiddleware<InsiderAuthorizationMiddleware>();
         app.UseMiddleware<RegularAuthorizationMiddleware>();
         
