@@ -1,7 +1,7 @@
 ﻿@inherits PropertyValueDisplay
 @attribute [AppliesForType(typeof(float))]
 
-<input type="text" class="input-text" @bind="Value" style="width: 147px" />
+<input type="text" id="config-@Property.Name" class="input-text" @bind="Value" style="width: 147px" />
 
 @code {
     public float Value

@@ -3,7 +3,7 @@
 @inherits PropertyValueDisplay
 @attribute [AppliesForType(typeof(bool))]
 
-<select @bind="Value" style="width: 163px">
+<select @bind="Value" id="config-@Property.Name" style="width: 163px">
     <option value="False">False</option>
     <option value="True">True</option>
 </select>

@@ -13,14 +13,14 @@
 @if (Attribute.IsDefined(Property, typeof(ColorAttribute)))
 {
     <div style="display: flex; gap: 4px">
-        <input type="color" value="#@GetHexValue()" @onchange="OnHexColorChange" style="width: 122px;height: 27px" />
+        <input type="color" id="config-@Property.Name" value="#@GetHexValue()" @onchange="OnHexColorChange" style="width: 122px;height: 27px" />
         <input type="text" class="input-text" @bind="ValueW" style="width: 22px" />
     </div>
 }
 else
 {
     <div>
-        <input type="text" class="input-text" @bind="ValueX" style="width: 22px" />
+        <input type="text" id="config-@Property.Name" class="input-text" @bind="ValueX" style="width: 22px" />
         <input type="text" class="input-text" @bind="ValueY" style="width: 22px" />
         <input type="text" class="input-text" @bind="ValueZ" style="width: 22px" />
         <input type="text" class="input-text" @bind="ValueW" style="width: 22px" />

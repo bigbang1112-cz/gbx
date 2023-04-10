@@ -8,7 +8,7 @@
     var val = (CultureInfo)GetValue()!;
 }
 
-<select @bind="Value" style="width: 163px">
+<select @bind="Value" id="config-@Property.Name" style="width: 163px">
     @foreach (var culture in CultureInfo.GetCultures(CultureTypes.AllCultures))
     {
         <option value="@culture.Name" selected="@culture.Equals(val)">@culture.DisplayName</option>

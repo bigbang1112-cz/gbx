@@ -184,7 +184,7 @@
                             continue;
                         }
 
-                        <div style="overflow: hidden;">@prop.Name</div>
+                        <label for="config-@prop.Name" style="overflow: hidden;">@prop.Name</label>
 
                         @if (PropValDisplay.TryGetComponent(prop.PropertyType, out var componentType))
                         {

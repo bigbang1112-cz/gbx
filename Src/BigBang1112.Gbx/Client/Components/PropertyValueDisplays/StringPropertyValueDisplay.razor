@@ -1,7 +1,7 @@
 ﻿@inherits PropertyValueDisplay
 @attribute [AppliesForType(typeof(string))]
 
-<input type="text" class="input-text" @bind="Value" style="width: 147px" placeholder="Default" />
+<input type="text" id="config-@Property.Name" class="input-text" @bind="Value" style="width: 147px" placeholder="Default" />
 
 @code {
     public string? Value
