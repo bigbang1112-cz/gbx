@@ -1,6 +1,13 @@
 ﻿.top {
     display: flex;
+    padding: 0 8px;
+    height: 50px;
+    cursor: pointer;
 }
+
+    .top:hover {
+        background: linear-gradient(to bottom, #3585, #3580);
+    }
 
 .top-text {
     flex: 1;
@@ -14,11 +21,11 @@
     height: 32px;
 }
 
-    .top-button > img {
-        transition: 0.25s all ease;
-    }
+.arrow {
+    transition: 0.25s all ease;
+}
 
-    .top-button > img.expanded {
+    .arrow.expanded {
         transform: rotate(180deg);
     }
 
@@ -27,7 +34,7 @@
     grid-auto-rows: min-content;
     gap: 4px;
     padding: 4px;
-    margin-top: 8px;
+    margin: 0 10px 10px 0;
     background: #0004;
     border-radius: 3px;
     overflow: auto;
@@ -78,7 +85,7 @@
 }
 
 .gbx-options {
-    margin-top: 8px;
+    margin: 0 0 10px 10px;
     background: #0004;
     border-radius: 3px;
     overflow: auto;

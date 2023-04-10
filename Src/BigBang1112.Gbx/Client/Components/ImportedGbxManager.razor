@@ -6,9 +6,9 @@
 @if (GbxService.Gbxs.Count > 0)
 {
     <div class="rectangle floating-div" style="height: @(Expanded ? ExpandedHeight : ClosedHeight)px">
-        <div class="top">
+        <div class="top" @onclick="ExpandOrClose">
             <div class="top-text">@GbxService.Gbxs.Count @(GbxService.Gbxs.Count == 1 ? "file" : "files") stored</div>
-            <button class="top-button" @onclick="ExpandOrClose"><img src="img/arrow-up.svg" width="24" class="@(Expanded ? "expanded" : "")" /></button>
+            <img src="img/arrow-up.svg" width="24" class="arrow @(Expanded ? "expanded" : "")" />
         </div>
         <div class="panel" style="@(SelectedGbx is null ? "" : "gap: 5px;")">
             <div class="gbx-options" style="width: @(SelectedGbx is null ? "0" : "200")px">
