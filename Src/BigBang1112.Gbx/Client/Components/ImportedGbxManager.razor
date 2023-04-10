@@ -1,7 +1,10 @@
 ﻿@using GBX.NET;
 @using System.Collections.Specialized;
+@using GbxToolAPI;
+@using System.Collections;
 
 @inject IGbxService GbxService
+@inject IDownloadService DownloadService
 
 @if (GbxService.Gbxs.Count > 0)
 {
@@ -11,11 +14,34 @@
             <img src="img/arrow-up.svg" width="24" class="arrow @(Expanded ? "expanded" : "")" />
         </div>
         <div class="panel" style="@(SelectedGbx is null ? "" : "gap: 5px;")">
-            <div class="gbx-options" style="width: @(SelectedGbx is null ? "0" : "200")px">
+            <div class="gbx-options" style="width: @(SelectedGbx is null ? "0" : "200")px; padding: @(SelectedGbx is null ? "4px 0" : "4px 4")px;">
+                
                 @if (SelectedGbx is not null)
                 {
-                    <span>nice</span>
+                    <button @onclick="() => DownloadAsync(SelectedGbx)" disabled="@(SelectedGbx.Object?.Node is not null && Attribute.IsDefined(SelectedGbx.Object.Node.GetType(), typeof(GBX.NET.Attributes.WritingNotSupportedAttribute)))">Download</button>
+                    
+                    @if (SelectedGbx.Object?.Node is not null && SelectedGbx.Type is not null)
+                    {
+                        var workflowFunctions = GetRelatedWorkflowFunctions(SelectedGbx).ToList();
+
+                        <button @onclick="() => ChangeCompression(SelectedGbx.Object)">
+                            @(SelectedGbx.Object.Header.CompressionOfBody == GameBoxCompression.Compressed ? "Decompress" : "Compress")
+                        </button>
+                        
+                        <div class="class-name">@SelectedGbx.Type.Name</div>
+
+                        @if (workflowFunctions.Count == 0)
+                        {
+                            <div class="gray">No actions found.</div>
+                        }
+
+                        @foreach (var (name, m) in workflowFunctions)
+                        {
+                            <button @onclick="() => RunAction(SelectedGbx.Object.Node, m)">@name</button>
+                        }
+                    }
                 }
+                
             </div>
             <div class="gbx-list">
 
@@ -79,5 +105,119 @@
         }
 
         GbxService.Gbxs.Remove(gbx);
+    }
+
+    private async Task DownloadAsync(GbxModel gbx)
+    {
+        using var ms = new MemoryStream();
+
+        if (gbx.Object is not null)
+        {
+            try
+            {
+                gbx.Object.Save(ms);
+            }
+            catch
+            {
+                return;
+            }
+        }
+
+        await DownloadService.DownloadAsync(gbx.FileName, ms.ToArray(), "application/octet-stream");
+    }
+
+    private IEnumerable<(string name, MethodInfo method)> GetRelatedWorkflowFunctions(GbxModel gbx)
+    {
+        if (gbx.Type is null)
+        {
+            yield break;
+        }
+
+        foreach (var m in typeof(WorkflowFunctions).GetMethods(BindingFlags.Public | BindingFlags.Static))
+        {
+            var ps = m.GetParameters();
+
+            if (ps.Length != 1)
+            {
+                continue;
+            }
+
+            var pType = ps[0].ParameterType;
+
+            if (pType != gbx.Type && !pType.IsSubclassOf(gbx.Type))
+            {
+                continue;
+            }
+
+            var name = m.GetCustomAttribute<ButtonNameAttribute>()?.Name ?? m.Name;
+
+            yield return (name, m);
+        }
+    }
+
+    private void RunAction(Node node, MethodInfo method)
+    {
+        var output = method.Invoke(null, new[] { node });
+
+        if (output is null)
+        {
+            return;
+        }
+
+        Type outputType;
+
+        if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+        {
+            outputType = method.ReturnType.GetGenericArguments()[0];
+        }
+        else
+        {
+            outputType = output.GetType();
+            output = new object[] { output };
+        }
+
+        foreach (var o in (IEnumerable)output)
+        {
+            if (outputType.IsGenericType && outputType.GetGenericTypeDefinition() == typeof(NodeFile<>))
+            {
+                var fileName = outputType.GetProperty(nameof(NodeFile<Node>.FileName))?.GetValue(o)?.ToString();
+                var nodeOut = outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(o) as Node ?? throw new Exception("Node cannot be null");
+
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    fileName = NodeManager.GetGbxExtensions(nodeOut.Id).FirstOrDefault() + ".Gbx";
+                }
+
+                var model = new GbxModel(fileName, nodeOut.ToGbx());
+
+                GbxService.Gbxs.Add(model);
+            }
+            else if (o is Node n)
+            {
+                var fileName = "Gbx";
+
+                if (NodeManager.GetGbxExtensions(n.Id).FirstOrDefault() is string str)
+                {
+                    fileName = str + ".Gbx";
+                }
+
+                var model = new GbxModel(fileName, n.ToGbx());
+
+                GbxService.Gbxs.Add(model);
+            }
+        }
+    }
+
+    private void ChangeCompression(GameBox gbx)
+    {
+        switch (gbx.Header.CompressionOfBody)
+        {
+            case GameBoxCompression.Compressed:
+                gbx.ChangeBodyCompression(GameBoxCompression.Uncompressed);
+                break;
+            case GameBoxCompression.Uncompressed:
+                gbx.ChangeBodyCompression(GameBoxCompression.Compressed);
+                break;
+        }
     }
 }

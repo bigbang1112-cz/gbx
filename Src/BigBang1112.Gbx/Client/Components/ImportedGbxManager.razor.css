@@ -1,6 +1,6 @@
 ﻿.top {
     display: flex;
-    padding: 0 8px;
+    padding: 0 15px;
     height: 50px;
     cursor: pointer;
 }
@@ -85,9 +85,32 @@
 }
 
 .gbx-options {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     margin: 0 0 10px 10px;
     background: #0004;
     border-radius: 3px;
-    overflow: auto;
+    overflow: hidden auto;
     transition: 0.2s all ease;
+    white-space: nowrap;
+}
+
+    .gbx-options > button {
+        padding: 4px;
+        overflow: hidden;
+    }
+
+    .gbx-options > div {
+        display: flex;
+        justify-content: center;
+        padding: 4px;
+    }
+
+div.class-name {
+    color: var(--class-type-color);
+}
+
+div.gray {
+    color: gray;
 }

@@ -90,7 +90,7 @@ h4 {
     .import-looking-for-param .param-type {
         font-size: 0.8rem;
         background: #3335;
-        color: #5BFFDE;
+        color: var(--class-type-color);
         width: min-content;
         padding: 2px 8px;
         border-radius: 4px;
