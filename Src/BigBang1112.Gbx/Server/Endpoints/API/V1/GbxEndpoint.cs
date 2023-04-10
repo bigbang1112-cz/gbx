@@ -1,6 +1,7 @@
 ﻿using BigBang1112.Gbx.Server.Exceptions;
 using GBX.NET;
 using GraphQLParser.AST;
+using GraphQLParser.Exceptions;
 using System.Diagnostics;
 
 namespace BigBang1112.Gbx.Server.Endpoints.API.V1;
@@ -24,7 +25,7 @@ public class GbxEndpoint : IEndpoint
     {
         if (file is null)
         {
-            return Results.BadRequest("File is null");
+            return Results.BadRequest(new { message = "File is null" });
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -78,11 +79,22 @@ public class GbxEndpoint : IEndpoint
 
     private static GraphQLDocument Validate(string query, string className)
     {
-        var graphQl = GraphQLParser.Parser.Parse(query);
+        try
+        {
+            var graphQl = GraphQLParser.Parser.Parse(query);
 
-        Models.Gbx.Gbx.Validate(graphQl.Definitions, className);
+            Models.Gbx.Gbx.Validate(graphQl.Definitions, className);
 
-        return graphQl;
+            return graphQl;
+        }
+        catch (GraphQLSyntaxErrorException ex)
+        {
+            throw new GbxApiClientException("Invalid GraphQL syntax.", ex);
+        }
+        catch (GraphQLMaxDepthExceededException ex)
+        {
+            throw new GbxApiClientException("Maximum GraphQL depth exceeded.", ex);
+        }
     }
 
     private Task MapByGraphQlAsync(GameBox gbx, GraphQLDocument graphQl, CancellationToken cancellationToken)

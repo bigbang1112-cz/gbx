@@ -1,5 +1,4 @@
 ﻿using BigBang1112.Gbx.Server.Exceptions;
-using GraphQLParser.Exceptions;
 
 namespace BigBang1112.Gbx.Server.Middlewares;
 
@@ -18,20 +17,15 @@ public class GbxApiMiddleware
         {
             await _next(context);
         }
-        catch (GraphQLSyntaxErrorException ex)
-        {
-            context.Response.StatusCode = 400;
-            await context.Response.WriteAsync(ex.Message);
-        }
         catch (GbxApiClientException ex)
         {
             context.Response.StatusCode = 400;
-            await context.Response.WriteAsync(ex.Message);
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message, innerMessage = ex.InnerException?.Message });
         }
         catch (GbxApiServerException ex)
         {
             context.Response.StatusCode = 500;
-            await context.Response.WriteAsync(ex.Message);
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message, innerMessage = ex.InnerException?.Message });
         }
     }
 }

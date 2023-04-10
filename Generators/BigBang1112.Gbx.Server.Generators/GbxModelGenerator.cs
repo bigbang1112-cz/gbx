@@ -92,7 +92,7 @@ public class GbxModelGenerator : ISourceGenerator
             builder.AppendLine("                break;");
         }
 
-        builder.AppendLine("            default: throw new Exception($\"Unknown class: {className}\");");
+        builder.AppendLine("            default: throw new Exceptions.GbxApiClientException($\"Unknown class: {className}\");");
         builder.AppendLine("        }");
         builder.AppendLine("    }");
         
@@ -113,7 +113,7 @@ public class GbxModelGenerator : ISourceGenerator
             builder.AppendLine($"            \"{typeSymbol.Name}\" => {typeSymbol.Name}.Map((GBX.NET.Engines.{typeSymbol.ContainingNamespace.Name}.{typeSymbol.Name})value.Node),");
         }
 
-        builder.AppendLine("            _ => throw new Exception($\"Unknown class: {className}\")");
+        builder.AppendLine("            _ => throw new Exceptions.GbxApiClientException($\"Unknown class: {className}\")");
         builder.AppendLine("        }");
         builder.AppendLine("    };");
         builder.AppendLine("}");
@@ -273,7 +273,7 @@ public class GbxModelGenerator : ISourceGenerator
         }
 
         builder.AppendLine();
-        builder.AppendLine(indent + 3, "throw new Exception($\"Unknown field: {field.Name} ({field.Location.Start}-{field.Location.End})\");");
+        builder.AppendLine(indent + 3, "throw new Exceptions.GbxApiClientException($\"Unknown field: {field.Name} ({field.Location.Start}-{field.Location.End})\");");
         builder.AppendLine(indent + 2, "}");
         builder.AppendLine(indent + 1, "}");
 
@@ -325,7 +325,7 @@ public class GbxModelGenerator : ISourceGenerator
 
             if (!isNodeTypeSymbol && propCounter > 0)
             {
-                builder.AppendLine(indent + 4, "if (field.SelectionSet?.Selections.Count > 0) throw new Exception($\"No fields are available for {field.Name}\");");
+                builder.AppendLine(indent + 4, "if (field.SelectionSet?.Selections.Count > 0) throw new Exceptions.GbxApiClientException($\"No fields are available for {field.Name}\");");
                 builder.AppendLine(indent + 4, "return true;");
             }
         }

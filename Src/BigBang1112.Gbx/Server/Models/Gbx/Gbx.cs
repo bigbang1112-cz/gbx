@@ -1,4 +1,5 @@
-﻿using GBX.NET;
+﻿using BigBang1112.Gbx.Server.Exceptions;
+using GBX.NET;
 using GraphQLParser.AST;
 
 namespace BigBang1112.Gbx.Server.Models.Gbx;
@@ -14,12 +15,12 @@ public partial class Gbx
 
         if (operation is null)
         {
-            throw new Exception("Bad request: no operation");
+            throw new GbxApiClientException("Bad request: no operation");
         }
 
         if (nodes.Count > 1)
         {
-            throw new Exception("Bad request: only one operation is allowed");
+            throw new GbxApiClientException("Bad request: only one operation is allowed");
         }
 
         foreach (var node in operation.SelectionSet.Selections)
@@ -36,7 +37,7 @@ public partial class Gbx
                     ValidateClass(field.SelectionSet?.Selections, className);
                     continue;
                 default:
-                    throw new Exception($"Unknown field: {field.Name} ({field.Location.Start}-{field.Location.End})");
+                    throw new GbxApiClientException($"Unknown field: {field.Name} ({field.Location.Start}-{field.Location.End})");
             }
         }
     }
