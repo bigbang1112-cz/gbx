@@ -68,7 +68,7 @@ internal static class ToolServerExtensions
 
                     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), options =>
                     {
-                        options.MigrationsAssembly(type.Assembly.FullName);
+                        options.MigrationsAssembly(type.Assembly.GetName().Name);
                     });
                 }
             },
