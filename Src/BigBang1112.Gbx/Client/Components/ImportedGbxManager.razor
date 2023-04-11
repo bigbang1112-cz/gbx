@@ -122,6 +122,18 @@
                 return;
             }
         }
+        else if (gbx.Text is not null)
+        {
+            try
+            {
+                using var sw = new StreamWriter(ms);
+                await sw.WriteAsync(gbx.Text);
+            }
+            catch
+            {
+                return;
+            }
+        }
 
         await DownloadService.DownloadAsync(gbx.FileName, ms.ToArray(), "application/octet-stream");
     }
