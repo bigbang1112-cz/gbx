@@ -329,7 +329,15 @@
 
     private void OnSelectionChanged()
     {
-        var gbxModelByTypeName = GbxSelection.ToLookup(x => x.Type?.Name);
+        var gbxModelByTypeName = GbxSelection.ToLookup(x =>
+        {
+            if (x.Text is not null)
+            {
+                return nameof(TextFile);
+            }
+            
+            return x.Type?.Name;
+        });
 
         foreach (var importType in ImportTypes)
         {
