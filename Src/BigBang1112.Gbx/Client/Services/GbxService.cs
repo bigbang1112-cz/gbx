@@ -1,5 +1,6 @@
 ﻿using BigBang1112.Gbx.Client.Models;
 using GBX.NET;
+using GBX.NET.Exceptions;
 using System.Collections.ObjectModel;
 using System.Text;
 
@@ -38,6 +39,15 @@ public class GbxService : IGbxService
         try
         {
             gbx = new GbxModel(fileName, GameBox.Parse(stream));
+            Gbxs.Add(gbx);
+            return true;
+        }
+        catch (NotAGbxException)
+        {
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+
+            gbx = new GbxModel(fileName, ms.ToArray());
             Gbxs.Add(gbx);
             return true;
         }
