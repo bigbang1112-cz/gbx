@@ -9,6 +9,7 @@ public class GbxModel
     public GameBox? Object { get; }
     public Type? Type { get; }
     public string? Text { get; }
+    public byte[]? Data { get; }
 
     public GbxModel(string fileName, GameBox gbx)
     {
@@ -21,5 +22,11 @@ public class GbxModel
     {
         FileName = fileName;
         Text = text;
+    }
+
+    public GbxModel(string fileName, byte[] data)
+    {
+        FileName = fileName;
+        Data = data;
     }
 }

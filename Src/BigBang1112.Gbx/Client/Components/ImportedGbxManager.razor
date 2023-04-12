@@ -124,15 +124,12 @@
         }
         else if (gbx.Text is not null)
         {
-            try
-            {
-                using var sw = new StreamWriter(ms);
-                await sw.WriteAsync(gbx.Text);
-            }
-            catch
-            {
-                return;
-            }
+            using var sw = new StreamWriter(ms);
+            await sw.WriteAsync(gbx.Text);
+        }
+        else if (gbx.Data is not null)
+        {
+            await ms.WriteAsync(gbx.Data);
         }
 
         await DownloadService.DownloadAsync(gbx.FileName, ms.ToArray(), "application/octet-stream");
@@ -201,6 +198,19 @@
                 }
 
                 var model = new GbxModel(fileName, nodeOut.ToGbx());
+
+                GbxService.Gbxs.Add(model);
+            }
+            else if (o is BinFile binFile)
+            {
+                var fileName = binFile.FileName;
+
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    fileName = "binary.dat";
+                }
+
+                var model = new GbxModel(fileName, binFile.Data);
 
                 GbxService.Gbxs.Add(model);
             }

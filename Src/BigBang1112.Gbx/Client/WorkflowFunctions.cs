@@ -2,6 +2,7 @@
 using GBX.NET.Engines.Game;
 using GBX.NET.Exceptions;
 using GbxToolAPI;
+using TmEssentials;
 
 namespace BigBang1112.Gbx.Client;
 
@@ -28,5 +29,18 @@ public static class WorkflowFunctions
     public static byte[] GetMapDataFromReplay(CGameCtnReplayRecord replay)
     {
         return replay.ChallengeData ?? throw new HeaderOnlyParseLimitationException();
+    }
+
+    [ButtonName("Extract embedded data")]
+    public static BinFile? GetEmbeddedDataFromMap(CGameCtnChallenge map)
+    {
+        using var ms = new MemoryStream();
+
+        if (!map.ExtractOriginalEmbedZip(ms))
+        {
+            return null;
+        }
+
+        return new(Data: ms.ToArray(), FileName: $"{TextFormatter.Deformat(map.MapName)}-embed.zip");
     }
 }
