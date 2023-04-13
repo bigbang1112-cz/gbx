@@ -28,7 +28,10 @@
 }
 
 <div class="util-background">
-    <div class="util-container">
+
+    @if (ToolFactory.ComponentType is null)
+    {
+        <div class="util-container">
 
         @if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
         {
@@ -67,7 +70,13 @@
             </UtilImport>
         }
 
-    </div>
+        </div>
+    }
+    else
+    {
+        <DynamicComponent Type="ToolFactory.ComponentType"></DynamicComponent>
+    }
+
 </div>
 
 <div class="semi-overlay">

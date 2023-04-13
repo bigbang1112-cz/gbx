@@ -2,6 +2,7 @@
 using Champagne;
 using ClipCheckpoint;
 using ClipInput;
+using ClipInput.Client;
 using ClipToReplay;
 using CombineClips;
 using GbxToolAPI;
@@ -51,7 +52,7 @@ internal class ToolManager : IToolManager
 
     internal static void Services(IServiceCollection services)
     {
-        AddTool<ClipInputTool>(services);
+        AddTool<ClipInputTool, ClipInputToolComponent>(services);
         AddTool<ClipCheckpointTool>(services);
         AddTool<GhostToClipTool>(services);
         AddTool<ClipToReplayTool>(services);
@@ -62,11 +63,11 @@ internal class ToolManager : IToolManager
         //AddTool<ChampagneTool>(services);
     }
 
-    internal static void AddTool<T>(IServiceCollection services) where T : class, ITool
+    internal static void AddTool<TTool>(IServiceCollection services, Type? toolComponent = null, Type? toolProceedComponent = null) where TTool : class, ITool
     {
-        services.AddScoped<ToolFactory<T>>();
+        services.AddScoped<ToolFactory<TTool>>(provider => new(provider.GetRequiredService<ILogger<ToolFactory<TTool>>>(), toolComponent, toolProceedComponent));
 
-        var toolType = typeof(T);
+        var toolType = typeof(TTool);
 
         foreach (var type in toolType.Assembly.DefinedTypes)
         {
@@ -75,7 +76,7 @@ internal class ToolManager : IToolManager
                 services.AddScoped(type, provider =>
                 {
                     var hubAddress = provider.GetRequiredService<IWebAssemblyHostEnvironment>().BaseAddress;
-                    var logger = provider.GetRequiredService<ILogger<T>>();
+                    var logger = provider.GetRequiredService<ILogger<TTool>>();
                     
                     return Activator.CreateInstance(type, hubAddress, logger)!;
                 });
@@ -87,6 +88,12 @@ internal class ToolManager : IToolManager
 
         stronglyTypedTools.Add(toolType);
         toolsByRoute.Add(route, toolType);
+        
+    }
+
+    internal static void AddTool<TTool, TToolComponent>(IServiceCollection services) where TTool : class, ITool where TToolComponent : ToolComponentBase<TTool>
+    {
+        AddTool<TTool>(services, toolComponent: typeof(TToolComponent));
     }
 
     public IToolFactory? GetToolFactoryByRoute(string route)

@@ -18,6 +18,8 @@ public interface IToolFactory
     IReadOnlyCollection<MethodInfo> ProduceMethods { get; }
     
     Type? ConfigType { get; }
+    Type? ComponentType { get; }
+    Type? ComponentProceedType { get; }
 
     bool HasOutput { get; }
     bool HasAssets { get; }
@@ -40,11 +42,13 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
     public IReadOnlyCollection<MethodInfo> ProduceMethods { get; }
     
     public Type? ConfigType { get; }
+    public Type? ComponentType { get; }
+    public Type? ComponentProceedType { get; }
 
     public bool HasOutput => ProduceMethods.Count > 0;
     public bool HasAssets { get; }
 
-    public ToolFactory(ILogger<ToolFactory<T>> logger)
+    internal ToolFactory(ILogger<ToolFactory<T>> logger, Type? componentType, Type? componentProceedType)
     {
         _logger = logger;
 
@@ -91,6 +95,9 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
                 }
             }
         }
+
+        ComponentType = componentType;
+        ComponentProceedType = componentProceedType;
     }
 
     ITool IToolFactory.CreateTool(params object?[] args)
