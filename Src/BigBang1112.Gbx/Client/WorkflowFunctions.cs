@@ -9,13 +9,19 @@ namespace BigBang1112.Gbx.Client;
 public static class WorkflowFunctions
 {
     [ButtonName("Extract ghosts")]
-    public static IEnumerable<NodeFile<CGameCtnGhost>> GetGhostsFromReplay(CGameCtnReplayRecord replay)
+    public static IEnumerable<NodeFile<CGameCtnGhost>> ExtractGhosts(CGameCtnReplayRecord replay)
     {
         return replay.GetGhosts().Select(x => new NodeFile<CGameCtnGhost>(x, Formatter.FormatAsFileName(x), GameVersion.IsManiaPlanet(x)));
     }
+    
+    [ButtonName("Extract ghosts")]
+    public static IEnumerable<NodeFile<CGameCtnGhost>> ExtractGhosts(CGameCtnMediaClip clip)
+    {
+        return clip.GetGhosts().Select(x => new NodeFile<CGameCtnGhost>(x, Formatter.FormatAsFileName(x), GameVersion.IsManiaPlanet(x)));
+    }
 
     [ButtonName("Extract map object")]
-    public static NodeFile<CGameCtnChallenge> GetMapFromReplay(CGameCtnReplayRecord replay)
+    public static NodeFile<CGameCtnChallenge> ExtractMapObject(CGameCtnReplayRecord replay)
     {
         if (replay.Challenge is null)
         {
@@ -26,13 +32,13 @@ public static class WorkflowFunctions
     }
 
     [ButtonName("Extract map binary")]
-    public static byte[] GetMapDataFromReplay(CGameCtnReplayRecord replay)
+    public static byte[] ExtractMapBinary(CGameCtnReplayRecord replay)
     {
         return replay.ChallengeData ?? throw new HeaderOnlyParseLimitationException();
     }
 
     [ButtonName("Extract embedded data")]
-    public static BinFile? GetEmbeddedDataFromMap(CGameCtnChallenge map)
+    public static BinFile? ExtractEmbeddedData(CGameCtnChallenge map)
     {
         using var ms = new MemoryStream();
 
