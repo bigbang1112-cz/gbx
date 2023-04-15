@@ -263,7 +263,7 @@
                 continue;
             }
 
-            using var entryStream = zip.CreateEntry(toolInstance.ShortFileName).Open();
+            using var entryStream = zip.CreateEntry(toolInstance.FileName).Open();
 
             var outputType = toolInstance.Output.GetType();
 
