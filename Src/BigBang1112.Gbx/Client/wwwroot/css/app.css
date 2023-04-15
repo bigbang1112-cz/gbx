@@ -213,7 +213,7 @@ button, a.button {
     justify-content: center;
 }
 
-    button:hover:enabled, a.button:hover {
+    button:hover:enabled, a.button:hover, button.selected {
         background: linear-gradient(90deg, var(--button-blue-edge) 0%, var(--button-blue) 2%, var(--button-blue) 98%, var(--button-blue-edge) 100%);
         cursor: pointer;
     }

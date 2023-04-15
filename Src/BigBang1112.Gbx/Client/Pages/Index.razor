@@ -13,7 +13,7 @@
 
 <div class="grid-container">
     <div class="grid-item">
-        <ImportGbx />
+        <ImportFile />
         <InputText @bind-Value="SearchValue" @oninput="OnSearchInput" class="search-bar" placeholder="Search..."></InputText>
     </div>
     <div class="grid-item">
@@ -32,7 +32,7 @@
         </div>
     </div>
     <div class="grid-item">
-        <h2 class="workflows">Workflows <img src="img/question.svg" width="24" style="margin-top: 2px;" title="Workflow is a combination of tools with adjusted input and output."/></h2>
+        <h2 class="workflows">Workflows <img src="img/question.svg" alt="?" width="24" style="margin-top: 2px;" title="Workflow is a combination of tools with adjusted input and output."/></h2>
         <div class="list">
             @foreach (var item in WorkflowManager.GetWorkflows(searchValue))
             {

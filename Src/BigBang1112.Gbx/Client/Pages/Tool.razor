@@ -1,6 +1,6 @@
 ﻿@page "/tool/{route}"
 
-@using BigBang1112.Gbx.Client.Models.UtilImport;
+@using GbxToolAPI.Client.Models.UtilImport;
 @using GBX.NET;
 @using GBX.NET.Attributes;
 @using System.Reflection;
@@ -29,27 +29,28 @@
 
 <div class="util-background">
 
-    @if (ToolFactory.ComponentType is null)
+    @if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
     {
         <div class="util-container">
-
-        @if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
+        
+        @if (gbxSelection.Count == 0)
         {
-            if (gbxSelection.Count == 0)
-            {
-                <h2>No files have been selected</h2>
-            }
-            else if (ToolFactory.HasOutput)
-            {
-                <ToolProduceReport ToolFactory="ToolFactory" GbxSelection="gbxSelection"></ToolProduceReport>
-            }
-            else
-            {
-                <h2>This tool doesn't support producing</h2>
-            }
+            <h2>No files have been selected</h2>
+        }
+        else if (ToolFactory.HasOutput)
+        {
+            <ToolProduceReport ToolFactory="ToolFactory" GbxSelection="gbxSelection"></ToolProduceReport>
         }
         else
         {
+            <h2>This tool doesn't support producing</h2>
+        }
+        
+        </div>
+    }
+    else if (ToolFactory.ComponentType is null)
+    {
+        <div class="util-container">
             <UtilImport Name="@ToolFactory.Name"
                         Route="@ToolFactory.Route"
                         ImportTypes="ImportTypes"
@@ -68,13 +69,11 @@
                     </div>
                 </div>
             </UtilImport>
-        }
-
         </div>
     }
     else
     {
-        <DynamicComponent Type="ToolFactory.ComponentType"></DynamicComponent>
+        <DynamicComponent Type="ToolFactory.ComponentType" Parameters="GetToolComponentParameters()"></DynamicComponent>
     }
 
 </div>
@@ -161,7 +160,7 @@
         {
             Configs.Add("Default", (Config)Activator.CreateInstance(configType)!);
         }
-        
+
         if (configList is not null)
         {
             foreach (var config in configList)
@@ -175,6 +174,17 @@
 
     private void OnGbxSelectionChanged()
     {
-        
+
+    }
+
+    private Dictionary<string, object?> GetToolComponentParameters()
+    {
+        return new()
+        {
+            { "Route", Route },
+            { "Configs", Configs },
+            { "GbxSelection", gbxSelection },
+            { "ImportTypes", ImportTypes }
+        };
     }
 }

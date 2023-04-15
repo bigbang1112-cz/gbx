@@ -1,19 +1,13 @@
-﻿@using BigBang1112.Gbx.Client.Models.UtilImport;
-@using System.Collections.Specialized;
+﻿@using System.Collections.Specialized;
 @using GbxToolAPI;
+@using GbxToolAPI.Client.Models.UtilImport;
 @using System.Reflection;
 @using System.Text.Json;
 
 @inject IGbxService GbxService
-@inject IPropertyValueDisplayService PropValDisplay
 @inject NavigationManager NavMgr
-@inject IDownloadService DownloadService
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject Blazored.LocalStorage.ISyncLocalStorageService SyncLocalStorage
-
-@{
-    var canProceed = false;
-}
 
 <h2>
     @Name
@@ -24,201 +18,25 @@
 <div class="import-section" style="padding-bottom: 30px">
             
     <div class="import-gbx">
-        <ImportGbx Height="280" />
+        <ImportFile Height="280" />
     </div>
     <div>
-        <h3>Looking for:</h3>
-        <div class="import-looking-for-grid">
-
-            @foreach (var importType in ImportTypes)
-            {
-                var parameters = importType.Parameters;
-
-                <div class="import-looking-for-params darker-bg">
-
-                    @{
-                        var allFilesImportedAndValid = true;
-                    }
-
-                    @for (var i = 0; i < parameters.Count; i++)
-                    {
-                        var p = parameters[i];
-                        var importedFile = p.ImportedFiles.Length > 0;
-
-                        if (!importedFile || importType.Invalid)
-                        {
-                            allFilesImportedAndValid = false;
-                        }
-
-                        @if (i > 0)
-                        {
-                            <div class="symbol">+</div>
-                        }
-
-                        <div class="rectangle import-looking-for-param @(importType.Invalid && p.ImportedFiles.Length > 1 ? "highlighted-red" : "") @(!importType.Invalid && importedFile ? "highlighted" : "")">
-                            <div style="display:flex;align-items:center;">
-
-                                <ExtensionDisplay Parameter="p"></ExtensionDisplay>
-
-                                @if (p.Multiple)
-                                {
-                                    <img src="img/multiple.svg" width="20" style="margin-left: 10px;" />
-                                }
-
-
-                            </div>
-
-                            @if (p.IsNodeType)
-                            {
-                                <div class="param-type">@p.TypeName</div>
-                            }
-                        </div>
-
-                    }
-
-                    <div class="symbol">
-                        →
-                    </div>
-
-                    @if (allFilesImportedAndValid)
-                    {
-                        canProceed = true;
-
-                        <div class="rectangle proceed-specific highlighted-green" title="This method will be used.">
-                            <img src="img/checkmark.svg" width="24" />
-                        </div>
-                    }
-                    else
-                    {
-                        <button class="rectangle proceed-specific @(importType.Invalid ? "highlighted-red" : "")" title="@(importType.Invalid ? "Parameters have been assigned incorrectly." : "No file has been selected for this method.")" disabled>
-                            <img src="img/x.svg" width="24" />
-                        </button>
-                    }
-                </div>
-
-            }
-        </div>
+        <LookingFor ImportTypes="ImportTypes" @ref="lookingFor"></LookingFor>
     </div>
-    <div class="rectangle imported-gbxs">
+    
+    <FileSelection Produces="Produces"
+                   GbxSelection="GbxSelection"
+                   SelectionChanged="SelectionChanged"
+                   ImportTypes="ImportTypes"
+                   @ref="fileSelection"></FileSelection>
 
-        @{
-            var gbxs = FilterGbxsBySuggestedTypes(GbxService.Gbxs);
-            var any = gbxs.Any();
-        }
-
-        <div class="gbx-list @(any ? "" : "centered-note")">
-
-            @if (any)
-            {
-                foreach (var gbx in FilterGbxsBySuggestedTypes(GbxService.Gbxs))
-                {
-                    <div class="@(GbxSelection.Contains(gbx) ? "selected" : "")" @onclick="() => ChangeGbxSelection(gbx)">
-                        @gbx.FileName
-                    </div>
-                }
-            }
-            else
-            {
-                <span>Please import related files...</span>
-            }
-
-        </div>
-        <div style="display:flex;gap: 8px;">
-            <button class="button-util" @onclick="SelectAll">Select all</button>
-            <button class="button-util" @onclick="DeselectAll">Deselect all</button>
-            <button class="button-util" style="flex: 1" disabled>Auto-@(Produces ? "produce" : "proceed")</button>
-        </div>
-
-        @if (Produces && canProceed)
-        {
-            <a href="@NavMgr.GetUriWithQueryParameter("produce", "selected")" class="button proceed-general">Produce</a>
-        }
-        else
-        {
-            <button class="proceed-general" disabled="@(!canProceed)">@(Produces ? "Produce" : "Proceed")</button>
-        }
-        
-    </div>
-
-    @if (Configs.Count > 0)
-    {
-        <div class="rectangle config">
-            <h4>Config</h4>
-            <div class="config-bar">
-                <select class="button-util" style="flex:1" @bind="SelectedConfigName">
-                    <option value="Default">Default</option>
-
-                    @foreach (var (name, _) in Configs.Where(x => x.Key != "Default"))
-                    {
-                        <option value="@name">@name</option>
-                    }
-
-                </select>
-                <button class="button-util" @onclick="SaveConfigAs">Save as...</button>
-                <button class="button-util" @onclick="ResetConfig">Reset</button>
-            </div>
-            <div class="config-bar">
-                <button class="button-util" style="flex:1">Import from .yml</button>
-                <button class="button-util" style="flex:1" @onclick="ExportConfigToYml">Export to .yml</button>
-            </div>
-
-            @{
-                var config = Configs[SelectedConfigName];
-                var type = config.GetType();
-                var props = type.GetProperties();
-            }
-
-            @if (props.Length == 0)
-            {
-                <div class="centered-note" style="margin: 10px 0 0 0;">TBA</div>
-            }
-            else
-            {
-                var textDictionaryInterface = type.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IHasTextDictionary<>));
-                
-                <div class="config-grid">
-                    @foreach (var prop in props)
-                    {
-                        if (textDictionaryInterface is not null && prop.Name == "Dictionary" && prop.PropertyType == textDictionaryInterface.GetGenericArguments()[0])
-                        {
-                            continue;
-                        }
-
-                        <label for="config-@prop.Name" style="overflow: hidden;">@prop.Name</label>
-
-                        @if (PropValDisplay.TryGetComponent(prop.PropertyType, out var componentType))
-                        {
-                            <DynamicComponent Type="componentType" Parameters="GetPropertyValueDisplayParameters(prop, config, Route)" />
-                        }
-                        else
-                        {
-                            <div style="color: gray;padding:0 8px">@prop.GetValue(config)</div>
-                        }
-                    }
-                </div>
-
-
-                <div class="config-bar">
-                    <button style="flex:1">Dictionary</button>
-                </div>
-            }
-        </div>
-    }
+    <ToolConfig Route="@Route" Configs="Configs"></ToolConfig>
+    
 </div>
 
 @code {
-    private HashSet<string>? suggestedTypeNames;
-    private string selectedConfigName = "Default";
-
-    public string SelectedConfigName
-    {
-        get => selectedConfigName;
-        set
-        {
-            selectedConfigName = value;
-            SyncLocalStorage.SetItem($"Tool:{Route}:Config:Selected", selectedConfigName);
-        }
-    }
+    private LookingFor? lookingFor;
+    private FileSelection? fileSelection;
 
     [Parameter]
     [EditorRequired]
@@ -248,196 +66,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        suggestedTypeNames = ImportTypes.SelectMany(x => x.Parameters)
-            .Select(x => x.TypeName)
-            .Distinct()
-            .ToHashSet();
-
         GbxService.Gbxs.CollectionChanged += Gbxs_CollectionChanged;
-
-        SelectedConfigName = await LocalStorage.GetItemAsync<string>($"Tool:{Route}:Config:Selected") ?? "Default";
     }
 
     private void Gbxs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        var selectionChanged = false;
-
-        if (e.NewItems is not null)
-        {
-            foreach (var gbx in FilterGbxsBySuggestedTypes(e.NewItems.OfType<GbxModel>()))
-            {
-                GbxSelection.Add(gbx);
-                selectionChanged = true;
-            }
-        }
-
-        if (e.OldItems is not null)
-        {
-            foreach (var gbx in FilterGbxsBySuggestedTypes(e.OldItems.OfType<GbxModel>()))
-            {
-                GbxSelection.Remove(gbx);
-                selectionChanged = true;
-            }
-        }
-
-        if (selectionChanged)
-        {
-            OnSelectionChanged();
-        }
-
         StateHasChanged();
     }
 
-    private IEnumerable<GbxModel> FilterGbxsBySuggestedTypes(IEnumerable<GbxModel> gbxs)
+    private void SelectionChanged()
     {
-        return gbxs.Where(IsSuggested);
-    }
-
-    private bool IsSuggested(GbxModel gbx)
-    {
-        if (suggestedTypeNames is null)
-        {
-            return true;
-        }
-
-        if (gbx.Text is not null)
-        {
-            return suggestedTypeNames.Contains(nameof(TextFile)) || suggestedTypeNames.Contains(nameof(String));
-        }
-
-        if (gbx.Type is not null)
-        {
-            return suggestedTypeNames.Contains(gbx.Type.Name);
-        }
-
-        return false;
-    }
-
-    private void ChangeGbxSelection(GbxModel gbx)
-    {
-        if (GbxSelection.Contains(gbx))
-        {
-            GbxSelection.Remove(gbx);
-        }
-        else
-        {
-            GbxSelection.Add(gbx);
-        }
-
-        OnSelectionChanged();
-    }
-
-    private void OnSelectionChanged()
-    {
-        var gbxModelByTypeName = GbxSelection.ToLookup(x =>
-        {
-            if (x.Text is not null)
-            {
-                return nameof(TextFile);
-            }
-            
-            return x.Type?.Name;
-        });
-
-        foreach (var importType in ImportTypes)
-        {
-            importType.Invalid = false;
-
-            var hasMultiParamAlready = false;
-
-            foreach (var param in importType.Parameters)
-            {
-                param.ImportedFiles = gbxModelByTypeName[param.TypeName].ToArray();
-
-                if (param.ImportedFiles.Length > 1)
-                {
-                    if (hasMultiParamAlready)
-                    {
-                        importType.Invalid = true;
-                        break;
-                    }
-
-                    hasMultiParamAlready = true;
-                }
-            }
-        }
-    }
-
-    private void SelectAll()
-    {
-        foreach (var gbx in FilterGbxsBySuggestedTypes(GbxService.Gbxs))
-        {
-            GbxSelection.Add(gbx);
-        }
-
-        OnSelectionChanged();
-    }
-
-    private void DeselectAll()
-    {
-        foreach (var gbx in FilterGbxsBySuggestedTypes(GbxService.Gbxs))
-        {
-            GbxSelection.Remove(gbx);
-        }
-
-        OnSelectionChanged();
-    }
-
-    private Dictionary<string, object?> GetPropertyValueDisplayParameters(PropertyInfo property, object owner, string toolRoute)
-    {
-        return new Dictionary<string, object?>
-        {
-            { "Property", property },
-            { "Owner", owner },
-            { "ToolRoute", toolRoute },
-            { "ToolConfig", owner },
-            { "ToolConfigName", SelectedConfigName },
-        };
-    }
-
-    private async Task ExportConfigToYml()
-    {
-        if (Configs.TryGetValue(SelectedConfigName, out var config))
-        {
-            await DownloadService.DownloadAsync($"{SelectedConfigName}.yml", Yml.Serializer.Serialize(config), "text/yaml");
-        }
-    }
-
-    private async Task ResetConfig()
-    {
-        var newConfig = (Config)Activator.CreateInstance(Configs[SelectedConfigName].GetType())!;
-
-        Configs[SelectedConfigName] = newConfig;
-
-        var configList = await LocalStorage.GetItemAsync<Dictionary<string, object>>($"Tool:{Route}:Config");
-
-        if (configList is null || configList.Count == 0)
-        {
-            return;
-        }
-
-        configList[SelectedConfigName] = newConfig;
-
-        await LocalStorage.SetItemAsync($"Tool:{Route}:Config", configList);
-    }
-
-    private async Task SaveConfigAs()
-    {
-        var configToSave = Configs[SelectedConfigName];
-
-        var configList = await LocalStorage.GetItemAsync<Dictionary<string, object>>($"Tool:{Route}:Config") ?? new();
-
-        var configName = $"Config{configList.Count}";
-
-        configList[configName] = configToSave;
-
-        await LocalStorage.SetItemAsync($"Tool:{Route}:Config", configList);
-
-        // weird trick to disjoin reference without deep clone
-        var configsTemp = await LocalStorage.GetItemAsync<Dictionary<string, JsonDocument>>($"Tool:{Route}:Config");
-
-        Configs[configName] = (Config)JsonSerializer.Deserialize(configsTemp[configName], configToSave.GetType(), Json.DefaultOptions)!;
-
-        SelectedConfigName = configName;
+        StateHasChanged(); // should maybe update only SOME components
     }
 }

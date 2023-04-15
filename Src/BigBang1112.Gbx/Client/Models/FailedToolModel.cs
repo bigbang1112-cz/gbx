@@ -1,4 +1,5 @@
 ﻿using GbxToolAPI;
+using GbxToolAPI.Client.Models;
 
 namespace BigBang1112.Gbx.Client.Models;
 

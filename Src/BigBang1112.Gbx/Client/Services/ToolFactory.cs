@@ -1,7 +1,5 @@
-﻿using BigBang1112.Gbx.Client.Models;
-using BigBang1112.Gbx.Shared;
-using GBX.NET;
-using GbxToolAPI;
+﻿using GbxToolAPI;
+using GbxToolAPI.Client.Models;
 using System.Reflection;
 
 namespace BigBang1112.Gbx.Client.Services;

@@ -2,6 +2,7 @@
 using BigBang1112.Gbx.Shared;
 using Blazored.LocalStorage;
 using GbxToolAPI;
+using GbxToolAPI.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 

@@ -1,11 +1,7 @@
-﻿using Microsoft.JSInterop;
+﻿using GbxToolAPI.Client.Services;
+using Microsoft.JSInterop;
 
 namespace BigBang1112.Gbx.Client.Services;
-
-public interface IDownloadService
-{
-    Task DownloadAsync(string fileName, object content, string mimeType);
-}
 
 public class DownloadService : IDownloadService
 {

@@ -117,7 +117,7 @@
         var config = default(Config);
         var configs = await LocalStorage.GetItemAsync<Dictionary<string, JsonDocument>>($"Tool:{route}:Config");
 
-        if (configs is not null && configs.Count > 0)
+        if (ToolFactory.ConfigType is not null && configs is not null && configs.Count > 0)
         {
             var selectedConfigName = await LocalStorage.GetItemAsync<string>($"Tool:{route}:Config:Selected");
 
