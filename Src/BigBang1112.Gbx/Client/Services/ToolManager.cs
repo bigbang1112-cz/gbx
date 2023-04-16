@@ -57,7 +57,7 @@ internal class ToolManager : IToolManager
         AddTool<GhostToClipTool>(services);
         AddTool<ClipToReplayTool>(services);
         //AddTool<ReplayViewerTool>(services);
-        //AddTool<MapViewerEngineTool>(services);
+        AddTool<MapViewerEngineTool, MapViewerEngineToolComponent>(services, isProceedComponent: true);
         AddTool<SpikeTool>(services);
         AddTool<CombineClipsTool>(services);
         //AddTool<ChampagneTool>(services);
@@ -91,9 +91,11 @@ internal class ToolManager : IToolManager
         
     }
 
-    internal static void AddTool<TTool, TToolComponent>(IServiceCollection services) where TTool : class, ITool where TToolComponent : ToolComponentBase<TTool>
+    internal static void AddTool<TTool, TToolComponent>(IServiceCollection services, bool isProceedComponent = false) where TTool : class, ITool where TToolComponent : ToolComponentBase<TTool>
     {
-        AddTool<TTool>(services, toolComponent: typeof(TToolComponent));
+        AddTool<TTool>(services,
+            toolComponent: isProceedComponent ? null : typeof(TToolComponent),
+            toolProceedComponent: isProceedComponent ? typeof(TToolComponent) : null);
     }
 
     public IToolFactory? GetToolFactoryByRoute(string route)

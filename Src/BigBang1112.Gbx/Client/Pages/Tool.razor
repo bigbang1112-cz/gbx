@@ -29,7 +29,11 @@
 
 <div class="util-background">
 
-    @if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
+    @if (ToolFactory.ComponentProceedType is not null && string.Equals(Proceed, "selected", StringComparison.OrdinalIgnoreCase))
+    {
+        <DynamicComponent Type="ToolFactory.ComponentProceedType"></DynamicComponent>
+    }
+    else if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
     {
         <div class="util-container">
         
@@ -96,6 +100,10 @@
     [Parameter]
     [SupplyParameterFromQuery]
     public string? Produce { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Proceed { get; set; }
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
