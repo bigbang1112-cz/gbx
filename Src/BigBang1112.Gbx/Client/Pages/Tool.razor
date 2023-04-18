@@ -31,7 +31,7 @@
 
     @if (ToolFactory.ComponentProceedType is not null && string.Equals(Proceed, "selected", StringComparison.OrdinalIgnoreCase))
     {
-        <DynamicComponent Type="ToolFactory.ComponentProceedType"></DynamicComponent>
+        <DynamicComponent Type="ToolFactory.ComponentProceedType" Parameters="GetToolComponentParameters()"></DynamicComponent>
     }
     else if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
     {
