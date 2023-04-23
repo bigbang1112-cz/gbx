@@ -118,10 +118,7 @@ internal static class GbxServerApp
             }
         }
 
-        if (config.GetValue<bool>(Constants.InsiderMode) == false)
-        {
-            services.AddToolServer<MapViewerEngineServer>(config, "MapViewerEngine");
-        }
+        services.AddToolServer<MapViewerEngineServer>(config, "MapViewerEngine");
     }
 
     internal static void Middleware(WebApplication app)

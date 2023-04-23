@@ -1,6 +1,6 @@
-﻿using BigBang1112.Gbx.Server.Endpoints;
-using GbxToolAPI.Server;
+﻿using GbxToolAPI.Server;
 using GbxToolAPI.Server.Options;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
@@ -107,15 +107,19 @@ internal static class ToolServerExtensions
 
         // ugly path to MapHub<type>
 
-        var methodInfo = typeof(HubEndpointRouteBuilderExtensions).GetMethod(nameof(HubEndpointRouteBuilderExtensions.MapHub), new[] { typeof(IEndpointRouteBuilder), typeof(string) });
+        var methodInfo = typeof(HubEndpointRouteBuilderExtensions).GetMethod(nameof(HubEndpointRouteBuilderExtensions.MapHub), new[] { typeof(IEndpointRouteBuilder), typeof(string), typeof(Action<HttpConnectionDispatcherOptions>) });
 
         if (methodInfo is null)
         {
             throw new Exception("MapHub method not found!");
         }
-
-        methodInfo.MakeGenericMethod(type).Invoke(null, new object[] { app, "/" + type.Name.ToLower() });
+        methodInfo.MakeGenericMethod(type).Invoke(null, new object[] { app, "/" + type.Name.ToLower(), HubOptions });
 
         return true;
+    }
+
+    private static void HubOptions(HttpConnectionDispatcherOptions options)
+    {
+        
     }
 }
