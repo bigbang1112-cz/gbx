@@ -23,7 +23,7 @@
 <PageTitle>@ToolFactory.Name - Tool - Gbx Web Tools</PageTitle>
 
 @{
-    var githubRepo = ToolFactory.ToolType.GetCustomAttribute<ToolGitHubAttribute>()?.Repository;
+    var githubAtt = ToolFactory.ToolType.GetCustomAttribute<ToolGitHubAttribute>();    
     var ctors = ToolFactory.ToolType.GetConstructors();
 }
 
@@ -55,8 +55,7 @@
     else if (ToolFactory.ComponentType is null)
     {
         <div class="util-container">
-            <UtilImport Name="@ToolFactory.Name"
-                        Route="@ToolFactory.Route"
+            <UtilImport ToolFactory="@ToolFactory"
                         ImportTypes="ImportTypes"
                         Produces="Outputs.Count > 0"
                         Configs="Configs"
@@ -65,10 +64,18 @@
                     <div class="description darker-bg">
                         @ToolFactory.Description
                     </div>
-                    <div class="rectangle">
-                        @if (githubRepo is not null)
+                    <div class="rectangle links">
+                        @if (githubAtt?.Repository is not null)
                         {
-                            <a href="https://github.com/@githubRepo/releases" class="button" target="_blank">Download tool as executable</a>
+                            if (!githubAtt.NoExe)
+                            {
+                                <a href="https://github.com/@(githubAtt.Repository)/releases" class="button" target="_blank">Download tool as executable</a>
+                            }
+
+                            <a href="https://github.com/@(githubAtt.Repository)" class="button" target="_blank" style="flex: 1">
+                                <img src="img/github.svg" style="width: 16px; margin-right: 5px" />
+                                GitHub
+                            </a>
                         }
                     </div>
                 </div>
@@ -189,10 +196,10 @@
     {
         return new()
         {
-            { "Route", Route },
-            { "Configs", Configs },
-            { "GbxSelection", gbxSelection },
-            { "ImportTypes", ImportTypes }
+            { nameof(ToolComponentBase<ITool>.Route), Route },
+            { nameof(ToolComponentBase<ITool>.Configs), Configs },
+            { nameof(ToolComponentBase<ITool>.GbxSelection), gbxSelection },
+            { nameof(ToolComponentBase<ITool>.ImportTypes), ImportTypes }
         };
     }
 }

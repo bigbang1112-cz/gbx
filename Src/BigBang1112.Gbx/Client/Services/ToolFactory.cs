@@ -13,6 +13,7 @@ public interface IToolFactory
     string Description { get; }
     string GitHubRepository { get; }
     string Route { get; }
+    bool SingleSelection { get; }
     IReadOnlyCollection<MethodInfo> ProduceMethods { get; }
     
     Type? ConfigType { get; }
@@ -37,6 +38,8 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
     public string Description { get; }
     public string GitHubRepository { get; }
     public string Route { get; }
+    public bool SingleSelection { get; }
+    
     public IReadOnlyCollection<MethodInfo> ProduceMethods { get; }
     
     public Type? ConfigType { get; }
@@ -57,8 +60,9 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
         Description = ToolType.GetCustomAttribute<ToolDescriptionAttribute>()?.Description ?? string.Empty;
         GitHubRepository = ToolType.GetCustomAttribute<ToolGitHubAttribute>()?.Repository ?? string.Empty;
         Route = ToolType.GetCustomAttribute<ToolRouteAttribute>()?.Route ?? RegexUtils.PascalCaseToKebabCase(Id);
+        SingleSelection = Attribute.IsDefined(ToolType, typeof(ToolSingleSelectionAttribute));
 
-        foreach(var iface in ToolType.GetInterfaces())
+        foreach (var iface in ToolType.GetInterfaces())
         {
             if (iface.IsGenericType)
             {

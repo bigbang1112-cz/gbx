@@ -10,7 +10,7 @@
 @inject Blazored.LocalStorage.ISyncLocalStorageService SyncLocalStorage
 
 <h2>
-    @Name
+    @ToolFactory?.Name
 </h2>
 
 @ChildContent
@@ -28,9 +28,10 @@
                    GbxSelection="GbxSelection"
                    SelectionChanged="SelectionChanged"
                    ImportTypes="ImportTypes"
+                   SingleSelection="@(ToolFactory?.SingleSelection ?? false)"
                    @ref="fileSelection"></FileSelection>
 
-    <ToolConfig Route="@Route" Configs="Configs"></ToolConfig>
+    <ToolConfig Route="@ToolFactory?.Route" Configs="Configs"></ToolConfig>
     
 </div>
 
@@ -40,11 +41,7 @@
 
     [Parameter]
     [EditorRequired]
-    public string Name { get; set; } = "Unnamed";
-
-    [Parameter]
-    [EditorRequired]
-    public string Route { get; set; } = "unnamed";
+    public IToolFactory? ToolFactory { get; set; }
 
     [Parameter]
     public bool Produces { get; set; }

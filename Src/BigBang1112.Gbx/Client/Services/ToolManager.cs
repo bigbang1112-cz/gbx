@@ -12,6 +12,7 @@ using MapViewerEngine;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using ReplayViewer;
 using Spike;
+using Spike.Client;
 using System.Reflection;
 
 namespace BigBang1112.Gbx.Client.Services;
@@ -58,7 +59,7 @@ internal class ToolManager : IToolManager
         AddTool<ClipToReplayTool>(services);
         //AddTool<ReplayViewerTool>(services);
         AddTool<MapViewerEngineTool, MapViewerEngineToolComponent>(services, isProceedComponent: true);
-        AddTool<SpikeTool>(services);
+        AddTool<SpikeTool, SpikeToolComponent>(services, isProceedComponent: true);
         AddTool<CombineClipsTool>(services);
         //AddTool<ChampagneTool>(services);
     }
