@@ -49,4 +49,40 @@ public static class WorkflowFunctions
 
         return new(Data: ms.ToArray(), FileName: $"{TextFormatter.Deformat(map.MapName)}-embed.zip");
     }
+
+    [ButtonName("Extract ghosts")]
+    public static IEnumerable<NodeFile<CGameCtnGhost>> ExtractGhosts(CGameCtnChallenge map)
+    {
+        if (map.ClipIntro is not null)
+        {
+            foreach (var ghost in ExtractGhosts(map.ClipIntro))
+            {
+                yield return ghost;
+            }
+        }
+
+        if (map.ClipGroupInGame is not null)
+        {
+            foreach (var ghost in map.ClipGroupInGame.Clips.SelectMany(x => ExtractGhosts(x.Clip)))
+            {
+                yield return ghost;
+            }
+        }
+
+        if (map.ClipGroupEndRace is not null)
+        {
+            foreach (var ghost in map.ClipGroupEndRace.Clips.SelectMany(x => ExtractGhosts(x.Clip)))
+            {
+                yield return ghost;
+            }
+        }
+
+        if (map.ClipAmbiance is not null)
+        {
+            foreach (var ghost in ExtractGhosts(map.ClipAmbiance))
+            {
+                yield return ghost;
+            }
+        }
+    }
 }
