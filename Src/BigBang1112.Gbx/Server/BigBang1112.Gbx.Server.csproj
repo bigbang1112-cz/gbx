@@ -33,6 +33,7 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Octokit" Version="5.0.4" />
 		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
 	</ItemGroup>
 
@@ -48,7 +49,6 @@
 	<ItemGroup>
 	  <Folder Include="Controllers\" />
 	  <Folder Include="Hubs\" />
-	  <Folder Include="Options\" />
 	</ItemGroup>
 
 

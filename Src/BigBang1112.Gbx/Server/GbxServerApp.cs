@@ -2,6 +2,7 @@
 using BigBang1112.Gbx.Server.Endpoints;
 using BigBang1112.Gbx.Server.Extensions;
 using BigBang1112.Gbx.Server.Middlewares;
+using BigBang1112.Gbx.Server.Options;
 using BigBang1112.Gbx.Server.Repos;
 using BigBang1112.Gbx.Shared;
 using ClipCheckpoint;
@@ -14,8 +15,10 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using MySqlConnector;
+using Octokit;
 using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -89,6 +92,16 @@ internal static class GbxServerApp
         services.AddScoped<IDbConnection>(s =>
         {
             return new MySqlConnection(config.GetConnectionString(Constants.Gbx));
+        });
+
+        services.AddSingleton<IGitHubClient>(sp =>
+        {
+            var options = config.GetSection(Constants.GitHub).Get<GitHubOptions>() ?? throw new Exception("GitHub options are not configured.");
+            
+            return new GitHubClient(new ProductHeaderValue("GbxWebTools"))
+            {
+                Credentials = new Credentials(options.Client.Id, options.Client.Secret)
+            };
         });
 
         services.AddScoped<IMemberRepo, MemberRepo>();
