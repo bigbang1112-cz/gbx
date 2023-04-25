@@ -1,5 +1,6 @@
 using BigBang1112;
 using BigBang1112.Gbx.Server;
+using Serilog;
 
 GBX.NET.Lzo.SetLzo(typeof(GBX.NET.LZO.MiniLZO));
 
@@ -10,6 +11,11 @@ var options = new AppOptions
     Title = "Gbx",
     Assembly = typeof(Program).Assembly
 };
+
+builder.Host.UseSerilog((context, config) => config
+    .WriteTo.Console()
+    .ReadFrom.Configuration(context.Configuration));
+
 
 // Add services to the container.
 
