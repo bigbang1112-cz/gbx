@@ -62,7 +62,10 @@
     else if (ToolFactory.ComponentType is null)
     {
         <div class="util-container">
-            <UtilImport ToolFactory="@ToolFactory"
+            <UtilImport Name="@ToolFactory.Name"
+                        Version="@(ToolFactory.ToolType.Assembly.GetName().Version?.ToString(3))"
+                        Route="@ToolFactory.Route"
+                        SingleSelection="@ToolFactory.SingleSelection"
                         ImportTypes="ImportTypes"
                         Produces="Outputs.Count > 0"
                         Configs="Configs"

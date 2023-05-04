@@ -37,13 +37,14 @@
         <div class="list">
             @foreach (var item in WorkflowManager.GetWorkflows(searchValue))
             {
-                <a href="workflow/@item.Route" class="rectangle clickable">
+                <div class="rectangle delayed"> <!--href="workflow/@item.Route"-->
+                    <span>Delayed :(</span>
                     <h3>@item.Name</h3>
                     @if (!string.IsNullOrWhiteSpace(item.Description))
                     {
                         <p>@item.Description</p>
                     }
-                </a>
+                </div>
             }
         </div>
     </div>
