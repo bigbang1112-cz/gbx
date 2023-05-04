@@ -66,6 +66,16 @@ internal static class GbxServerApp
                 options.Events.OnTicketReceived = DiscordAuthentication.TicketReceived;
             });
 
+        services.AddHttpClient(Constants.MxTrack, client =>
+        {
+            client.DefaultRequestHeaders.Add("User-Agent", "Gbx Web Tools by BigBang1112 (Map.Gbx request)");
+        });
+
+        services.AddHttpClient(Constants.MxReplay, client =>
+        {
+            client.DefaultRequestHeaders.Add("User-Agent", "Gbx Web Tools by BigBang1112 (Replay.Gbx request)");
+        });
+
         services.AddSignalR(options =>
         {
             options.SupportedProtocols = new List<string> { Constants.Messagepack };

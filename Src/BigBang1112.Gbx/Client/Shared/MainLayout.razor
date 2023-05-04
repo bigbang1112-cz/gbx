@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims;
+@using Toolbelt.Blazor.PWA.Updater;
+
+@inherits LayoutComponentBase
 
 <div class="page">
     <header class="grainy">
@@ -6,7 +9,7 @@
             <a href="https://gbxexplorer.net" class="button menu-button" target="_blank">
                 Explorer
             </a>
-            <a href="https://github.com/bigbang1112-cz/gbx" class="button menu-button">
+            <a href="https://github.com/bigbang1112-cz/gbx" class="button menu-button" target="_blank">
                 <img src="img/github.svg" style="width: 16px; margin-right: 5px" />
                 GitHub
             </a>
@@ -19,24 +22,51 @@
             </h1>
         </div>
         <div>
-            <a href="/docs/api" class="button menu-button">API</a>
-            <a href="/swagger" class="button menu-button">Swagger</a>
+            <AuthorizeView>
+                <Authorized>
+                    <span style="padding: 0 10px;">Logged as @context.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value</span>
+                    <LogoutButton></LogoutButton>
+                </Authorized>
+                <NotAuthorized>
+                    <LoginButton></LoginButton>
+                </NotAuthorized>
+            </AuthorizeView>
             <a class="donate" href="https://www.paypal.com/paypalme/bigbang1112" target="_blank">
                 Donate
             </a>
         </div>
     </header>
 
-    <div style="height: 80px; backdrop-filter: blur(20px)">
+    <div class="updater-offset">
+        <PWAUpdater></PWAUpdater>
     </div>
 
+    <div style="height: 80px; backdrop-filter: blur(20px)">
+    </div>
+    
     @Body
 </div>
 <footer class="grainy">
-    <div class="author">
-        <span>© 2023 Petr &nbsp;'&nbsp;</span>
-        <img src="img/bigbang1112.png">
-        <span>&nbsp;'&nbsp; Pivoňka</span>
+    <div>
+        <span style="font-size: 1.1rem">Powered by</span>
+        <img src="img/blazor.png" width="48" />
+        <div style="display: flex;flex-direction: column;">
+            <span style="font-size: 1.25rem;margin-top:-2px;margin-bottom: -6px;">Blazor</span>
+            <span>WebAssembly</span>
+        </div>
+    </div>
+    <div style="flex-direction:column">
+        <a href="https://bigbang1112.cz/" class="author">
+            <span>© 2023 Petr &nbsp;'&nbsp;</span>
+            <img src="img/bigbang1112.png">
+            <span>&nbsp;'&nbsp; Pivoňka</span>
+        </a>
+        <span style="font-size:0.7rem;opacity:0.2">Not affiliated with or endorsed by Nadeo or Ubisoft. All relevant trademarks belong to their respective owners.</span>
+    </div>
+    <div>
+        <a href="/swagger" class="button menu-button" target="_blank">Swagger</a>
+        <a href="/terms" class="button menu-button">Terms of Service</a>
+        <a href="/privacy" class="button menu-button">Privacy Policy</a>
     </div>
 </footer>
 <ImportedGbxManager />

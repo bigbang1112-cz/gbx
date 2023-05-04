@@ -60,7 +60,7 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
         Description = ToolType.GetCustomAttribute<ToolDescriptionAttribute>()?.Description ?? string.Empty;
         GitHubRepository = ToolType.GetCustomAttribute<ToolGitHubAttribute>()?.Repository ?? string.Empty;
         Route = ToolType.GetCustomAttribute<ToolRouteAttribute>()?.Route ?? RegexUtils.PascalCaseToKebabCase(Id);
-        SingleSelection = Attribute.IsDefined(ToolType, typeof(ToolSingleSelectionAttribute));
+        SingleSelection = Attribute.IsDefined(ToolType, typeof(ToolSingleSelectionAttribute), inherit: false);
 
         foreach (var iface in ToolType.GetInterfaces())
         {

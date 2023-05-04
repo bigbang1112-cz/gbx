@@ -25,9 +25,10 @@
 <body>
     <div id="app">
         <div class="centered-container">
-            <div class="rectangle" style="display:flex;align-items:center">
-                <img class="logo" src="img/logo.png" />
-            </div>
+            <img height="48" src="img/logo.png" />
+            <p>A melange of Gbx file utilities without a need to install anything.</p>
+        </div>
+        <div class="below-centered-container">
             <div class="progress-bar">
                 <div class="progress-bar-fill"></div>
             </div>
@@ -36,14 +37,14 @@
 
     <div id="blazor-error-ui">
         <div class="overlay">
-            <div class="rectangle" style="align-items: center; gap: 0.5rem">
+            <div class="rectangle" style="display: flex; align-items: center; gap: 0.5rem">
                 <div style="padding: 0 0.8rem">An unhandled error has occurred, see Console in DevTools.</div>
                 <a href="" onclick="location.reload()" class="button">Reload</a>
             </div>
         </div>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script src="_content/Toolbelt.Blazor.PWA.Updater.Service/script.min.js"></script>
 
     <script src="js/main.js"></script>
     <script src="js/download.js"></script>

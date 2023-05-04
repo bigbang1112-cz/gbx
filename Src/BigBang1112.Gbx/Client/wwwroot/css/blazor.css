@@ -9,8 +9,8 @@
 }
 
 .progress-bar {
-    width: 532px;
-    background: #444;
+    width: calc(100vw - 40px);
+    background: #333;
     border-radius: 3px;
 }
 
@@ -19,7 +19,13 @@
     align-items: center;
     justify-content: center;
     width: var(--blazor-load-percentage, 0%);
-    height: 0.5rem;
+    height: 30px;
     background: var(--button-blue);
     border-radius: 3px;
+}
+
+body .pwa-updater[b-pwa-updater] {
+    --pwa-updater-font-size: 16px;
+    --pwa-updater-font-family: inherit;
+    --pwa-updater-bar-height: 40px;
 }

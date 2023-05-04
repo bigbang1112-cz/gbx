@@ -10,4 +10,6 @@ public static class Constants
     public const string Gbx = "Gbx";
     public const string InsiderMode = "InsiderMode";
     public const string GitHub = "GitHub";
+    public const string MxTrack = "MxTrack";
+    public const string MxReplay = "MxReplay";
 }

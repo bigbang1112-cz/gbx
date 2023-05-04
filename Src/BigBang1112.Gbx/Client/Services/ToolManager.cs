@@ -55,10 +55,10 @@ internal class ToolManager : IToolManager
     {
         AddTool<ClipInputTool, ClipInputToolComponent>(services);
         AddTool<ClipCheckpointTool>(services);
+        AddTool<ReplayViewerTool, ReplayViewerToolComponent>(services, isProceedComponent: true);
+        AddTool<MapViewerEngineTool, MapViewerEngineToolComponent>(services, isProceedComponent: true);
         AddTool<GhostToClipTool>(services);
         AddTool<ClipToReplayTool>(services);
-        //AddTool<ReplayViewerTool>(services);
-        AddTool<MapViewerEngineTool, MapViewerEngineToolComponent>(services, isProceedComponent: true);
         AddTool<SpikeTool, SpikeToolComponent>(services, isProceedComponent: true);
         AddTool<CombineClipsTool>(services);
         //AddTool<ChampagneTool>(services);
@@ -92,7 +92,7 @@ internal class ToolManager : IToolManager
         
     }
 
-    internal static void AddTool<TTool, TToolComponent>(IServiceCollection services, bool isProceedComponent = false) where TTool : class, ITool where TToolComponent : ToolComponentBase<TTool>
+    internal static void AddTool<TTool, TToolComponent>(IServiceCollection services, bool isProceedComponent = false) where TTool : class, ITool where TToolComponent : ToolComponentBase
     {
         AddTool<TTool>(services,
             toolComponent: isProceedComponent ? null : typeof(TToolComponent),

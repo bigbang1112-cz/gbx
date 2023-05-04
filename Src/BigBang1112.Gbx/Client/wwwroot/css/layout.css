@@ -3,40 +3,12 @@
     padding: 0;
 }
 
-.page {
-    min-height: 100vh;
+.app {
     position: relative;
 }
 
-header {
-    text-align: center;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    position: fixed;
-    z-index: 20;
-}
-
-    header > div {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-        header > div:first-child, header > div:last-child {
-            display: none;
-            padding: 0 30px;
-        }
-
-footer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 80px;
-    z-index: 8;
+.page {
+    min-height: 100vh;
     position: relative;
 }
 
@@ -112,7 +84,21 @@ footer {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 20px;
+}
+
+.centered-container > p {
+    font-size: 1.3rem;
+}
+
+.below-centered-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    height: 50px;
+    width: 100%;
 }
 
 .centered-note {
@@ -123,20 +109,17 @@ footer {
     grid-auto-rows: auto !important;
 }
 
+.simply-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px);
+    gap: 10px;
+}
+
 a.menu-button {
     border-radius: 10px;
     padding: 6px 1.9rem;
-}
-
-.author {
-    display: flex;
-    align-items: center;
-    font-size: 1.3rem;
-}
-
-.author > img {
-    height: 15px;
-    margin-top: 2px;
 }
 
 .util-container {
@@ -160,11 +143,6 @@ a.menu-button {
 }
 
 @media screen and (min-width: 960px) {
-    header > div:first-child, header > div:last-child {
-        display: flex;
-        gap: 10px;
-    }
-
     .logo {
         height: 32px;
         padding: 24px;

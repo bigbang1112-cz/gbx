@@ -10,13 +10,13 @@ public class LogoutEndpoint : IEndpoint
         app.MapGet("logout", Logout);
     }
 
-    private static async Task Logout(HttpContext httpContext)
+    private static async Task Logout(HttpContext httpContext, string? redirectUri)
     {
         var location = httpContext.Request.Headers.Location.FirstOrDefault();
 
         if (string.IsNullOrWhiteSpace(location))
         {
-            location = "/";
+            location = redirectUri ?? "/";
         }
 
         await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties { RedirectUri = location });

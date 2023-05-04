@@ -5,6 +5,7 @@ using GbxToolAPI;
 using GbxToolAPI.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Toolbelt.Blazor.Extensions.DependencyInjection;
 
 namespace BigBang1112.Gbx.Client;
 
@@ -23,6 +24,8 @@ public static class GbxClientApp
                 options.JsonSerializerOptions.Converters.Add(conv);
             }
         });
+
+        services.AddPWAUpdater();
 
         services.AddScoped<IToolManager, ToolManager>(); // registers the tool manager so that it can implement some testability
         services.AddScoped<IWorkflowManager, WorkflowManager>();
