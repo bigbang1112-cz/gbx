@@ -3,3 +3,24 @@
     gap: 10px;
     justify-content: center;
 }
+
+h3 > small {
+    font-size: 1rem;
+    margin-left: 10px;
+    opacity: 0.6;
+}
+
+.delayed > span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-5deg);
+    font-size: 1.5rem;
+    color: #AAA;
+}
+
+.delayed {
+    background: #111;
+    color: #444;
+    cursor: not-allowed;
+}

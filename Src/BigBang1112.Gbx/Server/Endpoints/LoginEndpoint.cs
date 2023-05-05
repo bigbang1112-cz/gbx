@@ -9,13 +9,13 @@ public class LoginEndpoint : IEndpoint
         app.MapGet("login", Login);
     }
 
-    private static async Task Login(HttpContext httpContext)
+    private static async Task Login(HttpContext httpContext, string? redirectUri)
     {
         var location = httpContext.Request.Headers.Location.FirstOrDefault();
 
         if (string.IsNullOrWhiteSpace(location))
         {
-            location = "/";
+            location = redirectUri ?? "/";
         }
 
         await httpContext.ChallengeAsync(new AuthenticationProperties { RedirectUri = location });

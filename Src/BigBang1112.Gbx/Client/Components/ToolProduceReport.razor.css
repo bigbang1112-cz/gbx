@@ -4,6 +4,7 @@
     margin: 0 auto;
     gap: 10px;
     min-height: 300px;
+    max-height: 600px;
     padding-bottom: 20px;
 }
 
@@ -62,6 +63,7 @@
     border-radius: 5px;
     font-family: Source Code Pro;
     flex: 1;
+    overflow: auto;
 }
 
 h2 {

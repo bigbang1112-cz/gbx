@@ -13,11 +13,6 @@
     padding: 10px 15px 8px 15px;
 }
 
-.links {
-    display: flex;
-    gap: 10px;
-}
-
 @media screen and (min-width: 1024px) {
     .basic-info {
         grid-template-columns: auto 400px;

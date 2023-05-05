@@ -1,4 +1,4 @@
-﻿@page "/tool/{route}"
+﻿@page "/tool/{Route}"
 
 @using GbxToolAPI.Client.Models.UtilImport;
 @using GBX.NET;
@@ -29,9 +29,16 @@
 
 <div class="util-background">
 
-    @if (ToolFactory.ComponentProceedType is not null && string.Equals(Proceed, "selected", StringComparison.OrdinalIgnoreCase))
+    @if (ToolFactory.ComponentProceedType is not null && !string.IsNullOrEmpty(Proceed))
     {
-        <DynamicComponent Type="ToolFactory.ComponentProceedType" Parameters="GetToolComponentParameters()"></DynamicComponent>
+        @if (string.Equals(Proceed, "selected", StringComparison.OrdinalIgnoreCase) && gbxSelection.Count == 0)
+        {
+            NavMgr.NavigateTo(NavMgr.Uri.Split('?')[0]);
+        }
+        else
+        {
+            <DynamicComponent Type="ToolFactory.ComponentProceedType" Parameters="GetToolComponentParameters()"></DynamicComponent>
+        }
     }
     else if (string.Equals(Produce, "selected", StringComparison.OrdinalIgnoreCase))
     {
@@ -55,7 +62,10 @@
     else if (ToolFactory.ComponentType is null)
     {
         <div class="util-container">
-            <UtilImport ToolFactory="@ToolFactory"
+            <UtilImport Name="@ToolFactory.Name"
+                        Version="@(ToolFactory.ToolType.Assembly.GetName().Version?.ToString(3))"
+                        Route="@ToolFactory.Route"
+                        SingleSelection="@ToolFactory.SingleSelection"
                         ImportTypes="ImportTypes"
                         Produces="Outputs.Count > 0"
                         Configs="Configs"
@@ -64,20 +74,7 @@
                     <div class="description darker-bg">
                         @ToolFactory.Description
                     </div>
-                    <div class="rectangle links">
-                        @if (githubAtt?.Repository is not null)
-                        {
-                            if (!githubAtt.NoExe)
-                            {
-                                <a href="https://github.com/@(githubAtt.Repository)/releases" class="button" target="_blank">Download tool as executable</a>
-                            }
-
-                            <a href="https://github.com/@(githubAtt.Repository)" class="button" target="_blank" style="flex: 1">
-                                <img src="img/github.svg" style="width: 16px; margin-right: 5px" />
-                                GitHub
-                            </a>
-                        }
-                    </div>
+                    <ToolLinks GitHubAttribute="@githubAtt"></ToolLinks>
                 </div>
             </UtilImport>
         </div>
@@ -111,11 +108,6 @@
     [Parameter]
     [SupplyParameterFromQuery]
     public string? Proceed { get; set; }
-
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {
-        await base.SetParametersAsync(parameters);
-    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -196,10 +188,11 @@
     {
         return new()
         {
-            { nameof(ToolComponentBase<ITool>.Route), Route },
-            { nameof(ToolComponentBase<ITool>.Configs), Configs },
-            { nameof(ToolComponentBase<ITool>.GbxSelection), gbxSelection },
-            { nameof(ToolComponentBase<ITool>.ImportTypes), ImportTypes }
+            { nameof(ToolComponentBase.Route), Route },
+            { nameof(ToolComponentBase.Configs), Configs },
+            { nameof(ToolComponentBase.GbxSelection), gbxSelection },
+            { nameof(ToolComponentBase.ImportTypes), ImportTypes },
+            { nameof(ToolComponentBase.ProceedType), Proceed }
         };
     }
 }
