@@ -16,8 +16,8 @@ public class MxEndpoint : IEndpoint
     public void Endpoint(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("mx");
-        group.MapGet("track/{site}/{mapId}", Track);//.RequireAuthorization();
-        group.MapGet("replay/{site}/{replayId}", Replay);//.RequireAuthorization();
+        group.MapGet("track/{site}/{mapId}", Track).RequireAuthorization();
+        group.MapGet("replay/{site}/{replayId}", Replay).RequireAuthorization();
     }
 
     private async Task<IResult> Track(string site, int mapId)
