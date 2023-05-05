@@ -35,6 +35,10 @@ public class MxEndpoint : IEndpoint
         var url = site switch
         {
             "tmuf" => $"https://tmuf.exchange/{path}",
+            "tmnf" => $"https://tmnf.exchange/{path}",
+            "nations" => $"https://nations.tm-exchange.com/{path}",
+            "sunrise" => $"https://sunrise.tm-exchange.com/{path}",
+            "original" => $"https://original.tm-exchange.com/{path}",
             _ => null
         };
 
