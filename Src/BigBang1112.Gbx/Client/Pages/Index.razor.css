@@ -4,6 +4,12 @@
     justify-content: center;
 }
 
+h3 > small {
+    font-size: 1rem;
+    margin-left: 10px;
+    opacity: 0.6;
+}
+
 .delayed > span {
     position: absolute;
     left: 50%;

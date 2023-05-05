@@ -23,7 +23,14 @@
             @foreach (var item in ToolManager.GetToolFactories(searchValue))
             {
                 <a href="tool/@item.Route" class="rectangle clickable">
-                    <h3>@item.Name</h3>
+                    <h3>
+                        @item.Name
+
+                        @if (!string.IsNullOrWhiteSpace(item.Authors))
+                        {
+                            <small>by @item.Authors</small>
+                        }
+                    </h3>
                     @if (!string.IsNullOrWhiteSpace(item.Description))
                     {
                         <p>@item.Description</p>

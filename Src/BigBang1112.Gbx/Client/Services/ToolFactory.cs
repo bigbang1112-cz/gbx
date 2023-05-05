@@ -10,6 +10,7 @@ public interface IToolFactory
 
     string Id { get; }
     string Name { get; }
+    string? Authors { get; }
     string Description { get; }
     string GitHubRepository { get; }
     string Route { get; }
@@ -35,6 +36,7 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
 
     public string Id { get; }
     public string Name { get; }
+    public string? Authors { get; }
     public string Description { get; }
     public string GitHubRepository { get; }
     public string Route { get; }
@@ -57,6 +59,7 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
 
         Id = ToolType.Assembly.GetName().Name ?? throw new Exception("Tool requires an Id");
         Name = ToolType.GetCustomAttribute<ToolNameAttribute>()?.Name ?? ToolType.Name;
+        Authors = ToolType.GetCustomAttribute<ToolAuthorsAttribute>()?.Authors;
         Description = ToolType.GetCustomAttribute<ToolDescriptionAttribute>()?.Description ?? string.Empty;
         GitHubRepository = ToolType.GetCustomAttribute<ToolGitHubAttribute>()?.Repository ?? string.Empty;
         Route = ToolType.GetCustomAttribute<ToolRouteAttribute>()?.Route ?? RegexUtils.PascalCaseToKebabCase(Id);
