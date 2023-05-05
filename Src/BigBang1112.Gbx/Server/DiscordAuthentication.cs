@@ -26,7 +26,7 @@ static class DiscordAuthentication
 
         var name = principal.FindFirstValue(ClaimTypes.Name) ?? throw new Exception("Name claim not found");
         var discriminator = int.Parse(principal.FindFirstValue(DiscordAuthenticationConstants.Claims.Discriminator) ?? throw new Exception("Discriminator claim not found")); ;
-        var avatarHash = principal.FindFirstValue(DiscordAuthenticationConstants.Claims.AvatarHash) ?? throw new Exception("AvatarHash claim not found");
+        var avatarHash = principal.FindFirstValue(DiscordAuthenticationConstants.Claims.AvatarHash);
 
         var uow = context.HttpContext.RequestServices.GetRequiredService<IGbxUnitOfWork>();
 
