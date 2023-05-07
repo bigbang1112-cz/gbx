@@ -16,9 +16,6 @@
 [submodule "Tools/CombineClips"]
 	path = Tools/CombineClips
 	url = https://github.com/bigbang1112-cz/combine-clips
-[submodule "Tools/Champagne"]
-	path = Tools/Champagne
-	url = https://github.com/bigbang1112-cz/champagne
 [submodule "Tools/ClipInput"]
 	path = Tools/ClipInput
 	url = https://github.com/bigbang1112-cz/clip-input
