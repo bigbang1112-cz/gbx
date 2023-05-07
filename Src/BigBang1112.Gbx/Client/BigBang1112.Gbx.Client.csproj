@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Tools\Champagne\Champagne\Champagne.csproj" />
     <ProjectReference Include="..\..\..\Tools\ClipCheckpoint\ClipCheckpoint\ClipCheckpoint.csproj" />
     <ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput.Client\ClipInput.Client.csproj" />
     <ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput\ClipInput.csproj" />

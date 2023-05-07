@@ -1,5 +1,4 @@
 ﻿using BigBang1112.Gbx.Shared;
-using Champagne;
 using ClipCheckpoint;
 using ClipInput;
 using ClipInput.Client;
