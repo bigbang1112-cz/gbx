@@ -15,13 +15,13 @@
 	url = https://github.com/bigbang1112-cz/replay-viewer
 [submodule "Tools/ClipInput"]
 	path = Tools/ClipInput
-	url = https://github.com/bigbang1112-cz/clip-input-private
+	url = https://github.com/bigbang1112-cz/clip-input
 [submodule "Tools/CombineClips"]
 	path = Tools/CombineClips
 	url = https://github.com/bigbang1112-cz/combine-clips
 [submodule "Tools/ClipCheckpoint"]
 	path = Tools/ClipCheckpoint
-	url = https://github.com/bigbang1112-cz/clip-checkpoint-private
+	url = https://github.com/bigbang1112-cz/clip-checkpoint
 [submodule "Tools/Champagne"]
 	path = Tools/Champagne
 	url = https://github.com/bigbang1112-cz/champagne
