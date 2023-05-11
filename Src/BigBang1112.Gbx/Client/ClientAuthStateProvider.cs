@@ -1,4 +1,5 @@
 ﻿using BigBang1112.Gbx.Shared;
+using GbxToolAPI.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
 using System.Security.Claims;
@@ -9,10 +10,12 @@ namespace BigBang1112.Gbx.Client;
 public class ClientAuthStateProvider : AuthenticationStateProvider
 {
     private readonly HttpClient _http;
+    private readonly SettingsService _settings;
 
-    public ClientAuthStateProvider(HttpClient http)
+    public ClientAuthStateProvider(HttpClient http, SettingsService settings)
     {
         _http = http;
+        _settings = settings;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -40,6 +43,8 @@ public class ClientAuthStateProvider : AuthenticationStateProvider
             {
                 return null;
             }
+
+            //_settings.AutoLogin = identityModel.AutoLogin;
 
             return new ClaimsIdentity(ClaimStringsToClaims(identityModel.Claims), identityModel.AuthenticationType);
         }
