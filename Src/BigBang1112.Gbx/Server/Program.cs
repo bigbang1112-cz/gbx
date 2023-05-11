@@ -12,9 +12,17 @@ var options = new AppOptions
     Assembly = typeof(Program).Assembly
 };
 
-builder.Host.UseSerilog((context, config) => config
-    .WriteTo.Console()
-    .ReadFrom.Configuration(context.Configuration));
+builder.Host.UseSerilog((context, config) =>
+{
+    config.WriteTo.Console();
+
+    if (context.Configuration.GetValue<string>("Seq:Url") is string seqUrl && !string.IsNullOrEmpty(seqUrl))
+    {
+        config.WriteTo.Seq(seqUrl);
+    }
+    
+    config.ReadFrom.Configuration(context.Configuration);
+});
 
 
 // Add services to the container.
