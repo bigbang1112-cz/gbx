@@ -19,7 +19,7 @@ builder.Host.UseSerilog((context, config) =>
 
     var seqOptions = context.Configuration.GetSection(Constants.Seq).Get<SeqOptions>();
 
-    if (!string.IsNullOrEmpty(seqOptions.Url))
+    if (!string.IsNullOrEmpty(seqOptions?.Url))
     {
         config.WriteTo.Seq(seqOptions.Url);
     }
