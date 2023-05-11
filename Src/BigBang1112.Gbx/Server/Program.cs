@@ -29,9 +29,8 @@ builder.Host.UseSerilog((context, config) =>
 
 
 // Add services to the container.
-
 App.Services(builder.Services, options, builder.Configuration);
-GbxServerApp.Services(builder.Services, builder.Configuration);
+GbxServerApp.Services(builder.Services, builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
