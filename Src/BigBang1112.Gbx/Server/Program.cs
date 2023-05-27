@@ -1,5 +1,6 @@
 using BigBang1112;
 using BigBang1112.Gbx.Server;
+using BigBang1112.Gbx.Server.Options;
 using Serilog;
 
 GBX.NET.Lzo.SetLzo(typeof(GBX.NET.LZO.MiniLZO));
@@ -16,9 +17,11 @@ builder.Host.UseSerilog((context, config) =>
 {
     config.WriteTo.Console();
 
-    if (context.Configuration.GetValue<string>("Seq:Url") is string seqUrl && !string.IsNullOrEmpty(seqUrl))
+    var seqOptions = context.Configuration.GetSection(Constants.Seq).Get<SeqOptions>();
+
+    if (!string.IsNullOrEmpty(seqOptions?.Url))
     {
-        config.WriteTo.Seq(seqUrl);
+        config.WriteTo.Seq(seqOptions.Url);
     }
     
     config.ReadFrom.Configuration(context.Configuration);
@@ -26,9 +29,8 @@ builder.Host.UseSerilog((context, config) =>
 
 
 // Add services to the container.
-
 App.Services(builder.Services, options, builder.Configuration);
-GbxServerApp.Services(builder.Services, builder.Configuration);
+GbxServerApp.Services(builder.Services, builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 

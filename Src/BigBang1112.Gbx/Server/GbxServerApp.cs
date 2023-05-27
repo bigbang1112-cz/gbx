@@ -9,6 +9,7 @@ using ClipCheckpoint;
 using ClipInput;
 using GbxToolAPI.Server.Options;
 using MapViewerEngine.Server;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Http.Json;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.FileProviders;
 using MySqlConnector;
 using Octokit;
 using System.Data;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -27,44 +29,88 @@ namespace BigBang1112.Gbx.Server;
 
 internal static class GbxServerApp
 {
-    internal static void Services(IServiceCollection services, ConfigurationManager config)
+    internal static void Services(IServiceCollection services, ConfigurationManager config, IWebHostEnvironment env)
     {
         services.AddOptions<DatabaseOptions>().Bind(config.GetSection(Constants.Database));
         services.AddOptions<DiscordOptions>().Bind(config.GetSection(Constants.Discord));
-        
+        services.AddOptions<SeqOptions>().Bind(config.GetSection(Constants.Seq));
+
         services.AddAuthorization(SharedOptions.Authorization);
 
-        services.AddAuthentication(DiscordAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-            {
-                options.Events.OnRedirectToAccessDenied = context =>
+        if (env.IsDevelopment())
+        {
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    context.Response.StatusCode = 403;
-                    return Task.CompletedTask;
-                };
-            })
-            .AddDiscord(options =>
-            {
-                var discordOptions = config.GetSection(Constants.Discord).Get<DiscordOptions>() ?? new DiscordOptions();
+                    options.LoginPath = "/signin";
 
-                options.ClientId = discordOptions.Client.Id;
-                options.ClientSecret = discordOptions.Client.Secret;
-                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
-                options.Events.OnRedirectToAuthorizationEndpoint = context =>
-                {
-                    if (context.Request.Path.StartsWithSegments(Constants.ApiRoute))
+                    options.Events.OnRedirectToAccessDenied = context =>
                     {
-                        context.Response.StatusCode = 401;
+                        context.Response.StatusCode = 403;
                         return Task.CompletedTask;
-                    }
+                    };
+                    
+                    options.Events.OnRedirectToLogin = async context =>
+                    {
+                        var autoLogin = config.GetValue<bool>("AutoLogin");
 
-                    context.Response.Redirect(context.RedirectUri);
-                    return Task.CompletedTask;
-                };
+                        if (!autoLogin && context.Request.Path.StartsWithSegments("/api/v1/identity"))
+                        {
+                            context.Response.StatusCode = 401;
+                            return;
+                        }
 
-                options.Events.OnTicketReceived = DiscordAuthentication.TicketReceived;
-            });
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, Shared.Constants.Developer),
+                            new Claim(ClaimTypes.Role, Shared.Constants.SuperAdmin),
+                            new Claim(ClaimTypes.Role, Shared.Constants.Developer)
+                        };
+                        
+                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        await context.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), context.Properties);
+
+                        if (autoLogin && context.Request.Path.StartsWithSegments("/api/v1/identity"))
+                        {
+                            context.Response.Redirect("/api/v1/identity");
+                        }
+                    };
+                });
+        }
+        else
+        {
+            services.AddAuthentication(DiscordAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                {
+                    options.Events.OnRedirectToAccessDenied = context =>
+                    {
+                        context.Response.StatusCode = 403;
+                        return Task.CompletedTask;
+                    };
+                })
+                .AddDiscord(options =>
+                {
+                    var discordOptions = config.GetSection(Constants.Discord).Get<DiscordOptions>() ?? new DiscordOptions();
+
+                    options.ClientId = discordOptions.Client.Id;
+                    options.ClientSecret = discordOptions.Client.Secret;
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+                    options.Events.OnRedirectToAuthorizationEndpoint = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments(Constants.ApiRoute))
+                        {
+                            context.Response.StatusCode = 401;
+                            return Task.CompletedTask;
+                        }
+
+                        context.Response.Redirect(context.RedirectUri);
+                        return Task.CompletedTask;
+                    };
+
+                    options.Events.OnTicketReceived = DiscordAuthentication.TicketReceived;
+                });
+        }
 
         services.AddHttpClient(Constants.MxTrack, client =>
         {

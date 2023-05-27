@@ -12,4 +12,5 @@ public static class Constants
     public const string GitHub = "GitHub";
     public const string MxTrack = "MxTrack";
     public const string MxReplay = "MxReplay";
+    public const string Seq = "Seq";
 }
