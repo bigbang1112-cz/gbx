@@ -1,42 +1,54 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="BigBang1112.Gbx.Client.Tests" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-    <PackageReference Include="GBX.NET.LZO" Version="1.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.5" />
-    <PackageReference Include="Toolbelt.Blazor.PWA.Updater" Version="2.1.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+		<PackageReference Include="GBX.NET.LZO" Version="1.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.5" />
+		<PackageReference Include="Toolbelt.Blazor.PWA.Updater" Version="2.1.0.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Tools\ClipCheckpoint\ClipCheckpoint\ClipCheckpoint.csproj" />
-    <ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput.Client\ClipInput.Client.csproj" />
-    <ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput\ClipInput.csproj" />
-    <ProjectReference Include="..\..\..\Tools\ClipToReplay\ClipToReplay\ClipToReplay.csproj" />
-    <ProjectReference Include="..\..\..\Tools\CombineClips\CombineClips\CombineClips.csproj" />
-    <ProjectReference Include="..\..\..\Tools\GhostToClip\GhostToClip\GhostToClip.csproj" />
-    <ProjectReference Include="..\..\..\Tools\ReplayViewer\ReplayViewer\ReplayViewer.csproj" />
-    <ProjectReference Include="..\..\..\Tools\Spike\Spike.Client\Spike.Client.csproj" />
-    <ProjectReference Include="..\..\..\Tools\Spike\Spike\Spike.csproj" />
-    <ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2.Razor\BigBang1112.EssentialsV2.Razor.csproj" />
-    <ProjectReference Include="..\Shared\BigBang1112.Gbx.Shared.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\Tools\ClipCheckpoint\ClipCheckpoint\ClipCheckpoint.csproj">
+			<IsTrimmable>false</IsTrimmable>
+		</ProjectReference>
+		<ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput.Client\ClipInput.Client.csproj" />
+		<ProjectReference Include="..\..\..\Tools\ClipInput\ClipInput\ClipInput.csproj">
+			<IsTrimmable>false</IsTrimmable>
+		</ProjectReference>
+		<ProjectReference Include="..\..\..\Tools\ClipToReplay\ClipToReplay\ClipToReplay.csproj">
+			<IsTrimmable>false</IsTrimmable>
+		</ProjectReference>
+		<ProjectReference Include="..\..\..\Tools\CombineClips\CombineClips\CombineClips.csproj">
+			<IsTrimmable>false</IsTrimmable>
+		</ProjectReference>
+		<ProjectReference Include="..\..\..\Tools\GhostToClip\GhostToClip\GhostToClip.csproj">
+			<IsTrimmable>false</IsTrimmable>
+		</ProjectReference>
+		<ProjectReference Include="..\..\..\Tools\ReplayViewer\ReplayViewer\ReplayViewer.csproj" />
+		<ProjectReference Include="..\..\..\Tools\Spike\Spike.Client\Spike.Client.csproj" />
+		<ProjectReference Include="..\..\..\Tools\Spike\Spike\Spike.csproj">
+			<IsTrimmable>false</IsTrimmable>
+		</ProjectReference>
+		<ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2.Razor\BigBang1112.EssentialsV2.Razor.csproj" />
+		<ProjectReference Include="..\Shared\BigBang1112.Gbx.Shared.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
-  </ItemGroup>
+	<ItemGroup>
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
 
 </Project>
