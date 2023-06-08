@@ -29,30 +29,12 @@ jobs:
       
     - name: Build & Publish
       run: dotnet publish Src/${{env.PROJECT_NAME}} -c Release -o publish -p:PublishTrimmed=true --self-contained
-      
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.0
-      with:
-        name: build
-        path: publish
-  
-  deploy:
-    needs: build
 
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Download a Build Artifact
-      uses: actions/download-artifact@v3.0.0
-      with:
-        name: build
-        path: ${{env.PROJECT_NAME}}
-    
     - name: Deploy to Ubuntu using Rsync
       uses: burnett01/rsync-deployments@5.2
       with:
         switches: -avzr
-        path: ${{env.PROJECT_NAME}}/ # trailing slash means copy content
+        path: publish/ # trailing slash means copy content
         remote_path: /var/www/${{env.PROJECT_NAME}}
         remote_host: ${{ secrets.HOST }}
         remote_user: ${{ secrets.USERNAME }}
