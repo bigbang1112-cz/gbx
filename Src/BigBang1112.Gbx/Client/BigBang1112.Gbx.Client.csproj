@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-		<TrimMode>partial</TrimMode>
+		<PublishTrimmed>false</PublishTrimmed>
 	</PropertyGroup>
 
 	<ItemGroup>
