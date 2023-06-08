@@ -164,7 +164,7 @@ input[type=text], input[type=color], .input-text, select {
     }
 
 .search-bar {
-    background-color: rgba(25,26,31,0.95);
+    background-color: rgba(25,26,31,0.35);
     font-family: inherit;
     border: none;
     border-radius: 0.3rem;
