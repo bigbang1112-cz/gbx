@@ -1,4 +1,5 @@
 ﻿using BigBang1112.Gbx.Shared;
+using BigBang1112.Gbx.Shared.JsonContexts;
 using GbxToolAPI.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
@@ -37,7 +38,7 @@ public class ClientAuthStateProvider : AuthenticationStateProvider
         try // Hacky way to avoid the redirect issue
         {
             // parse the ClaimsIdentity from the API response
-            var identityModel = await response.Content.ReadFromJsonAsync<Identity>();
+            var identityModel = await response.Content.ReadFromJsonAsync(IdentityJsonContext.Default.Identity);
 
             if (identityModel is null)
             {

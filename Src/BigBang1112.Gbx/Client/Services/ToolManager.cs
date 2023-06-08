@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using ReplayViewer;
 using Spike;
 using Spike.Client;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace BigBang1112.Gbx.Client.Services;
@@ -63,7 +64,7 @@ internal class ToolManager : IToolManager
         //AddTool<ChampagneTool>(services);
     }
 
-    internal static void AddTool<TTool>(IServiceCollection services, Type? toolComponent = null, Type? toolProceedComponent = null) where TTool : class, ITool
+    internal static void AddTool<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.Interfaces)] TTool>(IServiceCollection services, Type? toolComponent = null, Type? toolProceedComponent = null) where TTool : class, ITool
     {
         services.AddScoped<ToolFactory<TTool>>(provider => new(provider.GetRequiredService<ILogger<ToolFactory<TTool>>>(), toolComponent, toolProceedComponent));
 
@@ -91,7 +92,7 @@ internal class ToolManager : IToolManager
         
     }
 
-    internal static void AddTool<TTool, TToolComponent>(IServiceCollection services, bool isProceedComponent = false) where TTool : class, ITool where TToolComponent : ToolComponentBase
+    internal static void AddTool<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.Interfaces)] TTool, TToolComponent>(IServiceCollection services, bool isProceedComponent = false) where TTool : class, ITool where TToolComponent : ToolComponentBase
     {
         AddTool<TTool>(services,
             toolComponent: isProceedComponent ? null : typeof(TToolComponent),

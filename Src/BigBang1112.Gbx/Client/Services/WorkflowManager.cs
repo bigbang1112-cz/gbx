@@ -1,4 +1,5 @@
 ﻿using BigBang1112.Gbx.Client.Models;
+using BigBang1112.Gbx.Shared.JsonContexts;
 using System.Net.Http.Json;
 
 namespace BigBang1112.Gbx.Client.Services;
@@ -28,7 +29,7 @@ public class WorkflowManager : IWorkflowManager
 
     public async Task LoadWorkflowsAsync(CancellationToken cancellationToken = default)
     {
-        var workflowList = await _http.GetFromJsonAsync<string[]>("workflow-list.json", cancellationToken) ?? Array.Empty<string>();
+        var workflowList = await _http.GetFromJsonAsync("workflow-list.json", StringArrayJsonContext.Default.StringArray, cancellationToken) ?? Array.Empty<string>();
 
         var tasks = new List<Task<HttpResponseMessage>>();
 

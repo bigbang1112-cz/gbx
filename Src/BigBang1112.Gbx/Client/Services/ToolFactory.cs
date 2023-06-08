@@ -1,5 +1,6 @@
 ﻿using GbxToolAPI;
 using GbxToolAPI.Client.Models;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace BigBang1112.Gbx.Client.Services;
@@ -28,7 +29,7 @@ public interface IToolFactory
     IEnumerable<ITool> CreateTools(IEnumerable<GbxModel> gbxs);
 }
 
-public class ToolFactory<T> : IToolFactory where T : class, ITool
+public class ToolFactory<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)] T> : IToolFactory where T : class, ITool
 {
     private readonly ILogger<ToolFactory<T>> _logger;
 
@@ -65,7 +66,7 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
         Route = ToolType.GetCustomAttribute<ToolRouteAttribute>()?.Route ?? RegexUtils.PascalCaseToKebabCase(Id);
         SingleSelection = Attribute.IsDefined(ToolType, typeof(ToolSingleSelectionAttribute), inherit: false);
 
-        foreach (var iface in ToolType.GetInterfaces())
+        foreach (var iface in typeof(T).GetInterfaces())
         {
             if (iface.IsGenericType)
             {
@@ -88,7 +89,7 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
         var produceMethods = new List<MethodInfo>();
         ProduceMethods = produceMethods;
 
-        foreach (var iface in ToolType.GetInterfaces())
+        foreach (var iface in typeof(T).GetInterfaces())
         {
             if (iface.IsGenericType)
             {
@@ -96,7 +97,7 @@ public class ToolFactory<T> : IToolFactory where T : class, ITool
 
                 if (genericDef == typeof(IHasOutput<>))
                 {
-                    produceMethods.Add(iface.GetMethod("Produce")!);
+                    produceMethods.Add(typeof(T).GetMethod(nameof(IHasOutput<object>.Produce))!);
                 }
             }
         }
