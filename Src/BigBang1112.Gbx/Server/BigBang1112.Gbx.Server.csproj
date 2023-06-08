@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
@@ -49,9 +49,7 @@
 		<ProjectReference Include="..\..\..\Tools\ReplayViewer\MapViewerEngine\MapViewerEngine.Server\MapViewerEngine.Server.csproj" />
 		<ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2.Razor\BigBang1112.EssentialsV2.Razor.csproj" />
 		<ProjectReference Include="..\..\BigBang1112.EssentialsV2\Src\BigBang1112.EssentialsV2\BigBang1112.EssentialsV2.csproj" />
-		<ProjectReference Include="..\Client\BigBang1112.Gbx.Client.csproj">
-			<IsTrimmable>false</IsTrimmable>
-		</ProjectReference>
+		<ProjectReference Include="..\Client\BigBang1112.Gbx.Client.csproj" />
 		<ProjectReference Include="..\Shared\BigBang1112.Gbx.Shared.csproj" />
 	</ItemGroup>
 
