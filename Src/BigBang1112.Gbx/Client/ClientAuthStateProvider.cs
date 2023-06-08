@@ -49,8 +49,9 @@ public class ClientAuthStateProvider : AuthenticationStateProvider
 
             return new ClaimsIdentity(ClaimStringsToClaims(identityModel.Claims), identityModel.AuthenticationType);
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
+            //Console.WriteLine($"GetIdentityAsync: {ex.Message}");
             return null;
         }
     }
