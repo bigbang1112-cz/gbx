@@ -222,7 +222,7 @@ internal static class GbxServerApp
             app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
         
         app.UseRouting();
 
