@@ -145,6 +145,15 @@ internal static class GbxServerApp
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
 
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = 
+                ForwardedHeaders.XForwardedFor | 
+                ForwardedHeaders.XForwardedProto;
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
+
         services.AddScoped<IDbConnection>(s =>
         {
             return new MySqlConnection(config.GetConnectionString(Constants.Gbx));
@@ -192,10 +201,7 @@ internal static class GbxServerApp
 
     internal static void Middleware(WebApplication app)
     {
-        app.UseForwardedHeaders(new ForwardedHeadersOptions
-        {
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-        });
+        app.UseForwardedHeaders();
         
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
