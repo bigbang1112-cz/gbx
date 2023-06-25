@@ -31,7 +31,7 @@ WORKDIR "/src/Src/BigBang1112.Gbx/Server"
 RUN dotnet build "BigBang1112.Gbx.Server.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "BigBang1112.Gbx.Server.csproj" -c Release -o /app/publish -r linux-musl-x64 -p:PublishReadyToRun=true --self-contained
+RUN dotnet publish "BigBang1112.Gbx.Server.csproj" -c Release -o /app/publish --self-contained
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:7.0-alpine
 RUN apk add --no-cache icu-libs
