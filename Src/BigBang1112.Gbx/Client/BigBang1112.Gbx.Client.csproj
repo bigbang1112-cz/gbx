@@ -15,7 +15,7 @@
 	<ItemGroup>
 		<PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
 		<PackageReference Include="GBX.NET.LZO" Version="1.0.3" />
-		<PackageReference Include="GbxToolAPI" Version="1.0.4">
+		<PackageReference Include="GbxToolAPI" Version="1.0.5">
 			<IsTrimmable>false</IsTrimmable>
 		</PackageReference>
 		<PackageReference Include="GbxToolAPI.Client" Version="1.0.0" />
