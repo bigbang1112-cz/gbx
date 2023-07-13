@@ -8,9 +8,7 @@ public class ToolInstanceModel
     public object? Output { get; set; }
     public Exception? Exception { get; set; }
     public List<string> Log { get; } = new();
-    public string? FileName { get; set; }
-    public string? ShortFileName => Path.GetFileName(FileName);
-    public bool IsForManiaPlanet { get; set; }
+    public List<ToolInstanceFileModel> Files { get; } = new();
 
     public ToolInstanceModel(ITool tool)
     {

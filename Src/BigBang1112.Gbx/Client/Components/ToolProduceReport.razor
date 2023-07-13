@@ -25,7 +25,19 @@
                 <div class="@(SelectedToolInstance == toolInstance ? "selected" : "") @(AutomationDone ? "enabled" : "")" @onclick="() => SelectedToolInstance = toolInstance">
                     @if (toolInstance.Output is not null)
                     {
-                        <span>@toolInstance.ShortFileName</span>
+                        if(toolInstance.Files.Count == 0)
+                        {
+                            <span>No file produced</span>
+                        }
+                        else
+                        {
+                            <span>@toolInstance.Files[0].ShortFileName</span>
+
+                            if (toolInstance.Files.Count > 1)
+                            {
+                                <span> (+ @(toolInstance.Files.Count - 1) more)</span>
+                            }
+                        }
                     }
                     else
                     {
@@ -170,9 +182,33 @@
                     }
 
                     SelectedToolInstance.Output = output;
-                    SelectedToolInstance.FileName = GetToolOutputFileName(output);
-                    SelectedToolInstance.IsForManiaPlanet = IsOutputForManiaPlanet(output);
-                    SelectedToolInstance.Log.Add($"Produced {SelectedToolInstance.ShortFileName}!");
+
+                    if (SelectedToolInstance.Output is System.Collections.IEnumerable enumerable)
+                    {
+                        foreach (var item in enumerable)
+                        {
+                            var file = new ToolInstanceFileModel()
+                            {
+                                FileName = GetToolOutputFileName(item),
+                                IsForManiaPlanet = IsOutputForManiaPlanet(item)
+                            };
+
+                            SelectedToolInstance.Files.Add(file);
+                            SelectedToolInstance.Log.Add($"Produced {file.ShortFileName}!");
+                        }
+                    }
+                    else
+                    {
+                        var singleFile = new ToolInstanceFileModel()
+                        {
+                            FileName = GetToolOutputFileName(output),
+                            IsForManiaPlanet = IsOutputForManiaPlanet(output)
+                        };
+
+                        SelectedToolInstance.Files.Add(singleFile);
+                        SelectedToolInstance.Log.Add($"Produced {singleFile.ShortFileName}!");
+                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -258,27 +294,40 @@
 
         foreach (var toolInstance in ToolInstances)
         {
-            if (toolInstance.Output is null || toolInstance.FileName is null)
+            if (toolInstance.Output is null)
             {
                 continue;
             }
 
-            using var entryStream = zip.CreateEntry(toolInstance.FileName).Open();
+            var counter = 0;
 
-            var outputType = toolInstance.Output.GetType();
+            foreach (var item in toolInstance.Output as System.Collections.IEnumerable ?? Enumerable.Repeat(toolInstance.Output, 1))
+            {
+                var individualFileName = toolInstance.Files[counter].FileName;
+                counter++; // be careful
 
-            if (outputType.IsGenericType && outputType.GetGenericTypeDefinition() == typeof(NodeFile<>))
-            {
-                var node = (Node)(outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(toolInstance.Output) ?? throw new Exception("NodeFile.Node is null!"));
-                node.Save(entryStream); // IDRemap needs to be addressed
-            }
-            else if (toolInstance.Output is Node node)
-            {
-                node.Save(entryStream); // IDRemap needs to be addressed
-            }
-            else if (toolInstance.Output is BinFile binFile)
-            {
-                entryStream.Write(binFile.Data);
+                if (individualFileName is null)
+                {
+                    continue;
+                }
+
+                using var entryStream = zip.CreateEntry(individualFileName).Open();
+
+                var itemType = item.GetType();
+
+                if (itemType.IsGenericType && itemType.GetGenericTypeDefinition() == typeof(NodeFile<>))
+                {
+                    var node = (Node)(itemType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(item) ?? throw new Exception("NodeFile.Node is null!"));
+                    node.Save(entryStream); // IDRemap needs to be addressed
+                }
+                else if (item is Node node)
+                {
+                    node.Save(entryStream); // IDRemap needs to be addressed
+                }
+                else if (item is BinFile binFile)
+                {
+                    entryStream.Write(binFile.Data);
+                }
             }
         }
 
@@ -301,52 +350,65 @@
 
         foreach (var toolInstance in ToolInstances)
         {
-            if (toolInstance.Output is null || toolInstance.ShortFileName is null)
+            if (toolInstance.Output is null)
             {
                 continue;
             }
 
-            var outputType = toolInstance.Output.GetType();
+            var counter = 0;
 
-            if (outputType.IsGenericType && outputType.GetGenericTypeDefinition() == typeof(NodeFile<>))
+            foreach (var item in toolInstance.Output as System.Collections.IEnumerable ?? Enumerable.Repeat(toolInstance.Output, 1))
             {
-                var node = (Node)(outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(toolInstance.Output) ?? throw new Exception("NodeFile.Node is null!"));
+                var shortFileName = toolInstance.Files[counter].ShortFileName;
+                counter++; // be careful
 
-                if (zipArchive is null)
+                if (shortFileName is null)
                 {
-                    node.Save(ms); // IDRemap needs to be addressed
-                    fileName = toolInstance.ShortFileName;
+                    continue;
                 }
-                else
+
+                var itemType = item.GetType();
+
+                if (itemType.IsGenericType && itemType.GetGenericTypeDefinition() == typeof(NodeFile<>))
                 {
-                    using var entryStream = zipArchive.CreateEntry(toolInstance.ShortFileName).Open();
-                    node.Save(entryStream); // IDRemap needs to be addressed
+                    var node = (Node)(itemType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(item) ?? throw new Exception("NodeFile.Node is null!"));
+
+                    if (zipArchive is null)
+                    {
+                        node.Save(ms); // IDRemap needs to be addressed
+                        fileName = shortFileName;
+                    }
+                    else
+                    {
+                        using var entryStream = zipArchive.CreateEntry(shortFileName).Open();
+                        node.Save(entryStream); // IDRemap needs to be addressed
+                    }
                 }
-            }
-            else if (toolInstance.Output is Node node)
-            {
-                if (zipArchive is null)
+                else if (item is Node node)
                 {
-                    node.Save(ms); // IDRemap needs to be addressed
-                    fileName = toolInstance.ShortFileName;
+                    if (zipArchive is null)
+                    {
+                        node.Save(ms); // IDRemap needs to be addressed
+                        fileName = shortFileName;
+                    }
+                    else
+                    {
+                        using var entryStream = zipArchive.CreateEntry(shortFileName).Open();
+                        node.Save(entryStream); // IDRemap needs to be addressed
+                    }
                 }
-                else
+                else if (item is BinFile binFile)
                 {
-                    using var entryStream = zipArchive.CreateEntry(toolInstance.ShortFileName).Open();
-                    node.Save(entryStream); // IDRemap needs to be addressed
-                }
-            }
-            else if (toolInstance.Output is BinFile binFile)
-            {
-                if (zipArchive is null)
-                {
-                    ms.Write(binFile.Data);
-                    fileName = toolInstance.ShortFileName;
-                }
-                else
-                {
-                    using var entryStream = zipArchive.CreateEntry(toolInstance.ShortFileName).Open();
-                    entryStream.Write(binFile.Data);
+                    if (zipArchive is null)
+                    {
+                        ms.Write(binFile.Data);
+                        fileName = shortFileName;
+                    }
+                    else
+                    {
+                        using var entryStream = zipArchive.CreateEntry(shortFileName).Open();
+                        entryStream.Write(binFile.Data);
+                    }
                 }
             }
         }
@@ -363,22 +425,35 @@
     {
         foreach (var toolInstance in ToolInstances)
         {
-            if (toolInstance.Output is null || toolInstance.ShortFileName is null)
+            if (toolInstance.Output is null)
             {
                 continue;
             }
 
-            var outputType = toolInstance.Output.GetType();
+            var counter = 0;
 
-            if (outputType.IsGenericType && outputType.GetGenericTypeDefinition() == typeof(NodeFile<>))
+            foreach (var item in toolInstance.Output as System.Collections.IEnumerable ?? Enumerable.Repeat(toolInstance.Output, 1))
             {
-                var node = (Node)(outputType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(toolInstance.Output) ?? throw new Exception("NodeFile.Node is null!"));
+                var shortFileName = toolInstance.Files[counter].ShortFileName;
+                counter++; // be careful
 
-                GbxService.Gbxs.Add(new GbxModel(toolInstance.ShortFileName, node.ToGbx()));
-            }
-            else if (toolInstance.Output is Node node)
-            {
-                GbxService.Gbxs.Add(new GbxModel(toolInstance.ShortFileName, node.ToGbx()));
+                if (shortFileName is null)
+                {
+                    continue;
+                }
+
+                var itemType = item.GetType();
+
+                if (itemType.IsGenericType && itemType.GetGenericTypeDefinition() == typeof(NodeFile<>))
+                {
+                    var node = (Node)(itemType.GetProperty(nameof(NodeFile<Node>.Node))?.GetValue(item) ?? throw new Exception("NodeFile.Node is null!"));
+
+                    GbxService.Gbxs.Add(new GbxModel(shortFileName, node.ToGbx()));
+                }
+                else if (item is Node node)
+                {
+                    GbxService.Gbxs.Add(new GbxModel(shortFileName, node.ToGbx()));
+                }
             }
         }
     }

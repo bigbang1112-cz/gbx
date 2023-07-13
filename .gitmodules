@@ -22,3 +22,6 @@
 [submodule "Tools/ClipCheckpoint"]
 	path = Tools/ClipCheckpoint
 	url = https://github.com/bigbang1112-cz/clip-checkpoint
+[submodule "Tools/EnvimixForTmuf"]
+	path = Tools/EnvimixForTmuf
+	url = https://github.com/bigbang1112-cz/envimix-for-tmuf
