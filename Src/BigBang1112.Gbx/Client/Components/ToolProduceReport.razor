@@ -50,8 +50,10 @@
 
     @if (SelectedToolInstance is null)
     {
+        var fileCount = ToolInstances.SelectMany(x => x.Files).Count();
+
         <div class="rectangle report overview">
-            <h3>Produced @ToolInstances.Count @(ToolInstances.Count == 1 ? "file" : "files")</h3>
+            <h3>Produced @fileCount @(fileCount == 1 ? "file" : "files")</h3>
             <div class="overview-buttons">
                 <button @onclick="DownloadWithFolders" title="Downloads all outputs as a zip that you can just extract into your user data folder (MyDocuments/[game]).">
                     Download with folders
