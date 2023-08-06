@@ -34,7 +34,7 @@ footer {
 
 .updater-offset {
     position: fixed;
-    transform: translateY(80px);
+    transform: translateY(0px);
     width: 100%;
     z-index: 19;
 }
