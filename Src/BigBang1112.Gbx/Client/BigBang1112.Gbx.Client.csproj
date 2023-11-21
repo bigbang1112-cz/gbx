@@ -42,6 +42,7 @@
 		<ProjectReference Include="..\..\..\Tools\CombineClips\CombineClips\CombineClips.csproj">
 			<IsTrimmable>false</IsTrimmable>
 		</ProjectReference>
+		<ProjectReference Include="..\..\..\Tools\EnvimixForTM2020\EnvimixForTM2020\EnvimixForTM2020.csproj" />
 		<ProjectReference Include="..\..\..\Tools\GhostToClip\GhostToClip\GhostToClip.csproj">
 			<IsTrimmable>false</IsTrimmable>
 		</ProjectReference>

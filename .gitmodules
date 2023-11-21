@@ -25,3 +25,6 @@
 [submodule "Tools/EnvimixForTmuf"]
 	path = Tools/EnvimixForTmuf
 	url = https://github.com/bigbang1112-cz/envimix-for-tmuf
+[submodule "Tools/EnvimixForTM2020"]
+	path = Tools/EnvimixForTM2020
+	url = https://github.com/bigbang1112-cz/envimix-for-tm2020

@@ -4,6 +4,7 @@ using ClipInput;
 using ClipInput.Client;
 using ClipToReplay;
 using CombineClips;
+using EnvimixForTM2020;
 using EnvimixForTmuf;
 using GbxToolAPI;
 using GbxToolAPI.Client;
@@ -60,6 +61,7 @@ internal class ToolManager : IToolManager
         AddTool<MapViewerEngineTool, MapViewerEngineToolComponent>(services, isProceedComponent: true);
         AddTool<GhostToClipTool>(services);
         AddTool<ClipToReplayTool>(services);
+        AddTool<EnvimixForTM2020Tool>(services);
         AddTool<EnvimixForTmufTool>(services);
         AddTool<SpikeTool, SpikeToolComponent>(services, isProceedComponent: true);
         AddTool<CombineClipsTool>(services);
