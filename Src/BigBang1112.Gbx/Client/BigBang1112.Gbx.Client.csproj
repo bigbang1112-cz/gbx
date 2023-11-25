@@ -14,11 +14,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-		<PackageReference Include="GBX.NET.LZO" Version="1.0.3" />
-		<PackageReference Include="GbxToolAPI" Version="1.0.5">
+		<PackageReference Include="GBX.NET.LZO" Version="1.0.4" />
+		<PackageReference Include="GbxToolAPI" Version="1.0.6">
 			<IsTrimmable>false</IsTrimmable>
 		</PackageReference>
-		<PackageReference Include="GbxToolAPI.Client" Version="1.0.0" />
+		<PackageReference Include="GbxToolAPI.Client" Version="1.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
