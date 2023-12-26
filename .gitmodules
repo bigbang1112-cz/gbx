@@ -28,3 +28,6 @@
 [submodule "Tools/EnvimixForTM2020"]
 	path = Tools/EnvimixForTM2020
 	url = https://github.com/bigbang1112-cz/envimix-for-tm2020
+[submodule "Tools/Downgrader"]
+	path = Tools/Downgrader
+	url = https://github.com/LinUwUxCat/Downgrader
