@@ -7,6 +7,7 @@ using BigBang1112.Gbx.Server.Repos;
 using BigBang1112.Gbx.Shared;
 using ClipCheckpoint;
 using ClipInput;
+using Downgrader;
 using GbxToolAPI.Server.Options;
 using MapViewerEngine.Server;
 using Microsoft.AspNetCore.Authentication;
@@ -258,6 +259,7 @@ internal static class GbxServerApp
 
         app.UseToolAssets<ClipInputTool>();
         app.UseToolAssets<ClipCheckpointTool>();
+        app.UseToolAssets<DowngraderTool>();
 
         app.UseToolServer<MapViewerEngineServer>();
         
