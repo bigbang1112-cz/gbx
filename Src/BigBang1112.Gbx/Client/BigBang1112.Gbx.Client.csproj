@@ -42,8 +42,12 @@
 		<ProjectReference Include="..\..\..\Tools\CombineClips\CombineClips\CombineClips.csproj">
 			<IsTrimmable>false</IsTrimmable>
 		</ProjectReference>
-		<ProjectReference Include="..\..\..\Tools\Downgrader\Downgrader\Downgrader.csproj" />
-		<ProjectReference Include="..\..\..\Tools\EnvimixForTM2020\EnvimixForTM2020\EnvimixForTM2020.csproj" />
+		<ProjectReference Include="..\..\..\Tools\Downgrader\Downgrader\Downgrader.csproj">
+			<IsTrimmable>false</IsTrimmable>
+		</ProjectReference>
+		<ProjectReference Include="..\..\..\Tools\EnvimixForTM2020\EnvimixForTM2020\EnvimixForTM2020.csproj">
+			<IsTrimmable>false</IsTrimmable>
+		</ProjectReference>
 		<ProjectReference Include="..\..\..\Tools\GhostToClip\GhostToClip\GhostToClip.csproj">
 			<IsTrimmable>false</IsTrimmable>
 		</ProjectReference>
