@@ -59,7 +59,13 @@ h4 {
 
 a {
     text-decoration: none;
+    color: #0099FF;
 }
+
+    a:hover {
+        color: #00BFFF;
+        text-decoration: underline;
+    }
 
 .file-input {
     width: 100%;
