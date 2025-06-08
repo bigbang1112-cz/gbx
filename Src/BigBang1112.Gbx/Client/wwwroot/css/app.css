@@ -109,6 +109,8 @@ a {
 }
     .donate:hover {
         background: #EAD067;
+        color: black;
+        text-decoration: none;
     }
 
 .rectangle {
@@ -130,6 +132,8 @@ a {
         border-left: 0.5rem solid var(--button-blue-edge);
         border-right: 0.5rem solid var(--button-blue-edge);
         cursor: pointer;
+        color: white;
+        text-decoration: none;
     }
 
     .rectangle.highlighted {
@@ -221,6 +225,7 @@ button, a.button {
     button:hover:enabled, a.button:hover, button.selected {
         background: linear-gradient(90deg, var(--button-blue-edge) 0%, var(--button-blue) 2%, var(--button-blue) 98%, var(--button-blue-edge) 100%);
         cursor: pointer;
+        text-decoration: none;
     }
 
     button:disabled {

@@ -54,6 +54,7 @@ footer {
 
     .author:hover {
         transform: scale(1.02);
+        text-decoration: none;
     }
 
     .author:visited {
