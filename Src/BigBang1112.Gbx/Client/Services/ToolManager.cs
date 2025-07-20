@@ -58,8 +58,8 @@ internal class ToolManager : IToolManager
     {
         AddTool<ClipInputTool, ClipInputToolComponent>(services);
         AddTool<ClipCheckpointTool>(services);
-        AddTool<ReplayViewerTool, ReplayViewerToolComponent>(services, isProceedComponent: true);
-        AddTool<MapViewerEngineTool, MapViewerEngineToolComponent>(services, isProceedComponent: true);
+        //AddTool<ReplayViewerTool, ReplayViewerToolComponent>(services, isProceedComponent: true);
+        //AddTool<MapViewerEngineTool, MapViewerEngineToolComponent>(services, isProceedComponent: true);
         AddTool<DowngraderTool>(services);
         AddTool<GhostToClipTool>(services);
         AddTool<ClipToReplayTool>(services);
