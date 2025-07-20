@@ -197,7 +197,7 @@ internal static class GbxServerApp
             }
         }
 
-        services.AddToolServer<MapViewerEngineServer>(config, "MapViewerEngine");
+        //services.AddToolServer<MapViewerEngineServer>(config, "MapViewerEngine");
     }
 
     internal static void Middleware(WebApplication app)
