@@ -52,5 +52,6 @@ jobs:
           push: true
           build-args: |
             BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} # Bad but the site is deprecated anyway
           secrets: |
             github_token=${{ secrets.GITHUB_TOKEN }}
