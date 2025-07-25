@@ -187,8 +187,10 @@ internal static class GbxServerApp
         });
 
         // migrate
-        using (var scope = services.BuildServiceProvider().CreateScope())
+        if (env.IsDevelopment())
         {
+            using var scope = services.BuildServiceProvider().CreateScope();
+
             var db = scope.ServiceProvider.GetRequiredService<GbxContext>().Database;
 
             if (db.IsRelational())
