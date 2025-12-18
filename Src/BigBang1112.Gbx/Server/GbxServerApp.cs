@@ -17,10 +17,15 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using MySqlConnector;
 using Octokit;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 using System.Data;
 using System.Security.Claims;
 using System.Text.Json;
@@ -146,15 +151,6 @@ internal static class GbxServerApp
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
 
-        services.Configure<ForwardedHeadersOptions>(options =>
-        {
-            options.ForwardedHeaders = 
-                ForwardedHeaders.XForwardedFor | 
-                ForwardedHeaders.XForwardedProto;
-            options.KnownNetworks.Clear();
-            options.KnownProxies.Clear();
-        });
-
         services.AddScoped<IDbConnection>(s =>
         {
             return new MySqlConnection(config.GetConnectionString(Constants.Gbx));
@@ -185,6 +181,54 @@ internal static class GbxServerApp
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             }
         });
+
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(config)
+            .Enrich.FromLogContext()
+            .WriteTo.Console(theme: AnsiConsoleTheme.Sixteen, applyThemeToRedirectedOutput: true)
+            .WriteTo.OpenTelemetry(options =>
+            {
+                options.Endpoint = config["OTEL_EXPORTER_OTLP_ENDPOINT"];
+                options.Protocol = config["OTEL_EXPORTER_OTLP_PROTOCOL"]?.ToLowerInvariant() switch
+                {
+                    "grpc" => Serilog.Sinks.OpenTelemetry.OtlpProtocol.Grpc,
+                    "http/protobuf" or null or "" => Serilog.Sinks.OpenTelemetry.OtlpProtocol.HttpProtobuf,
+                    _ => throw new NotSupportedException($"OTLP protocol {config["OTEL_EXPORTER_OTLP_PROTOCOL"]} is not supported")
+                };
+                options.Headers = config["OTEL_EXPORTER_OTLP_HEADERS"]?
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Split('=', 2, StringSplitOptions.RemoveEmptyEntries))
+                    .ToDictionary(x => x[0], x => x[1]) ?? [];
+            })
+            .CreateLogger();
+
+        services.AddSerilog();
+
+        services.AddOpenTelemetry()
+            .WithMetrics(options =>
+            {
+                options
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddRuntimeInstrumentation()
+                    .AddProcessInstrumentation()
+                    .AddOtlpExporter();
+
+                options.AddMeter("System.Net.Http");
+            })
+            .WithTracing(options =>
+            {
+                if (env.IsDevelopment())
+                {
+                    options.SetSampler<AlwaysOnSampler>();
+                }
+
+                options
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation()
+                    .AddOtlpExporter();
+            });
 
         // migrate
         if (env.IsDevelopment())
