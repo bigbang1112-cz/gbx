@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 ARG GITHUB_TOKEN
 WORKDIR /src
 COPY ["Src/BigBang1112.Gbx/Server/BigBang1112.Gbx.Server.csproj", "Src/BigBang1112.Gbx/Server/"]
@@ -34,7 +34,7 @@ RUN dotnet build "BigBang1112.Gbx.Server.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "BigBang1112.Gbx.Server.csproj" -c Release -o /app/publish --self-contained
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine
 RUN apk add --no-cache icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 WORKDIR /app
