@@ -5,6 +5,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG GITHUB_TOKEN
+RUN apt-get update && apt-get install -y git python3
 WORKDIR /src
 COPY ["Src/BigBang1112.Gbx/Server/BigBang1112.Gbx.Server.csproj", "Src/BigBang1112.Gbx/Server/"]
 COPY ["Generators/BigBang1112.Gbx.Server.Generators/BigBang1112.Gbx.Server.Generators.csproj", "Generators/BigBang1112.Gbx.Server.Generators/"]
