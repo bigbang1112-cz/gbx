@@ -8,6 +8,11 @@
 		<TrimMode>partial</TrimMode>
 	</PropertyGroup>
 
+    <PropertyGroup>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <InvariantTimezone>true</InvariantTimezone>
+    </PropertyGroup>
+
 	<ItemGroup>
 		<InternalsVisibleTo Include="BigBang1112.Gbx.Client.Tests" />
 	</ItemGroup>
