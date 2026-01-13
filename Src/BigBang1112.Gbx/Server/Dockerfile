@@ -36,8 +36,6 @@ FROM build AS publish
 RUN dotnet publish "BigBang1112.Gbx.Server.csproj" -c Release -o /app/publish --self-contained
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:10.0
-RUN apk add --no-cache icu-libs
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["./BigBang1112.Gbx.Server"]
