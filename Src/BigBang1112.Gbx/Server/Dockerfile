@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG GITHUB_TOKEN
 WORKDIR /src
 COPY ["Src/BigBang1112.Gbx/Server/BigBang1112.Gbx.Server.csproj", "Src/BigBang1112.Gbx/Server/"]
@@ -25,7 +25,6 @@ COPY ["Tools/Spike/Spike.Client/Spike.Client.csproj", "Tools/Spike/Spike.Client/
 COPY ["Tools/Spike/Spike/Spike.csproj", "Tools/Spike/Spike/"]
 COPY ["Tools/EnvimixForTmuf/EnvimixForTmuf/EnvimixForTmuf.csproj", "Tools/EnvimixForTmuf/EnvimixForTmuf/"]
 COPY ["Src/BigBang1112.Gbx/Shared/BigBang1112.Gbx.Shared.csproj", "Src/BigBang1112.Gbx/Shared/"]
-RUN apk add --no-cache python3
 RUN dotnet nuget add source --username USERNAME --password $GITHUB_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/bigbang1112-cz/index.json"
 RUN dotnet workload install wasm-tools
 RUN dotnet restore "Src/BigBang1112.Gbx/Server/BigBang1112.Gbx.Server.csproj"
@@ -36,7 +35,7 @@ RUN dotnet build "BigBang1112.Gbx.Server.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "BigBang1112.Gbx.Server.csproj" -c Release -o /app/publish --self-contained
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0
 RUN apk add --no-cache icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 WORKDIR /app
