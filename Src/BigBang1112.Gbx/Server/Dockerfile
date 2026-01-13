@@ -25,6 +25,7 @@ COPY ["Tools/Spike/Spike.Client/Spike.Client.csproj", "Tools/Spike/Spike.Client/
 COPY ["Tools/Spike/Spike/Spike.csproj", "Tools/Spike/Spike/"]
 COPY ["Tools/EnvimixForTmuf/EnvimixForTmuf/EnvimixForTmuf.csproj", "Tools/EnvimixForTmuf/EnvimixForTmuf/"]
 COPY ["Src/BigBang1112.Gbx/Shared/BigBang1112.Gbx.Shared.csproj", "Src/BigBang1112.Gbx/Shared/"]
+RUN apk add --no-cache python3
 RUN dotnet nuget add source --username USERNAME --password $GITHUB_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/bigbang1112-cz/index.json"
 RUN dotnet workload install wasm-tools
 RUN dotnet restore "Src/BigBang1112.Gbx/Server/BigBang1112.Gbx.Server.csproj"
